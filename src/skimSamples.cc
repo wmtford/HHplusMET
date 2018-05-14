@@ -7,7 +7,7 @@
 #include <iostream>
 #include <vector>
 
-static const TString BASE_DIR="root://cmseos.fnal.gov//store/user/lpcsusyhad/SusyRA2Analysis2015/Skims/Run2ProductionV12/";
+static const TString BASE_DIR="root://cmseos.fnal.gov//store/user/rgp230/SUSYRA2Higgsino/Skims/Run2ProductionV12/";
 
 class skimSamples{
 
@@ -34,6 +34,7 @@ public :
         if( r == kSignal ){
             skimType=BASE_DIR+"tree_signal/";
         }
+	/*
         if( r == kPhoton ){
             skimType="root://cmseos.fnal.gov//store/user/fojensen/boostedSkims_19062017/Run2ProductionV12/tree_GJet/";
         }
@@ -46,10 +47,11 @@ public :
         if(r==kLowDphi){
             skimType=BASE_DIR+"tree_LDP/";
         }
+	*/
         ///////////////////////////////////////////////////////////////////////
         // - - - - - - - - - - BACKGROUND INPUTS - - - - - - - - - - - - - - //
         ///////////////////////////////////////////////////////////////////////
-
+	/*
         std::vector<TString> OtherFileNames;
         OtherFileNames.push_back("tree_WWTo1L1Nu2Q.root");
         OtherFileNames.push_back("tree_WWTo2L2Nu.root");
@@ -76,7 +78,7 @@ public :
             fillColor.push_back(kRed+1);
             lineColor.push_back(1);
         }
-
+	*/
         std::vector<TString> ZJetsFileNames;
         ZJetsFileNames.push_back("tree_ZJetsToNuNu_HT-100to200.root");
         ZJetsFileNames.push_back("tree_ZJetsToNuNu_HT-200to400.root");
@@ -114,7 +116,7 @@ public :
             fillColor.push_back(kBlue);
             lineColor.push_back(1);
         }
-
+	/*
         std::vector<TString> SnglTFileNames;
         SnglTFileNames.push_back("tree_ST_s-channel.root");
         SnglTFileNames.push_back("tree_ST_t-channel_antitop.root");
@@ -131,13 +133,14 @@ public :
             fillColor.push_back(kOrange);
             lineColor.push_back(1);
         }
-
+	*/
         std::vector<TString> TTincFileNames;
         TTincFileNames.push_back("tree_TTJets.root");
         TTinc = new TChain("tree");
         for( int i = 0 ; i < TTincFileNames.size() ; i++ ){
             TTinc->Add(skimType+"/"+TTincFileNames[i]);
         }
+
         /*
         if( r == kSignal || r == kSLm || r == kSLe || r == kLowDphi ){
             ntuples.push_back(new RA2bTree(TTinc));
@@ -165,7 +168,7 @@ public :
             fillColor.push_back(kCyan);
             lineColor.push_back(kCyan);
         }
-
+	/*
         std::vector<TString> DYFileNames;
         DYFileNames.push_back("tree_DYJetsToLL_M-50_HT-100to200.root");
         DYFileNames.push_back("tree_DYJetsToLL_M-50_HT-200to400.root");
@@ -206,13 +209,7 @@ public :
         for( int i = 0 ; i < GJetsFileNames.size() ; i++ ){
             GJets->Add(skimType+"/"+GJetsFileNames[i]);
         }
-        /*if( r == kPhoton ){
-            ntuples.push_back(new RA2bTree(GJets));
-            sampleName.push_back("GJets");
-            fillColor.push_back(kGreen);
-            lineColor.push_back(1);
-        }*/
-
+	*/
         std::vector<TString> QCDFileNames;
         QCDFileNames.push_back("tree_QCD_HT-200to300.root");
         QCDFileNames.push_back("tree_QCD_HT-300to500.root");
@@ -231,12 +228,10 @@ public :
             fillColor.push_back(kGray);
             lineColor.push_back(1);
         }
-
-
         ////////////////////////////////////////////////////////////
         // - - - - - - - - - - - DATA INPUTS - - - - - - - - - -  //
         ////////////////////////////////////////////////////////////
-
+/*
         std::vector<TString> HTMHTFileNames;
         HTMHTFileNames.push_back("tree_HTMHT_re2016B.root");
         HTMHTFileNames.push_back("tree_HTMHT_re2016C.root");
@@ -307,8 +302,9 @@ public :
             }
             dataNtuple = new RA2bTree(data);
         }
-
-        std::vector<TString> T5HH750FilesNames;
+*/
+        /*
+	std::vector<TString> T5HH750FilesNames;
         std::vector<TString> T5HH1000FilesNames;
         std::vector<TString> T5HH1100FilesNames;
         std::vector<TString> T5HH1200FilesNames;
@@ -451,6 +447,7 @@ public :
             signalSampleName.push_back("T5HH2100");
             sigLineColor.push_back(kRed);
         }
+	*/
     };
 
     RA2bTree* findNtuple(TString name){
