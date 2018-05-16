@@ -61,7 +61,7 @@ double BuildBCombinations( vector<TLorentzVector> Jets, std::vector<unsigned int
 			}
 
 		}
-	if(TightTags.size()+MedTags.size()+LooseTags.size()>2   || Jets.size()>1)std::cout<<"Mass of Candidate "<<ResolvedCandidate.M()<<std::endl;
+//	if(TightTags.size()+MedTags.size()+LooseTags.size()>2   || Jets.size()>1)std::cout<<"Mass of Candidate "<<ResolvedCandidate.M()<<std::endl;
 	if(TightTags.size()+MedTags.size()+LooseTags.size()>2	|| Jets.size()>1)return ResolvedCandidate.M();
 	else return -999.;	
 //	}
@@ -141,15 +141,18 @@ int main(int argc, char** argv){
 	
     	   for(unsigned int j=0; j<ntuple->Jets->size();++j){
 			if(ntuple->Jets->at(j).Pt()<30 || fabs(ntuple->Jets->at(j).Eta())>2.4)continue;
+			bool Overlap=false;
 	   		for(unsigned int fj=0; fj<ntuple->JetsAK8->size();++fj){
 				if(ntuple->JetsAK8_doubleBDiscriminator->at(fj)<bbtagCut && !(ntuple->JetsAK8_prunedMass->at(fj)>85 && ntuple->JetsAK8_prunedMass->at(fj)<135))continue; //match only to non H-tagged jets
 				float deta=ntuple->Jets->at(j).Eta()-ntuple->JetsAK8->at(fj).Eta();
 				float dphi=ntuple->Jets->at(j).Phi()-ntuple->JetsAK8->at(fj).Phi();
 				float dR=sqrt((deta*deta)+(dphi*dphi));
 				if(dR>0.8){
-				JetsIsoAK8Jets.push_back(j);
+				Overlap=true;
+				break;
 		}
 	    }
+				if(!Overlap)JetsIsoAK8Jets.push_back(j);
         }
 //	std::cout<<"N AK4 Jets away from AK& Jets "<<JetsIsoAK8Jets.size()<<std::endl;
 	//based on Moriond Recommnedations for comb CSV: https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco#Recommendation_for_combining_b_a 
@@ -185,7 +188,7 @@ int main(int argc, char** argv){
 
 	}			
 	    //std::cout<<"NBtags loose "<<BTagsL <<" medium "<<BTagsM<< " tight "<<BTagsT<<std::endl;
-	    //std::cout<<"Resolved Candidte "<< BuildBCombinations(CleanedJets, LooseTags, MedTags, TightTags)<<std::endl;;   	
+	    std::cout<<"Resolved Candidte "<< BuildBCombinations(CleanedJets, LooseTags, MedTags, TightTags)<<std::endl;;   	
 	    double ResolvedHiggs=BuildBCombinations(CleanedJets, LooseTags, MedTags, TightTags);
 	    if(ResolvedHiggs>100 && ResolvedHiggs<140)++nResolvedH;
 	    //std::cout<<"Resolved "<<ResolvedHiggs<<std::endl;
