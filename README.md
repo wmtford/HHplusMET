@@ -8,7 +8,7 @@ classes to facilitate some things.
 cmsrel CMSSW_7_4_2
 cd CMSSW_7_4_2/src/
 cmsenv
-git clone https://github.com/awhitbeck/boostedHiggsPlusMET.git
+git clone -b Higgsino https://github.com/awhitbeck/boostedHiggsPlusMET.git
 </pre>
 
 NEEDS UPDATING
