@@ -265,6 +265,7 @@ public :
            ntuples.push_back(new RA2bTree(TChiHH625));
            ntuples.push_back(new RA2bTree(TChiHH650));
            ntuples.push_back(new RA2bTree(TChiHH675));
+           ntuples.push_back(new RA2bTree(TChiHH700));
            ntuples.push_back(new RA2bTree(TChiHH800));
            ntuples.push_back(new RA2bTree(TChiHH825));
            ntuples.push_back(new RA2bTree(TChiHH850));
