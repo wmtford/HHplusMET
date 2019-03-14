@@ -304,9 +304,9 @@ int main(int argc, char** argv){
 				//double prunedMass = ntuple->JetsAK8_prunedMass->at(fj);
 				if(ntuple->JetsAK8->at(fj).Pt()>300 && ntuple->JetsAK8_prunedMass->at(fj)>=85.0 && ntuple->JetsAK8_prunedMass->at(fj)<=135.0) {
 					if (ntuple->JetsAK8_doubleBDiscriminator->at(fj)<bbtagCut){
-						 nAK8_belowB++;
-						 continue;
-					 }
+						nAK8_belowB++;
+						continue;
+					}
 					++nBoostedH;
 					boostedHiggsCan_eta.push_back(ntuple->JetsAK8->at(fj).Eta());
 					boostedHiggsCan_phi.push_back(ntuple->JetsAK8->at(fj).Phi());
