@@ -1,0 +1,53 @@
+imax 6 #number of channels, 3 for 2H then 3 for 1H
+jmax 1 #number of backgrounds
+kmax * nuissance
+shapes * * FAKE
+
+bin Bin2HSignal1 Bin2HSignal2 Bin2HSignal3 Bin1HSignal1 Bin1HSignal2 Bin1HSignal3
+observation 5.0000 0.0000 0.0000 43.0000 7.0000 1.0000
+bin Bin2HSignal1 Bin2HSignal1 Bin2HSignal2 Bin2HSignal2 Bin2HSignal3 Bin2HSignal3 Bin1HSignal1 Bin1HSignal1 Bin1HSignal2 Bin1HSignal2 Bin1HSignal3 Bin1HSignal3
+process sig bkg sig bkg sig bkg sig bkg sig bkg sig bkg
+process 0 1 0 1 0 1 0 1 0 1 0 1
+rate  9.9968 1.0 3.3272 1.0 0.4034 1.0 2.4158 1.0 0.9884 1.0 0.2391 1.0 
+-----------------------
+NormStatMCKappa_2H lnN - 1.17 -	1.17 - 1.17 - - - - - - #MC error on kappa
+Norm1LControl_2H lnN - 1.13 - 1.13 - 1.13 - - - - - -  #Data error kappa in 1l region
+MCMismodelUncKappa_2H lnN - 1.057 - 1.057 - 1.057 - - - - - - #MC mismodeling
+METShapeSys_2H lnN - 0.868 - 1.193 - 1.634 - - - - - -
+
+NormStatMCKappa_1H lnN - - - - - - - 1.04 - 1.04 - 1.04 #MC error on kappa
+Norm1LControl_1H lnN - - - - - - - 1.12 - 1.12 - 1.12 #Data error kappa in 1l regions
+MCMismodelUncKappa_1H lnN - - - - - - - 1.04 - 1.04 - 1.04 #MC mismodeling
+METShapeSys_1H lnN - - - - - - - 0.980 - 1.025 - 1.085
+BkgComp lnN - 1.03 - 1.07 - 1.32 - 1.03 - 1.07 - 1.32
+MCMismodelUncMETShape lnN - 1.006 - 0.9767 - 0.9516 - 1.006 - 0.9767 - 0.9516 #MC mismodeling
+
+#Signal systematics
+LumiSyst lnN 1.0243 - 1.0243 - 1.0243 - 1.0243 - 1.0243 - 1.0243 -
+TrigSyst lnN 0.964658/1.00075 - 0.964338/1.00054 - 0.959872/1 - 0.970441/1.00076 - 0.971738/1.00053 - 0.965169/1.00003 - 
+ISRSyst lnN 1.02768/0.972318 - 1.07476/0.925244 - 1.16399/0.836009 - 1.04958/0.950417 - 1.10264/0.897363 - 1.18191/0.818091 - 
+SignalStat1_2H lnN 1.0127 - - - - - - - - - - - 
+SignalStat2_2H lnN - - 1.0209 - - - - - - - - - 
+SignalStat3_2H lnN - - - - 1.0563 - - - - - - - 
+SignalStat1_1H lnN - - - - - - 1.0264 - - - - -
+SignalStat2_1H lnN - - - - - - - - 1.0393 - - -
+SignalStat3_1H lnN - - - - - - - - - - 1.0795 -
+SignalJEC lnN 0.985361/1.01063 - 0.932387/1.0689 - 0.931278/1.13844 - 0.983993/1.00892 - 0.931982/1.06569 - 0.952829/1.03794 - 
+SignalJER lnN 1.00035/0.996436 - 0.995379/1.00247 - 0.995026/1.01773 - 1.00303/0.999456 - 0.991207/0.997979 - 1.02003/0.99993 - 
+SignalRes lnN 1.0151 - 0.9932 - 0.9643 - 1.0176 - 1.0030 - 0.9860 - 
+SignalPrefire lnN 1.00089/0.999103 - 1.00077/0.999228 - 1.00093/0.999072 - 1.0015/0.998502 - 1.00096/0.999038 - 1.00032/0.999677 - 
+SignalPU lnN 1.00402/0.997722 - 1.00054/1.0009 - 0.99856/0.99908 - 0.999073/1.00074 - 1.01759/0.985562 - 1.01592/0.985116 - 
+SignalScale lnN 0.997836/1.0023 - 0.992954/1.00777 - 0.977826/1.02475 - 0.993515/1.0072 - 0.988138/1.01332 - 0.967618/1.03697 - 
+SignalBBTag lnN 0.862451/1.16244 - 0.864595/1.1627 - 0.859005/1.16411 - 0.932297/1.07981 - 0.934017/1.08053 - 0.930078/1.0798 - 
+SignalFastBBTag lnN 0.97372/1.0267 - 0.973701/1.02673 - 0.972087/1.0284 - 0.987284/1.01272 - 0.987322/1.01268 - 0.986735/1.01326 - 
+SignalFastMass lnN 0.974729/1.02563 - 0.972812/1.02759 - 0.963096/1.0375 - 0.987284/1.01272 - 0.987322/1.01268 - 0.986735/1.01326 - 
+SignalMETFastSIM lnN 1.0016 - 1.0397 - 1.0753 - 1.0010 - 1.0148 - 1.0143 - 
+SignalJetID lnN 1.01 - 1.01 - 1.01 - 1.01 - 1.01 - 1.01 -
+
+
+Alpha1_2H rateParam Bin2HSignal1 bkg ((@0*@1/@2)*@3/(@3+@4+@5)) Beta_2H,Gamma,Delta,Epsilon1,Epsilon2,Epsilon3
+Alpha2_2H rateParam Bin2HSignal2 bkg ((@0*@1/@2)*@4/(@3+@4+@5)) Beta_2H,Gamma,Delta,Epsilon1,Epsilon2,Epsilon3
+Alpha3_2H rateParam Bin2HSignal3 bkg ((@0*@1/@2)*@5/(@3+@4+@5)) Beta_2H,Gamma,Delta,Epsilon1,Epsilon2,Epsilon3
+Alpha1_1H rateParam Bin1HSignal1 bkg ((@0*@1/@2)*@3/(@3+@4+@5)) Beta_1H,Gamma,Delta,Epsilon1,Epsilon2,Epsilon3
+Alpha2_1H rateParam Bin1HSignal2 bkg ((@0*@1/@2)*@4/(@3+@4+@5)) Beta_1H,Gamma,Delta,Epsilon1,Epsilon2,Epsilon3
+Alpha3_1H rateParam Bin1HSignal3 bkg ((@0*@1/@2)*@5/(@3+@4+@5)) Beta_1H,Gamma,Delta,Epsilon1,Epsilon2,Epsilon3

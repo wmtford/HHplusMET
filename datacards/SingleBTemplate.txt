@@ -1,0 +1,15 @@
+imax 2 #number of channels
+jmax 1 #number of backgrounds
+kmax * nuissance
+shapes * * FAKE
+
+bin SidebandRegion2H SidebandRegion1H
+observation obs1 obs2
+
+bin SidebandRegion2H SidebandRegion2H SidebandRegion1H SidebandRegion1H
+process sig bkg sig bkg
+process 0 1 0 1
+rate higgsino bkg higgsino bkg
+-----------------------
+Beta_2H rateParam SidebandRegion2H bkg obs [low,high]
+Beta_1H rateParam SidebandRegion1H bkg obs [low,high]

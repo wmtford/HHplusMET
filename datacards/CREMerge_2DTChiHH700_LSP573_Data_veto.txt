@@ -1,0 +1,15 @@
+imax 3 #number of channels
+jmax 1 #number of backgrounds
+kmax * nuissance
+shapes * * FAKE
+
+bin METShape_1 METShape_2 METShape_3
+observation 142.0000 31.0000 7.0000 
+bin METShape_1 METShape_1 METShape_2 METShape_2 METShape_3 METShape_3
+process sig bkg sig bkg sig bkg
+process 0 1 0 1 0 1
+rate 0.0032 1.0 0.0027 1.0 0.0027 1.0 
+-----------------------
+Epsilon1 rateParam METShape_1 bkg 142.0000 [0.000,1420.0000] 
+Epsilon2 rateParam METShape_2 bkg 31.0000 [0.000,310.0000] 
+Epsilon3 rateParam METShape_3 bkg 7.0000 [0.000,70.0000] 

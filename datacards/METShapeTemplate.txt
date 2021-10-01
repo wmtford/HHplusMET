@@ -1,0 +1,16 @@
+imax 3 #number of channels
+jmax 1 #number of backgrounds
+kmax * nuissance
+shapes * * FAKE
+
+bin METShape_1 METShape_2 METShape_3
+observation obs1 obs2 obs3
+
+bin METShape_1 METShape_1 METShape_2 METShape_2 METShape_3 METShape_3
+process sig bkg sig bkg sig bkg
+process 0 1 0 1 0 1
+rate higgsino bkg higgsino bkg higgsino bkg
+-----------------------
+Epsilon1 rateParam METShape_1 bkg obs [0,200]
+Epsilon2 rateParam METShape_2 bkg obs [0,200]
+Epsilon3 rateParam METShape_3 bkg obs [0,200]

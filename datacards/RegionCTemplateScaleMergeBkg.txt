@@ -1,0 +1,14 @@
+imax 1 #number of channels
+jmax 1 #number of backgrounds
+kmax * nuissance
+shapes * * FAKE
+
+bin AntitagRegion0
+observation obs1
+
+bin AntitagRegion0 AntitagRegion0
+process sig bkg
+process 0 1
+rate higgsino bkg
+-----------------------
+Gamma rateParam AntitagRegion0 bkg obs [0.00,4000.00]

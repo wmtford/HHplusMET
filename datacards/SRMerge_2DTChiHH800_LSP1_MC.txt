@@ -1,0 +1,56 @@
+imax 3 #number of channels
+jmax 1 #number of backgrounds
+kmax * nuissance
+shapes * * FAKE
+
+bin BinRegion0 BinRegion1 BinRegion2
+observation 3.4363 0.3625 0.3079
+bin BinRegion0 BinRegion0 BinRegion1 BinRegion1 BinRegion2 BinRegion2
+process sig bkg sig bkg sig bkg
+process 0 1 0 1 0 1
+rate  0.6752 4.2958 0.5935 4.2958 0.2193 4.2958 
+-----------------------
+NormStatMCKappa_2H lnN - 1.17 -	1.17 - 1.17 #MC error on kappa
+Norm1LControl_2H lnN - 1.13 - 1.13 - 1.13 #Data error kappa in 1l region
+MCMismodelUncKappa_2H lnN - 1.057 - 1.057 - 1.057 #MC mismodeling
+METShapeSys_2H lnN - 0.868 - 1.193 - 1.634
+BkgComp lnN - 1.03 - 1.07 - 1.32
+MCMismodelUncMETShape lnN - 1.006 - 0.9767 - 0.9516 #MC mismodeling
+
+#MC, BoostedOnly, pred: 4.278
+#METUncStat1_2H gmN 166 - 0.026 - - - -
+#METUncStat2_2H gmN 27 - - - 0.158 - -
+#METUncStat3_2H gmN 7 - - - - - 0.611
+
+#Data, BoostedOnly, pred: 5.142
+METUncStat1_2H gmN 141 - 0.036 - - - -
+METUncStat2_2H gmN 31 - - - 0.166 - -
+METUncStat3_2H gmN 7 - - - - - 0.735
+
+#Signal systematics
+LumiSyst lnN 1.0243 - 1.0243 - 1.0243 -
+TrigSyst lnN 0.964211/1.00056 - 0.964613/1.00064 - 0.963452/1.00035 - 
+ISRSyst lnN 1/1 - 1/1 - 1/1 - 
+SignalStat1_2H lnN 1.0104 - - - - -
+SignalStat2_2H lnN - - 1.0112 - - -
+SignalStat3_2H lnN - - - - 1.0179 -
+SignalJEC lnN 1.00645/0.9957 - 0.98037/1.01039 - 0.898727/1.09812 -
+SignalJER lnN 1.00452/0.999055 - 0.998314/0.995609 - 0.986429/1.00856 -
+SignalRes lnN 0.9768 - 0.9902 - 1.0091 -
+SignalPrefire lnN 1.00087/0.999125 - 1.00086/0.999137 - 1.00087/0.999125 -
+SignalPU lnN 1.00099/0.998481 - 0.99952/1.00022 - 0.999682/1.00167 -
+SignalScale lnN 1.00063/0.999238 - 1.00001/0.999917 - 0.994127/1.00646 -
+SignalBBTag lnN 0.86091/1.16309 - 0.862409/1.16119 - 0.861992/1.16203 -
+SignalFastBBTag lnN 0.993729/1.00629 - 0.993736/1.00628 - 0.993973/1.00605 -
+SignalFastMass lnN 0.974029/1.02639 - 0.973763/1.02664 - 0.96953/1.03095 -
+SignalMETFastSIM lnN 1.0044 - 1.0058 - 1.0544 -
+SignalJetID lnN 1.01 - 1.01 -  1.01 -
+
+
+#Alpha0_2H rateParam BinRegion0 bkg ((@0*@1/@2)*0.828) Beta_2H,Gamma,Delta #All MC
+#Alpha1_2H rateParam BinRegion1 bkg ((@0*@1/@2)*0.136) Beta_2H,Gamma,Delta
+#Alpha2_2H rateParam BinRegion2 bkg ((@0*@1/@2)*0.037) Beta_2H,Gamma,Delta
+
+Alpha0_2H rateParam BinRegion0 bkg ((@0*@1/@2)*0.788) Beta_2H,Gamma,Delta #Full run 2 data
+Alpha1_2H rateParam BinRegion1 bkg ((@0*@1/@2)*0.173) Beta_2H,Gamma,Delta
+Alpha2_2H rateParam BinRegion2 bkg ((@0*@1/@2)*0.039) Beta_2H,Gamma,Delta
