@@ -1,0 +1,17 @@
+\documentclass{standalone}
+\begin{document}
+\begin{tabular}{l|ccc}
+  & T5HH(1000,1) & T5HH(1600,1) & T5HH(2200,1) \\ 
+Selection requirement & \multicolumn{3}{c}{\large{[Events]}}  \\ \hline
+All events & 49365.6 & 1169.1 & 47.9  \\ 
+Hadronic baseline & 22952.0 & 642.3 & 28.0  \\ 
+$N_{\mathrm{AK8}}>$1, jet $p_{\mathrm{T}}>$300 GeV & 11297.7 & 474.1 & 22.9  \\ 
+m$_{\mathrm{J1\&2}}$ [60,260] GeV & 6326.2 & 273.8 & 13.3  \\ 
+Resolved event veto & 5974.4 & 269.0 & 13.3  \\ 
+\hline 
+$D_{bb,J1\&2}>$0.7 & 1707.7 & 90.6 & 4.6  \\ 
+m$_{\mathrm{J1\&2}}$ [95,145] GeV & 984.7 & 60.8 & 3.1  \\ 
+$D_{bb,J1or2}>$0.7 & 2995.2 & 131.9 & 6.4  \\ 
+m$_{\mathrm{J1\&2}}$ [95,145] GeV & 1396.9 & 73.4 & 3.7  \\ 
+\end{tabular}
+\end{document}

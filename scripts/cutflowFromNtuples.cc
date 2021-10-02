@@ -179,7 +179,7 @@ int main(int argc, char** argv) {
   cutName.push_back("nAK8"); //Lead and sublead jet, pass pT>300 and jetID each, and HT>600
   cutFlow.push_back(*looseMassCut<RA2bTree>);
   cutName.push_back("LooseJetMass");
-  cutFlow.push_back(*ResVetoCutflow<RA2bTree>);
+  cutFlow.push_back(*resVetoCutflow<RA2bTree>);
   cutName.push_back("ResVeto");
   cutFlow.push_back(*cutflowBoostBBTag<RA2bTree>);
   cutName.push_back("BB2H");
@@ -205,8 +205,8 @@ int main(int argc, char** argv) {
   }
 
   if (runVeto) { // region 0=1DTChiHH, 1=1DT5HH
-    if (region==0){readResVeto_Sig1D("TChiHH");}
-    else if (region==1){readResVeto_Sig1D("T5HH");}
+    if (region==0){readResVeto_Sig1D("all","TChiHH");}
+    else if (region==1){readResVeto_Sig1D("all","T5HH");}
   }
 
   if (!doDetailed) {

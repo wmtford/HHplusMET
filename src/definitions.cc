@@ -28,17 +28,7 @@ float jetPt1=1.0; float jetPt2=1.0;
 double jetMass1 = 1.0; double jetMass2 = 1.0;
 float thisDeltaPhi1=10.0; float thisDeltaPhi2=10.0; float thisDeltaPhi3=10.0; float thisDeltaPhi4=10.0;
 int numIsoMuonTracks = 0; int numIsoElectronTracks = 0; int numIsoPionTracks = 0;
-vector<string> vYear_SRData, vrunNum_SRData, vlumiNum_SRData, vevtNum_SRData;
-vector<string> vYear_CRData, vrunNum_CRData, vlumiNum_CRData, vevtNum_CRData;
-set<string> vYearLumiEvt;
-vector<string> vsample_SR, vYear_SR, vrunNum_SR, vlumiNum_SR, vevtNum_SR, vMET_SR, vNLSPmass_SR, vLSPmass_SR;
-vector<string> vsample_CR, vYear_CR, vrunNum_CR, vlumiNum_CR, vevtNum_CR, vMET_CR, vNLSPmass_CR, vLSPmass_CR;
-vector<string> vsample_SR_16, vYear_SR_16, vrunNum_SR_16, vlumiNum_SR_16, vevtNum_SR_16, vMET_SR_16, vNLSPmass_SR_16, vLSPmass_SR_16;
-vector<string> vsample_CR_16, vYear_CR_16, vrunNum_CR_16, vlumiNum_CR_16, vevtNum_CR_16, vMET_CR_16, vNLSPmass_CR_16, vLSPmass_CR_16;
-vector<string> vsample_SR_17, vYear_SR_17, vrunNum_SR_17, vlumiNum_SR_17, vevtNum_SR_17, vMET_SR_17, vNLSPmass_SR_17, vLSPmass_SR_17;
-vector<string> vsample_CR_17, vYear_CR_17, vrunNum_CR_17, vlumiNum_CR_17, vevtNum_CR_17, vMET_CR_17, vNLSPmass_CR_17, vLSPmass_CR_17;
-vector<string> vsample_SR_18, vYear_SR_18, vrunNum_SR_18, vlumiNum_SR_18, vevtNum_SR_18, vMET_SR_18, vNLSPmass_SR_18, vLSPmass_SR_18;
-vector<string> vsample_CR_18, vYear_CR_18, vrunNum_CR_18, vlumiNum_CR_18, vevtNum_CR_18, vMET_CR_18, vNLSPmass_CR_18, vLSPmass_CR_18;
+set<string> vYearRunLumiEvt;
 TString thisYear; TString NLSPmass; TString LSPmass;
 
 TString whichJEC = "none";
@@ -1255,519 +1245,184 @@ int getTotHHEvents(TString NLSPmass, TString LSPmass) {
 ////////////////////////////////////////////////////////////
 /////////////////////// FOR RESOLVED ///////////////////////
 ////////////////////////////////////////////////////////////
-void readResVeto_SR(string whichYear) {
-  string in_dir = "evtCount/";
-  if (whichYear != "all") {
-    string line;
-    ifstream file(in_dir+"processed_resolved_list_SR_met300_SCAN_MC_"+whichYear+".txt");
-    while (std::getline(file, line)) {
-      std::vector<std::string> x = split(line, ',');
-      vsample_SR.push_back(x[0]); vYear_SR.push_back(x[1].erase(0,1)); vrunNum_SR.push_back(x[2].erase(0,1));
-      vlumiNum_SR.push_back(x[3].erase(0,1)); vevtNum_SR.push_back(x[4].erase(0,1)); vMET_SR.push_back(x[5].erase(0,1));
-    }
-  }
-  else {
-    string line1; string line2; string line3;
-    ifstream file1(in_dir+"processed_resolved_list_SR_met300_SCAN_MC_2016.txt");
-    ifstream file2(in_dir+"processed_resolved_list_SR_met300_SCAN_MC_2017.txt");
-    ifstream file3(in_dir+"processed_resolved_list_SR_met300_SCAN_MC_2018.txt");
-    while (std::getline(file1, line1)) {
-      std::vector<std::string> x = split(line1, ',');
-      vsample_SR_16.push_back(x[0]); vYear_SR_16.push_back(x[1].erase(0,1)); vrunNum_SR_16.push_back(x[2].erase(0,1));
-      vlumiNum_SR_16.push_back(x[3].erase(0,1)); vevtNum_SR_16.push_back(x[4].erase(0,1)); vMET_SR_16.push_back(x[5].erase(0,1));
-    }
-    while (std::getline(file2, line2)) {
-      std::vector<std::string> x = split(line2, ',');
-      vsample_SR_17.push_back(x[0]); vYear_SR_17.push_back(x[1].erase(0,1)); vrunNum_SR_17.push_back(x[2].erase(0,1));
-      vlumiNum_SR_17.push_back(x[3].erase(0,1)); vevtNum_SR_17.push_back(x[4].erase(0,1)); vMET_SR_17.push_back(x[5].erase(0,1));
-    }
-    while (std::getline(file3, line3)) {
-      std::vector<std::string> x = split(line3, ',');
-      vsample_SR_18.push_back(x[0]); vYear_SR_18.push_back(x[1].erase(0,1)); vrunNum_SR_18.push_back(x[2].erase(0,1));
-      vlumiNum_SR_18.push_back(x[3].erase(0,1)); vevtNum_SR_18.push_back(x[4].erase(0,1)); vMET_SR_18.push_back(x[5].erase(0,1));
-    }
-  }
-}
-
-void readResVeto_CR(string whichYear) {
-  string in_dir = "evtCount/";
-  if (whichYear != "all") {
-    string line;
-    ifstream file(in_dir+"processed_resolved_list_CR_met300_SCAN_MC_"+whichYear+".txt");
-    while (std::getline(file, line)) {
-      std::vector<std::string> x = split(line, ',');
-      vsample_CR.push_back(x[0]); vYear_CR.push_back(x[1].erase(0,1)); vrunNum_CR.push_back(x[2].erase(0,1));
-      vlumiNum_CR.push_back(x[3].erase(0,1)); vevtNum_CR.push_back(x[4].erase(0,1)); vMET_CR.push_back(x[5].erase(0,1));
-    }
-  }
-  else {
-    string line1; string line2; string line3;
-    ifstream file1(in_dir+"processed_resolved_list_CR_met300_SCAN_MC_2016.txt");
-    ifstream file2(in_dir+"processed_resolved_list_CR_met300_SCAN_MC_2017.txt");
-    ifstream file3(in_dir+"processed_resolved_list_CR_met300_SCAN_MC_2018.txt");
-    while (std::getline(file1, line1)) {
-      std::vector<std::string> x = split(line1, ',');
-      vsample_CR_16.push_back(x[0]); vYear_CR_16.push_back(x[1].erase(0,1)); vrunNum_CR_16.push_back(x[2].erase(0,1));
-      vlumiNum_CR_16.push_back(x[3].erase(0,1)); vevtNum_CR_16.push_back(x[4].erase(0,1)); vMET_CR_16.push_back(x[5].erase(0,1));
-    }
-    while (std::getline(file2, line2)) {
-      std::vector<std::string> x = split(line2, ',');
-      vsample_CR_17.push_back(x[0]); vYear_CR_17.push_back(x[1].erase(0,1)); vrunNum_CR_17.push_back(x[2].erase(0,1));
-      vlumiNum_CR_17.push_back(x[3].erase(0,1)); vevtNum_CR_17.push_back(x[4].erase(0,1)); vMET_CR_17.push_back(x[5].erase(0,1));
-    }
-    while (std::getline(file3, line3)) {
-      std::vector<std::string> x = split(line3, ',');
-      vsample_CR_18.push_back(x[0]); vYear_CR_18.push_back(x[1].erase(0,1)); vrunNum_CR_18.push_back(x[2].erase(0,1));
-      vlumiNum_CR_18.push_back(x[3].erase(0,1)); vevtNum_CR_18.push_back(x[4].erase(0,1)); vMET_CR_18.push_back(x[5].erase(0,1));
-    }
-  }
-}
-
-void readResVeto_SRData(string whichYear) {
-  string in_dir = "evtCount/";
-  if (whichYear != "all") {
-    string line;
-    ifstream file(in_dir+"processed_resolved_list_SR_met300_SCAN_DATA_"+whichYear+".txt");
-    while (std::getline(file, line)) {
-      std::vector<std::string> x = split(line, ',');
-      vYear_SRData.push_back(x[1].erase(0,1)); vrunNum_SRData.push_back(x[2].erase(0,1)); vlumiNum_SRData.push_back(x[3].erase(0,1)); vevtNum_SRData.push_back(x[4].erase(0,1));
-    }
-  }
-  else { //if data runs with MC
-    std::cout<<"You really don't want to run vetoed data for all years at the same time."<<std::endl;
-  }
-}
-
-void readResVeto_CRData(string whichYear) {
-  string in_dir = "evtCount/";
-  if (whichYear != "all") {
-    string line;
-    ifstream file(in_dir+"processed_resolved_list_CR_met300_SCAN_DATA_"+whichYear+".txt");
-    while (std::getline(file, line)) {
-      std::vector<std::string> x = split(line, ',');
-      vYear_CRData.push_back(x[1].erase(0,1)); vrunNum_CRData.push_back(x[2].erase(0,1)); vlumiNum_CRData.push_back(x[3].erase(0,1)); vevtNum_CRData.push_back(x[4].erase(0,1));
-    }
-  }
-  else {
-    std::cout<<"You really don't want to run vetoed data for all years at the same time."<<std::endl;
-  }
-}
-
-void readResVeto_Sig1D(string model) { //this is only for 1DTChiHH950 and all T5HH
+void readResVeto_MC(string whichYear) {
   string in_dir = "evtCount/"; string line;
-  if (model=="TChiHH") {
-    // string fileName = in_dir+"resolved_1DTChiHH950_allYears.txt";
-    string fileName1 = in_dir+"processed_resolved_list_SR_met300_SCAN_TChiHH1D_2016.txt";
-    string fileName2 = in_dir+"processed_resolved_list_SR_met300_SCAN_TChiHH1D_2017.txt";
-    string fileName3 = in_dir+"processed_resolved_list_SR_met300_SCAN_TChiHH1D_2018.txt";
-    string fileName4 = in_dir+"processed_resolved_list_CR_met300_SCAN_TChiHH1D_2016.txt";
-    string fileName5 = in_dir+"processed_resolved_list_CR_met300_SCAN_TChiHH1D_2017.txt";
-    string fileName6 = in_dir+"processed_resolved_list_CR_met300_SCAN_TChiHH1D_2018.txt";
+  if (whichYear != "all") {
+    string fileName1 = in_dir+"processed_resolved_list_SR_met300_SCAN_MC_"+whichYear+".txt";
+    string fileName2 = in_dir+"processed_resolved_list_CR_met300_SCAN_MC_"+whichYear+".txt";
+    vector<string> fileList = {fileName1, fileName2};
+    for (int i=0; i<fileList.size(); i++) {
+      string fileName = fileList[i];
+      ifstream file(fileName);
+      while (std::getline(file, line)) {
+        std::vector<std::string> x = split(line, ',');
+        string thisOne = x[1].erase(0,1) + "," + x[2].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1);
+        vYearRunLumiEvt.insert(thisOne);
+      }
+    }
+  }
+  else {
+    string fileName1 = in_dir+"processed_resolved_list_SR_met300_SCAN_MC_2016.txt";
+    string fileName2 = in_dir+"processed_resolved_list_SR_met300_SCAN_MC_2017.txt";
+    string fileName3 = in_dir+"processed_resolved_list_SR_met300_SCAN_MC_2018.txt";
+    string fileName4 = in_dir+"processed_resolved_list_CR_met300_SCAN_MC_2016.txt";
+    string fileName5 = in_dir+"processed_resolved_list_CR_met300_SCAN_MC_2017.txt";
+    string fileName6 = in_dir+"processed_resolved_list_CR_met300_SCAN_MC_2018.txt";
     vector<string> fileList = {fileName1, fileName2, fileName3, fileName4, fileName5, fileName6};
     for (int i=0; i<fileList.size(); i++) {
       string fileName = fileList[i];
       ifstream file(fileName);
       while (std::getline(file, line)) {
         std::vector<std::string> x = split(line, ',');
-        string checkNLSPMass = x[6].erase(0,1);
-        if (checkNLSPMass!=NLSPmass) continue;
-        string thisOne = x[1].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1);
-        vYearLumiEvt.insert(thisOne);
+        string thisOne = x[1].erase(0,1) + "," + x[2].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1);
+        vYearRunLumiEvt.insert(thisOne);
       }
     }
   }
-  else if (model=="T5HH") {
-    string fileName1 = in_dir+"processed_resolved_list_SR_met300_SCAN_T5HH1D_2016.txt";
-    string fileName2 = in_dir+"processed_resolved_list_SR_met300_SCAN_T5HH1D_2017.txt";
-    string fileName3 = in_dir+"processed_resolved_list_SR_met300_SCAN_T5HH1D_2018.txt";
-    string fileName4 = in_dir+"processed_resolved_list_CR_met300_SCAN_T5HH1D_2016.txt";
-    string fileName5 = in_dir+"processed_resolved_list_CR_met300_SCAN_T5HH1D_2017.txt";
-    string fileName6 = in_dir+"processed_resolved_list_CR_met300_SCAN_T5HH1D_2018.txt";
+}
+
+
+void readResVeto_Data(string whichYear) {
+  string in_dir = "evtCount/"; string line;
+  if (whichYear=="all") {std::cout<<"Res veto not setup for all years!"; return;}
+  string fileName1 = in_dir+"processed_resolved_list_SR_met300_SCAN_DATA_"+whichYear+".txt";
+  string fileName2 = in_dir+"processed_resolved_list_CR_met300_SCAN_DATA_"+whichYear+".txt";
+  vector<string> fileList = {fileName1, fileName2};
+  for (int i=0; i<fileList.size(); i++) {
+    string fileName = fileList[i];
+    ifstream file(fileName);
+    while (std::getline(file, line)) {
+      std::vector<std::string> x = split(line, ',');
+      string thisOne = x[1].erase(0,1) + "," + x[2].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1);
+      vYearRunLumiEvt.insert(thisOne);
+    }
+  }
+}
+
+
+void readResVeto_Sig1D(string whichYear, string model) {
+  string in_dir = "evtCount/"; string line;
+  if (whichYear!="all") {
+    string fileName1 = in_dir+"processed_resolved_list_SR_met300_SCAN_"+model+"1D_"+whichYear+".txt";
+    string fileName2 = in_dir+"processed_resolved_list_CR_met300_SCAN_"+model+"1D_"+whichYear+".txt";
+    vector<string> fileList = {fileName1, fileName2};
+    for (int i=0; i<fileList.size(); i++) {
+      string fileName = fileList[i];
+      ifstream file(fileName);
+      while (std::getline(file, line)) {
+        std::vector<std::string> x = split(line, ',');
+        if (model=="TChiHH") {
+          string checkNLSPMass = x[6].erase(0,1);
+          if (checkNLSPMass!=NLSPmass) continue;
+        }
+        else if (model=="T5HH") {
+          std::vector<std::string> sample = split(x[0], '-');
+          std::vector<std::string> mNLSP = split(sample[3], '_');
+          if (mNLSP[0]!=NLSPmass) continue;
+        }
+        string thisOne = x[1].erase(0,1) + "," + x[2].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1);
+        vYearRunLumiEvt.insert(thisOne);
+      }
+    }
+  }
+  else {
+    string fileName1 = in_dir+"processed_resolved_list_SR_met300_SCAN_"+model+"1D_2016.txt";
+    string fileName2 = in_dir+"processed_resolved_list_SR_met300_SCAN_"+model+"1D_2017.txt";
+    string fileName3 = in_dir+"processed_resolved_list_SR_met300_SCAN_"+model+"1D_2018.txt";
+    string fileName4 = in_dir+"processed_resolved_list_CR_met300_SCAN_"+model+"1D_2016.txt";
+    string fileName5 = in_dir+"processed_resolved_list_CR_met300_SCAN_"+model+"1D_2017.txt";
+    string fileName6 = in_dir+"processed_resolved_list_CR_met300_SCAN_"+model+"1D_2018.txt";
+
     vector<string> fileList = {fileName1, fileName2, fileName3, fileName4, fileName5, fileName6};
     for (int i=0; i<fileList.size(); i++) {
       string fileName = fileList[i];
       ifstream file(fileName);
       while (std::getline(file, line)) {
         std::vector<std::string> x = split(line, ',');
-        std::vector<std::string> sample = split(x[0], '-');
-        std::vector<std::string> mNLSP = split(sample[3], '_');
-        if (mNLSP[0]!=NLSPmass) continue;
-        string thisOne = x[1].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1);
-        vYearLumiEvt.insert(thisOne);
+        if (model=="TChiHH") {
+          string checkNLSPMass = x[6].erase(0,1);
+          if (checkNLSPMass!=NLSPmass) continue;
+        }
+        else if (model=="T5HH") {
+          std::vector<std::string> sample = split(x[0], '-');
+          std::vector<std::string> mNLSP = split(sample[3], '_');
+          if (mNLSP[0]!=NLSPmass) continue;
+        }
+        string thisOne = x[1].erase(0,1) + "," + x[2].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1);
+        vYearRunLumiEvt.insert(thisOne);
       }
     }
   }
 }
 
-void readResVeto_SRSig1D(string whichYear) {
-  string in_dir = "evtCount/";
+void readResVeto_Sig2D(string whichYear, string model) {
+  string in_dir = "evtCount/"; string line;
+  if (model=="T5HH") {std::cout<<"Res veto not setup for this!!"<<std::endl; return;}
+
   if (whichYear!="all") {
-    string line;
-    string fileName = in_dir+"processed_resolved_list_SR_met300_SCAN_TChiHH1D_"+whichYear+".txt";
-    ifstream file(fileName);
-    while (std::getline(file, line)) {
-      std::vector<std::string> x = split(line, ',');
-      vsample_SR.push_back(x[0]); vYear_SR.push_back(x[1].erase(0,1)); vrunNum_SR.push_back(x[2].erase(0,1));
-      vlumiNum_SR.push_back(x[3].erase(0,1)); vevtNum_SR.push_back(x[4].erase(0,1)); vMET_SR.push_back(x[5].erase(0,1));
-      vNLSPmass_SR.push_back(x[6].erase(0,1)); vLSPmass_SR.push_back(x[7].erase(0,1));
+
+    string fileName1 = in_dir+"processed_resolved_list_SR_met300_SCAN_TChiHH2D_"+whichYear+".txt";
+    string fileName2 = in_dir+"processed_resolved_list_CR_met300_SCAN_TChiHH2D_"+whichYear+".txt";
+    vector<string> fileList = {fileName1, fileName2};
+    for (int i=0; i<fileList.size(); i++) {
+      string fileName = fileList[i];
+      ifstream file(fileName);
+      while (std::getline(file, line)) {
+        std::vector<std::string> x = split(line, ',');
+        string checkNLSPMass = x[6].erase(0,1); if (checkNLSPMass!=NLSPmass) continue;
+        string checkLSPMass = x[7].erase(0,1); if (checkLSPMass!=LSPmass) continue;
+        string thisOne = x[1].erase(0,1) + "," + x[2].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1);
+        vYearRunLumiEvt.insert(thisOne);
+      }
     }
   }
   else {
-    std::cout<<"Res veto list: reading in all SR years"<<std::endl;
-    string line1; string line2; string line3;
-    ifstream file1(in_dir+"processed_resolved_list_SR_met300_SCAN_TChiHH1D_2016.txt");
-    ifstream file2(in_dir+"processed_resolved_list_SR_met300_SCAN_TChiHH1D_2017.txt");
-    ifstream file3(in_dir+"processed_resolved_list_SR_met300_SCAN_TChiHH1D_2018.txt");
+    string fileName1 = in_dir+"processed_resolved_list_SR_met300_SCAN_TChiHH2D_2016.txt";
+    string fileName2 = in_dir+"processed_resolved_list_SR_met300_SCAN_TChiHH2D_2017.txt";
+    string fileName3 = in_dir+"processed_resolved_list_SR_met300_SCAN_TChiHH2D_2018.txt";
+    string fileName4 = in_dir+"processed_resolved_list_CR_met300_SCAN_TChiHH2D_2016.txt";
+    string fileName5 = in_dir+"processed_resolved_list_CR_met300_SCAN_TChiHH2D_2017.txt";
+    string fileName6 = in_dir+"processed_resolved_list_CR_met300_SCAN_TChiHH2D_2018.txt";
 
-    while (std::getline(file1, line1)) {
-      std::vector<std::string> x = split(line1, ',');
-      vsample_SR_16.push_back(x[0]); vYear_SR_16.push_back(x[1].erase(0,1)); vrunNum_SR_16.push_back(x[2].erase(0,1));
-      vlumiNum_SR_16.push_back(x[3].erase(0,1)); vevtNum_SR_16.push_back(x[4].erase(0,1)); vMET_SR_16.push_back(x[5].erase(0,1));
-      vNLSPmass_SR_16.push_back(x[6].erase(0,1)); vLSPmass_SR_16.push_back(x[7].erase(0,1));
-    }
-    while (std::getline(file2, line2)) {
-      std::vector<std::string> x = split(line2, ',');
-      vsample_SR_17.push_back(x[0]); vYear_SR_17.push_back(x[1].erase(0,1)); vrunNum_SR_17.push_back(x[2].erase(0,1));
-      vlumiNum_SR_17.push_back(x[3].erase(0,1)); vevtNum_SR_17.push_back(x[4].erase(0,1)); vMET_SR_17.push_back(x[5].erase(0,1));
-      vNLSPmass_SR_17.push_back(x[6].erase(0,1)); vLSPmass_SR_17.push_back(x[7].erase(0,1));
-    }
-    while (std::getline(file3, line3)) {
-      std::vector<std::string> x = split(line3, ',');
-      vsample_SR_18.push_back(x[0]); vYear_SR_18.push_back(x[1].erase(0,1)); vrunNum_SR_18.push_back(x[2].erase(0,1));
-      vlumiNum_SR_18.push_back(x[3].erase(0,1)); vevtNum_SR_18.push_back(x[4].erase(0,1)); vMET_SR_18.push_back(x[5].erase(0,1));
-      vNLSPmass_SR_18.push_back(x[6].erase(0,1)); vLSPmass_SR_18.push_back(x[7].erase(0,1));
+    vector<string> fileList = {fileName1, fileName2, fileName3, fileName4, fileName5, fileName6};
+    for (int i=0; i<fileList.size(); i++) {
+      string fileName = fileList[i];
+      ifstream file(fileName);
+      while (std::getline(file, line)) {
+        std::vector<std::string> x = split(line, ',');
+        string checkNLSPMass = x[6].erase(0,1); if (checkNLSPMass!=NLSPmass) continue;
+        string checkLSPMass = x[7].erase(0,1); if (checkLSPMass!=LSPmass) continue;
+        string thisOne = x[1].erase(0,1) + "," + x[2].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1);
+        vYearRunLumiEvt.insert(thisOne);
+      }
     }
   }
 }
 
-void readResVeto_CRSig1D(string whichYear) {
-  string in_dir = "evtCount/";
-  if (whichYear!="all") {
-    string line;
-    string fileName = in_dir+"processed_resolved_list_CR_met300_SCAN_TChiHH1D_"+whichYear+".txt";
-    ifstream file(fileName);
-    while (std::getline(file, line)) {
-      std::vector<std::string> x = split(line, ',');
-      vsample_CR.push_back(x[0]); vYear_CR.push_back(x[1].erase(0,1)); vrunNum_CR.push_back(x[2].erase(0,1));
-      vlumiNum_CR.push_back(x[3].erase(0,1)); vevtNum_CR.push_back(x[4].erase(0,1)); vMET_CR.push_back(x[5].erase(0,1));
-      vNLSPmass_CR.push_back(x[6].erase(0,1)); vLSPmass_CR.push_back(x[7].erase(0,1));
-    }
-  }
-  else {
-    std::cout<<"Res veto list: reading in all CR years"<<std::endl;
-    string line1; string line2; string line3;
-    ifstream file1(in_dir+"processed_resolved_list_CR_met300_SCAN_TChiHH1D_2016.txt");
-    ifstream file2(in_dir+"processed_resolved_list_CR_met300_SCAN_TChiHH1D_2017.txt");
-    ifstream file3(in_dir+"processed_resolved_list_CR_met300_SCAN_TChiHH1D_2018.txt");
-    while (std::getline(file1, line1)) {
-      std::vector<std::string> x = split(line1, ',');
-      vsample_CR_16.push_back(x[0]); vYear_CR_16.push_back(x[1].erase(0,1)); vrunNum_CR_16.push_back(x[2].erase(0,1));
-      vlumiNum_CR_16.push_back(x[3].erase(0,1)); vevtNum_CR_16.push_back(x[4].erase(0,1)); vMET_CR_16.push_back(x[5].erase(0,1));
-      vNLSPmass_CR_16.push_back(x[6].erase(0,1)); vLSPmass_CR_16.push_back(x[7].erase(0,1));
-    }
-    while (std::getline(file2, line2)) {
-      std::vector<std::string> x = split(line2, ',');
-      vsample_CR_17.push_back(x[0]); vYear_CR_17.push_back(x[1].erase(0,1)); vrunNum_CR_17.push_back(x[2].erase(0,1));
-      vlumiNum_CR_17.push_back(x[3].erase(0,1)); vevtNum_CR_17.push_back(x[4].erase(0,1)); vMET_CR_17.push_back(x[5].erase(0,1));
-      vNLSPmass_CR_17.push_back(x[6].erase(0,1)); vLSPmass_CR_17.push_back(x[7].erase(0,1));
-    }
-    while (std::getline(file3, line3)) {
-      std::vector<std::string> x = split(line3, ',');
-      vsample_CR_18.push_back(x[0]); vYear_CR_18.push_back(x[1].erase(0,1)); vrunNum_CR_18.push_back(x[2].erase(0,1));
-      vlumiNum_CR_18.push_back(x[3].erase(0,1)); vevtNum_CR_18.push_back(x[4].erase(0,1)); vMET_CR_18.push_back(x[5].erase(0,1));
-      vNLSPmass_CR_18.push_back(x[6].erase(0,1)); vLSPmass_CR_18.push_back(x[7].erase(0,1));
-    }
-  }
-}
 
-void readResVeto_SRSig1D_T5HH(string whichYear) {
-  string in_dir = "evtCount/";
-  if (whichYear!="all") {
-    string line;
-    ifstream file(in_dir+"processed_resolved_list_SR_met300_SCAN_T5HH1D_"+whichYear+".txt");
-    while (std::getline(file, line)) {
-      std::vector<std::string> x = split(line, ',');
-      vsample_SR.push_back(x[0]); vYear_SR.push_back(x[1].erase(0,1)); vrunNum_SR.push_back(x[2].erase(0,1));
-      vlumiNum_SR.push_back(x[3].erase(0,1)); vevtNum_SR.push_back(x[4].erase(0,1)); vMET_SR.push_back(x[5].erase(0,1));
-      std::vector<std::string> sample = split(x[0], '-');
-      std::vector<std::string> mNLSP = split(sample[3], '_');
-      vNLSPmass_SR.push_back(mNLSP[0]); vLSPmass_SR.push_back("1");
-    }
-  }
-  else {
-    std::cout<<"Res veto list: reading in all SR years"<<std::endl;
-    string line1; string line2; string line3;
-    ifstream file1(in_dir+"processed_resolved_list_SR_met300_SCAN_T5HH1D_2016.txt");
-    ifstream file2(in_dir+"processed_resolved_list_SR_met300_SCAN_T5HH1D_2017.txt");
-    ifstream file3(in_dir+"processed_resolved_list_SR_met300_SCAN_T5HH1D_2018.txt");
-    while (std::getline(file1, line1)) {
-      std::vector<std::string> x = split(line1, ',');
-      vsample_SR_16.push_back(x[0]); vYear_SR_16.push_back(x[1].erase(0,1)); vrunNum_SR_16.push_back(x[2].erase(0,1));
-      vlumiNum_SR_16.push_back(x[3].erase(0,1)); vevtNum_SR_16.push_back(x[4].erase(0,1)); vMET_SR_16.push_back(x[5].erase(0,1));
-      std::vector<std::string> sample = split(x[0], '-');
-      std::vector<std::string> mNLSP = split(sample[3], '_');
-      vNLSPmass_SR_16.push_back(mNLSP[0]); vLSPmass_SR_16.push_back("1");
-    }
-    while (std::getline(file2, line2)) {
-      std::vector<std::string> x = split(line2, ',');
-      vsample_SR_17.push_back(x[0]); vYear_SR_17.push_back(x[1].erase(0,1)); vrunNum_SR_17.push_back(x[2].erase(0,1));
-      vlumiNum_SR_17.push_back(x[3].erase(0,1)); vevtNum_SR_17.push_back(x[4].erase(0,1)); vMET_SR_17.push_back(x[5].erase(0,1));
-      std::vector<std::string> sample = split(x[0], '-');
-      std::vector<std::string> mNLSP = split(sample[3], '_');
-      vNLSPmass_SR_17.push_back(mNLSP[0]); vLSPmass_SR_17.push_back("1");
-    }
-    while (std::getline(file3, line3)) {
-      std::vector<std::string> x = split(line3, ',');
-      vsample_SR_18.push_back(x[0]); vYear_SR_18.push_back(x[1].erase(0,1)); vrunNum_SR_18.push_back(x[2].erase(0,1));
-      vlumiNum_SR_18.push_back(x[3].erase(0,1)); vevtNum_SR_18.push_back(x[4].erase(0,1)); vMET_SR_18.push_back(x[5].erase(0,1));
-      std::vector<std::string> sample = split(x[0], '-');
-      std::vector<std::string> mNLSP = split(sample[3], '_');
-      vNLSPmass_SR_18.push_back(mNLSP[0]); vLSPmass_SR_18.push_back("1");
-    }
-  }
-}
-
-void readResVeto_CRSig1D_T5HH(string whichYear) {
-  string in_dir = "evtCount/";
-  if (whichYear!="all") {
-    string line;
-    ifstream file(in_dir+"processed_resolved_list_CR_met300_SCAN_T5HH1D_"+whichYear+".txt");
-    while (std::getline(file, line)) {
-      std::vector<std::string> x = split(line, ',');
-      vsample_CR.push_back(x[0]); vYear_CR.push_back(x[1].erase(0,1)); vrunNum_CR.push_back(x[2].erase(0,1));
-      vlumiNum_CR.push_back(x[3].erase(0,1)); vevtNum_CR.push_back(x[4].erase(0,1)); vMET_CR.push_back(x[5].erase(0,1));
-      std::vector<std::string> sample = split(x[0], '-');
-      std::vector<std::string> mNLSP = split(sample[3], '_');
-      vNLSPmass_CR.push_back(mNLSP[0]); vLSPmass_CR.push_back("1");
-    }
-  }
-  else {
-    std::cout<<"Res veto list: reading in all CR years"<<std::endl;
-    string line1; string line2; string line3;
-    ifstream file1(in_dir+"processed_resolved_list_CR_met300_SCAN_T5HH1D_2016.txt");
-    ifstream file2(in_dir+"processed_resolved_list_CR_met300_SCAN_T5HH1D_2017.txt");
-    ifstream file3(in_dir+"processed_resolved_list_CR_met300_SCAN_T5HH1D_2018.txt");
-    while (std::getline(file1, line1)) {
-      std::vector<std::string> x = split(line1, ',');
-      vsample_CR_16.push_back(x[0]); vYear_CR_16.push_back(x[1].erase(0,1)); vrunNum_CR_16.push_back(x[2].erase(0,1));
-      vlumiNum_CR_16.push_back(x[3].erase(0,1)); vevtNum_CR_16.push_back(x[4].erase(0,1)); vMET_CR_16.push_back(x[5].erase(0,1));
-      std::vector<std::string> sample = split(x[0], '-');
-      std::vector<std::string> mNLSP = split(sample[3], '_');
-      vNLSPmass_CR_16.push_back(mNLSP[0]); vLSPmass_CR_16.push_back("1");
-    }
-    while (std::getline(file2, line2)) {
-      std::vector<std::string> x = split(line2, ',');
-      vsample_CR_17.push_back(x[0]); vYear_CR_17.push_back(x[1].erase(0,1)); vrunNum_CR_17.push_back(x[2].erase(0,1));
-      vlumiNum_CR_17.push_back(x[3].erase(0,1)); vevtNum_CR_17.push_back(x[4].erase(0,1)); vMET_CR_17.push_back(x[5].erase(0,1));
-      std::vector<std::string> sample = split(x[0], '-');
-      std::vector<std::string> mNLSP = split(sample[3], '_');
-      vNLSPmass_CR_17.push_back(mNLSP[0]); vLSPmass_CR_17.push_back("1");
-    }
-    while (std::getline(file3, line3)) {
-      std::vector<std::string> x = split(line3, ',');
-      vsample_CR_18.push_back(x[0]); vYear_CR_18.push_back(x[1].erase(0,1)); vrunNum_CR_18.push_back(x[2].erase(0,1));
-      vlumiNum_CR_18.push_back(x[3].erase(0,1)); vevtNum_CR_18.push_back(x[4].erase(0,1)); vMET_CR_18.push_back(x[5].erase(0,1));
-      std::vector<std::string> sample = split(x[0], '-');
-      std::vector<std::string> mNLSP = split(sample[3], '_');
-      vNLSPmass_CR_18.push_back(mNLSP[0]); vLSPmass_CR_18.push_back("1");
-    }
-  }
-}
-
-void readResVeto_SRSig2D(string whichYear) {
-  string in_dir = "evtCount/";
-  if (whichYear!="all") {
-    string line;
-    ifstream file(in_dir+"processed_resolved_list_SR_met300_SCAN_TChiHH2D_"+whichYear+".txt");
-    while (std::getline(file, line)) {
-      std::vector<std::string> x = split(line, ',');
-      vsample_SR.push_back(x[0]); vYear_SR.push_back(x[1].erase(0,1)); vrunNum_SR.push_back(x[2].erase(0,1));
-      vlumiNum_SR.push_back(x[3].erase(0,1)); vevtNum_SR.push_back(x[4].erase(0,1)); vMET_SR.push_back(x[5].erase(0,1));
-      vNLSPmass_SR.push_back(x[6].erase(0,1)); vLSPmass_SR.push_back(x[7].erase(0,1));
-    }
-  }
-  else {
-    string line1; string line2; string line3;
-    ifstream file1(in_dir+"processed_resolved_list_SR_met300_SCAN_TChiHH2D_2016.txt");
-    ifstream file2(in_dir+"processed_resolved_list_SR_met300_SCAN_TChiHH2D_2017.txt");
-    ifstream file3(in_dir+"processed_resolved_list_SR_met300_SCAN_TChiHH2D_2018.txt");
-    while (std::getline(file1, line1)) {
-      std::vector<std::string> x = split(line1, ',');
-      vsample_SR_16.push_back(x[0]); vYear_SR_16.push_back(x[1].erase(0,1)); vrunNum_SR_16.push_back(x[2].erase(0,1));
-      vlumiNum_SR_16.push_back(x[3].erase(0,1)); vevtNum_SR_16.push_back(x[4].erase(0,1)); vMET_SR_16.push_back(x[5].erase(0,1));
-      vNLSPmass_SR_16.push_back(x[6].erase(0,1)); vLSPmass_SR_16.push_back(x[7].erase(0,1));
-    }
-    while (std::getline(file2, line2)) {
-      std::vector<std::string> x = split(line2, ',');
-      vsample_SR_17.push_back(x[0]); vYear_SR_17.push_back(x[1].erase(0,1)); vrunNum_SR_17.push_back(x[2].erase(0,1));
-      vlumiNum_SR_17.push_back(x[3].erase(0,1)); vevtNum_SR_17.push_back(x[4].erase(0,1)); vMET_SR_17.push_back(x[5].erase(0,1));
-      vNLSPmass_SR_17.push_back(x[6].erase(0,1)); vLSPmass_SR_17.push_back(x[7].erase(0,1));
-    }
-    while (std::getline(file3, line3)) {
-      std::vector<std::string> x = split(line3, ',');
-      vsample_SR_18.push_back(x[0]); vYear_SR_18.push_back(x[1].erase(0,1)); vrunNum_SR_18.push_back(x[2].erase(0,1));
-      vlumiNum_SR_18.push_back(x[3].erase(0,1)); vevtNum_SR_18.push_back(x[4].erase(0,1)); vMET_SR_18.push_back(x[5].erase(0,1));
-      vNLSPmass_SR_18.push_back(x[6].erase(0,1)); vLSPmass_SR_18.push_back(x[7].erase(0,1));
-    }
-  }
-}
-
-void readResVeto_CRSig2D(string whichYear) {
-  string in_dir = "evtCount/";
-  if (whichYear!="all") {
-    string line;
-    ifstream file(in_dir+"processed_resolved_list_CR_met300_SCAN_TChiHH2D_"+whichYear+".txt");
-    while (std::getline(file, line)) {
-      std::vector<std::string> x = split(line, ',');
-      vsample_CR.push_back(x[0]); vYear_CR.push_back(x[1].erase(0,1)); vrunNum_CR.push_back(x[2].erase(0,1));
-      vlumiNum_CR.push_back(x[3].erase(0,1)); vevtNum_CR.push_back(x[4].erase(0,1)); vMET_CR.push_back(x[5].erase(0,1));
-      vNLSPmass_CR.push_back(x[6].erase(0,1)); vLSPmass_CR.push_back(x[7].erase(0,1));
-    }
-  }
-  else {
-    string line1; string line2; string line3;
-    ifstream file1(in_dir+"processed_resolved_list_CR_met300_SCAN_TChiHH2D_2016.txt");
-    ifstream file2(in_dir+"processed_resolved_list_CR_met300_SCAN_TChiHH2D_2017.txt");
-    ifstream file3(in_dir+"processed_resolved_list_CR_met300_SCAN_TChiHH2D_2018.txt");
-    while (std::getline(file1, line1)) {
-      std::vector<std::string> x = split(line1, ',');
-      vsample_CR_16.push_back(x[0]); vYear_CR_16.push_back(x[1].erase(0,1)); vrunNum_CR_16.push_back(x[2].erase(0,1));
-      vlumiNum_CR_16.push_back(x[3].erase(0,1)); vevtNum_CR_16.push_back(x[4].erase(0,1)); vMET_CR_16.push_back(x[5].erase(0,1));
-      vNLSPmass_CR_16.push_back(x[6].erase(0,1)); vLSPmass_CR_16.push_back(x[7].erase(0,1));
-    }
-    while (std::getline(file2, line2)) {
-      std::vector<std::string> x = split(line2, ',');
-      vsample_CR_17.push_back(x[0]); vYear_CR_17.push_back(x[1].erase(0,1)); vrunNum_CR_17.push_back(x[2].erase(0,1));
-      vlumiNum_CR_17.push_back(x[3].erase(0,1)); vevtNum_CR_17.push_back(x[4].erase(0,1)); vMET_CR_17.push_back(x[5].erase(0,1));
-      vNLSPmass_CR_17.push_back(x[6].erase(0,1)); vLSPmass_CR_17.push_back(x[7].erase(0,1));
-    }
-    while (std::getline(file3, line3)) {
-      std::vector<std::string> x = split(line3, ',');
-      vsample_CR_18.push_back(x[0]); vYear_CR_18.push_back(x[1].erase(0,1)); vrunNum_CR_18.push_back(x[2].erase(0,1));
-      vlumiNum_CR_18.push_back(x[3].erase(0,1)); vevtNum_CR_18.push_back(x[4].erase(0,1)); vMET_CR_18.push_back(x[5].erase(0,1));
-      vNLSPmass_CR_18.push_back(x[6].erase(0,1)); vLSPmass_CR_18.push_back(x[7].erase(0,1));
-    }
-  }
-}
-
-template<typename ntupleType> bool resVeto(ntupleType* ntuple, vector<string> vsample, vector<string> vrunNum, vector<string> vlumi, vector<string> vevtNum) {
-  TString filename = ntuple->fChain->GetFile()->GetName();
-  string runNumber;  string lumiNumber; string evtNumber;
-  runNumber = std::to_string(ntuple->RunNum);
-  lumiNumber = std::to_string(ntuple->LumiBlockNum);
-  evtNumber = std::to_string(ntuple->EvtNum);
-  bool foundEvent = false;
-  for (unsigned int i=0; i<vsample.size();i++) {
-    if (!filename.Contains(vsample[i])) continue;
-    if (runNumber!=vrunNum[i]) continue;
-    if (evtNumber!=vevtNum[i]) continue;
-    if (lumiNumber!=vlumi[i]) continue;
-    foundEvent = true; break;
-  }
-  return foundEvent;
-}
-
-template<typename ntupleType> bool resVetoSignal(ntupleType* ntuple, vector<string> vrunNum, vector<string> vlumi, vector<string> vevtNum, vector<string> vNLSPmass, vector<string> vLSPmass) {
-  string runNumber;  string lumiNumber; string evtNumber;
-  runNumber = std::to_string(ntuple->RunNum);
-  lumiNumber = std::to_string(ntuple->LumiBlockNum);
-  evtNumber = std::to_string(ntuple->EvtNum);
-  bool foundEvent = false;
-  for (unsigned int i=0; i<vrunNum.size();i++) {
-    if (NLSPmass!=vNLSPmass[i]) continue;
-    if (LSPmass!=vLSPmass[i]) continue;
-    if (runNumber!=vrunNum[i]) continue;
-    if (lumiNumber!=vlumi[i]) continue;
-    if (evtNumber!=vevtNum[i]) continue;
-    foundEvent = true; break;
-  }
-  return foundEvent;
-}
-
-template<typename ntupleType> bool resVetoData(ntupleType* ntuple, vector<string> vrunNum, vector<string> vlumi, vector<string> vevtNum) {
-  string runNumber;  string lumiNumber; string evtNumber;
-  runNumber = std::to_string(ntuple->RunNum);
-  lumiNumber = std::to_string(ntuple->LumiBlockNum);
-  evtNumber = std::to_string(ntuple->EvtNum);
-  bool foundEvent = false;
-  for (unsigned int i=0; i<vrunNum.size();i++) {
-    if (runNumber!=vrunNum[i]) continue;
-    if (lumiNumber!=vlumi[i]) continue;
-    if (evtNumber!=vevtNum[i]) continue;
-    foundEvent = true; break;
-  }
-  return foundEvent;
-}
-
-template<typename ntupleType> bool resVetoALPHABET(ntupleType* ntuple, string type) {
-  if (type=="signal") {
-    bool foundSRVeto = resVetoSignal(ntuple, vrunNum_SR, vlumiNum_SR, vevtNum_SR, vNLSPmass_SR, vLSPmass_SR);
-    bool foundCRVeto = resVetoSignal(ntuple, vrunNum_CR, vlumiNum_CR, vevtNum_CR, vNLSPmass_CR, vLSPmass_CR);
-    return (foundSRVeto || foundCRVeto);
-  }
-  else if (type=="MC") {
-    bool foundSRVeto = resVeto(ntuple, vsample_SR, vrunNum_SR, vlumiNum_SR, vevtNum_SR);
-    bool foundCRVeto = resVeto(ntuple, vsample_CR, vrunNum_CR, vlumiNum_CR, vevtNum_CR);
-    return (foundSRVeto || foundCRVeto);
-  }
-  else if (type=="data") {
-    bool foundSRVeto = resVetoData(ntuple, vrunNum_SRData, vlumiNum_SRData, vevtNum_SRData);
-    bool foundCRVeto = resVetoData(ntuple, vrunNum_CRData, vlumiNum_CRData, vevtNum_CRData);
-    return (foundSRVeto || foundCRVeto);
-  }
-}
-
-
-template<typename ntupleType> bool ResVetoCutflow(ntupleType* ntuple) {
+template<typename ntupleType> bool resEventFound(ntupleType* ntuple) {
   TString filename = ntuple->fChain->GetFile()->GetName();
   string runNumber;  string lumiNumber; string evtNumber;
   runNumber = std::to_string(ntuple->RunNum);
   lumiNumber = std::to_string(ntuple->LumiBlockNum);
   evtNumber = std::to_string(ntuple->EvtNum);
   string check = "";
-  if (filename.Contains("2016")) check = "2016," + lumiNumber + "," + evtNumber;
-  else if (filename.Contains("2017")) check = "2017," + lumiNumber + "," + evtNumber;
-  else if (filename.Contains("2018")) check = "2018," + lumiNumber + "," + evtNumber;
+  if (filename.Contains("2016")) check = "2016," + runNumber + "," + lumiNumber + "," + evtNumber;
+  else if (filename.Contains("2017")) check = "2017," + runNumber + "," + lumiNumber + "," + evtNumber;
+  else if (filename.Contains("2018")) check = "2018," + runNumber + "," + lumiNumber + "," + evtNumber;
 
   bool foundEvent = false;
-  set<string>::iterator it = vYearLumiEvt.find(check);
-  if (it != vYearLumiEvt.end()) {
+  set<string>::iterator it = vYearRunLumiEvt.find(check);
+  if (it != vYearRunLumiEvt.end()) {
     foundEvent = true;
   }
-
-  return !foundEvent;
+  return foundEvent;
 }
 
-template<typename ntupleType> bool ResVetoCutflow_16(ntupleType* ntuple) {
-  TString filename = ntuple->fChain->GetFile()->GetName();
-  if (filename.Contains("2016")) {
-    bool foundSRVeto = resVetoSignal(ntuple, vrunNum_SR_16, vlumiNum_SR_16, vevtNum_SR_16, vNLSPmass_SR_16, vLSPmass_SR_16);
-    bool foundCRVeto = resVetoSignal(ntuple, vrunNum_CR_16, vlumiNum_CR_16, vevtNum_CR_16, vNLSPmass_CR_16, vLSPmass_CR_16);
-    return (!foundSRVeto && !foundCRVeto);
-  }
-  else return true;
+template<typename ntupleType> bool resVetoCutflow(ntupleType* ntuple) {
+  bool isFound = resEventFound(ntuple);
+  return !isFound;
 }
-
-template<typename ntupleType> bool ResVetoCutflow_17(ntupleType* ntuple) {
-  TString filename = ntuple->fChain->GetFile()->GetName();
-  if (filename.Contains("2017")) {
-    bool foundSRVeto = resVetoSignal(ntuple, vrunNum_SR_17, vlumiNum_SR_17, vevtNum_SR_17, vNLSPmass_SR_17, vLSPmass_SR_17);
-    bool foundCRVeto = resVetoSignal(ntuple, vrunNum_CR_17, vlumiNum_CR_17, vevtNum_CR_17, vNLSPmass_CR_17, vLSPmass_CR_17);
-    return (!foundSRVeto && !foundCRVeto);
-  }
-  else return true;
-}
-
-template<typename ntupleType> bool ResVetoCutflow_18(ntupleType* ntuple) {
-  TString filename = ntuple->fChain->GetFile()->GetName();
-  if (filename.Contains("2018")) {
-    bool foundSRVeto = resVetoSignal(ntuple, vrunNum_SR_18, vlumiNum_SR_18, vevtNum_SR_18, vNLSPmass_SR_18, vLSPmass_SR_18);
-    bool foundCRVeto = resVetoSignal(ntuple, vrunNum_CR_18, vlumiNum_CR_18, vevtNum_CR_18, vNLSPmass_CR_18, vLSPmass_CR_18);
-    return (!foundSRVeto && !foundCRVeto);
-  }
-  else return true;
-}
-
 ////////////////////////////////////////////////////////////
 /////////////////////////// BOOSTED ////////////////////////
 ////////////////////////////////////////////////////////////

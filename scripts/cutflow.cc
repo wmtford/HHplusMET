@@ -25,6 +25,8 @@ int main(int argc, char** argv) {
   int mass2D(0); mass2D = atoi(argv[4]);
   std::string mass2D_string = std::to_string(mass2D);
 
+  string yearStr = "2016"; if (Year=="MC2017") yearStr = "2017"; if (Year=="MC2018") yearStr = "2018";
+
   bool runData = true; if (region == 1 || region == 2) runData = false;
   bool applySFs_ = false; //btag SFs, SFs for photons, electrons, and muons - only used for MC/data comparisons
   if (region == 1 || region == 2) runData = false;
@@ -72,7 +74,7 @@ int main(int argc, char** argv) {
   cutName.push_back("JetPt");
   cutFlow.push_back(*looseMassCut<RA2bTree>);
   cutName.push_back("LooseJetMass");
-  cutFlow.push_back(*ResVetoCutflow<RA2bTree>);
+  cutFlow.push_back(*resVetoCutflow<RA2bTree>);
   cutName.push_back("ResVeto");
   cutFlow.push_back(*cutflowBoostBBTag<RA2bTree>);
   cutName.push_back("BB2H");
@@ -90,26 +92,13 @@ int main(int argc, char** argv) {
     plots.push_back(tempPlots);
   }
 
-  string justYear = "2016";
-  if (Year=="MC2017") justYear = "2017";
-  else if (Year=="MC2018") justYear = "2018";
+
   if (runVeto) {
-    if (region==1 && !runFullSIM){
-      readResVeto_SRSig1D(justYear);
-      readResVeto_CRSig1D(justYear);
-    }
-    else if (region==1 && runFullSIM){
-      readResVeto_SRSig1D_T5HH(justYear);
-      readResVeto_CRSig1D_T5HH(justYear);
-    }
-    else if (region==2){
-      readResVeto_SRSig2D(justYear);
-      readResVeto_CRSig2D(justYear);
-    }
-    else {
-      readResVeto_SR(justYear);
-      readResVeto_CR(justYear);
-    }
+    if (region==1 && !runFullSIM) readResVeto_Sig1D(yearStr,"TChiHH");
+    else if (region==1 && runFullSIM) readResVeto_Sig1D(yearStr,"T5HH");
+    else if (region==2) readResVeto_Sig2D(yearStr,"TChiHH");
+    else if (region==0 && runData) readResVeto_Data(yearStr);
+    else readResVeto_MC(yearStr);
   }
 
 

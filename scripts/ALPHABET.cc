@@ -20,6 +20,8 @@ int main(int argc, char** argv){
   bool applySFs_ = true; //btag SFs, SFs for photons, electrons, and muons - only used for MC/data comparisons
   bool runFullSIM = true; //only for 1D T5HH
 
+  string yearStr = "2016"; if (Year=="MC2017") yearStr = "2017"; if (Year=="MC2018") yearStr = "2018";
+
   if (region==1 || region==2) runData=false;
   if (region==0 || region==1 || region==2) applySFs_ = false;
   // if (region==1 || region==2) applySFs_ = false; //toggle if doing data/MC comparisons for 0-lepton region
@@ -225,27 +227,12 @@ int main(int argc, char** argv){
   std::vector<TH2F*> hSFeff_; if (region!=1 && region!=2) hSFeff_ = openSFFiles(Year, region);
   std::vector<TEfficiency*> eTrigEff_; if (region == 5) eTrigEff_ = photonTrigEffHist(Year);
 
-  string justYear = "2016";
-  if (Year=="MC2017") justYear = "2017";
-  else if (Year=="MC2018") justYear = "2018";
-
   if (runVeto) {
-    if (region==1 && !runFullSIM){
-      readResVeto_SRSig1D(justYear);
-      readResVeto_CRSig1D(justYear);
-    }
-    else if (region==1 && runFullSIM){
-      readResVeto_SRSig1D_T5HH(justYear);
-      readResVeto_CRSig1D_T5HH(justYear);
-    }
-    else if (region==2){
-      readResVeto_SRSig2D(justYear);
-      readResVeto_CRSig2D(justYear);
-    }
-    else {
-      readResVeto_SR(justYear);
-      readResVeto_CR(justYear);
-    }
+    if (region==1 && !runFullSIM) readResVeto_Sig1D(yearStr,"TChiHH");
+    else if (region==1 && runFullSIM) readResVeto_Sig1D(yearStr,"T5HH");
+    else if (region==2) readResVeto_Sig2D(yearStr,"TChiHH");
+    else if (region==0 && runData) readResVeto_Data(yearStr);
+    else readResVeto_MC(yearStr);
   }
 
   // background MC samples - 0 lepton regions
@@ -326,10 +313,8 @@ int main(int argc, char** argv){
       if (!passBaseline) continue; //probably not necessary, but ya know CYA
 
 
-      if (runVeto){ //Toggle whether or not we veto resolved events, so we don't double count in the combination
-        string vetoType = "MC";
-        if (region==1 || region==2) vetoType = "signal";
-        if (resVetoALPHABET(ntuple,vetoType)) continue;
+      if (runVeto){
+        if (resEventFound(ntuple)) continue;
       }
 
       TString thisFilename = ntuple->fChain->GetFile()->GetName();
@@ -480,11 +465,6 @@ int main(int argc, char** argv){
     int numEvents = ntuple->fChain->GetEntries();
     ntupleBranchStatus<RA2bTree>(ntuple);
     bool passBaseline;
-    if (runVeto && region==0){
-      readResVeto_SRData(justYear);
-      readResVeto_CRData(justYear);
-    }
-
     for (int iEvt = 0; iEvt < numEvents; iEvt++) {
       ntuple->GetEntry(iEvt);
       if (iEvt % 100000 == 0 ) cout << "data: " << iEvt << "/" << numEvents << endl;
@@ -506,8 +486,8 @@ int main(int argc, char** argv){
       else if (region == 5 && !photonTriggerCut(ntuple)) continue;
 
       //Toggle whether or not we veto resolved events
-      if (runVeto && region==0) {
-        if (resVetoALPHABET(ntuple,"data")) continue;
+      if (runVeto && region==0){
+        if (resEventFound(ntuple)) continue;
       }
 
       for (unsigned int i = 0; i < baselinePlots.size(); i++) {baselinePlots[i].fillData(ntuple);}
