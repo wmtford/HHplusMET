@@ -1246,7 +1246,8 @@ int getTotHHEvents(TString NLSPmass, TString LSPmass) {
 /////////////////////// FOR RESOLVED ///////////////////////
 ////////////////////////////////////////////////////////////
 void readResVeto_MC(string whichYear) {
-  string in_dir = "evtCount/"; string line;
+  string in_dir = "../src/evtCount/";
+  string line;
   if (whichYear != "all") {
     string fileName1 = in_dir+"processed_resolved_list_SR_met300_SCAN_MC_"+whichYear+".txt";
     string fileName2 = in_dir+"processed_resolved_list_CR_met300_SCAN_MC_"+whichYear+".txt";
@@ -1256,7 +1257,7 @@ void readResVeto_MC(string whichYear) {
       ifstream file(fileName);
       while (std::getline(file, line)) {
         std::vector<std::string> x = split(line, ',');
-        string thisOne = x[1].erase(0,1) + "," + x[2].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1);
+        string thisOne = x[1].erase(0,1) + "," + x[2].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1)+ ",0";
         vYearRunLumiEvt.insert(thisOne);
       }
     }
@@ -1274,7 +1275,7 @@ void readResVeto_MC(string whichYear) {
       ifstream file(fileName);
       while (std::getline(file, line)) {
         std::vector<std::string> x = split(line, ',');
-        string thisOne = x[1].erase(0,1) + "," + x[2].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1);
+        string thisOne = x[1].erase(0,1) + "," + x[2].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1)+ ",0";
         vYearRunLumiEvt.insert(thisOne);
       }
     }
@@ -1283,7 +1284,8 @@ void readResVeto_MC(string whichYear) {
 
 
 void readResVeto_Data(string whichYear) {
-  string in_dir = "evtCount/"; string line;
+  string in_dir = "../src/evtCount/";
+  string line;
   if (whichYear=="all") {std::cout<<"Res veto not setup for all years!"; return;}
   string fileName1 = in_dir+"processed_resolved_list_SR_met300_SCAN_DATA_"+whichYear+".txt";
   string fileName2 = in_dir+"processed_resolved_list_CR_met300_SCAN_DATA_"+whichYear+".txt";
@@ -1293,7 +1295,7 @@ void readResVeto_Data(string whichYear) {
     ifstream file(fileName);
     while (std::getline(file, line)) {
       std::vector<std::string> x = split(line, ',');
-      string thisOne = x[1].erase(0,1) + "," + x[2].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1);
+      string thisOne = x[1].erase(0,1) + "," + x[2].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1)+ ",0";
       vYearRunLumiEvt.insert(thisOne);
     }
   }
@@ -1301,7 +1303,8 @@ void readResVeto_Data(string whichYear) {
 
 
 void readResVeto_Sig1D(string whichYear, string model) {
-  string in_dir = "evtCount/"; string line;
+  string in_dir = "../src/evtCount/";
+  string line;
   if (whichYear!="all") {
     string fileName1 = in_dir+"processed_resolved_list_SR_met300_SCAN_"+model+"1D_"+whichYear+".txt";
     string fileName2 = in_dir+"processed_resolved_list_CR_met300_SCAN_"+model+"1D_"+whichYear+".txt";
@@ -1320,7 +1323,7 @@ void readResVeto_Sig1D(string whichYear, string model) {
           std::vector<std::string> mNLSP = split(sample[3], '_');
           if (mNLSP[0]!=NLSPmass) continue;
         }
-        string thisOne = x[1].erase(0,1) + "," + x[2].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1);
+        string thisOne = x[1].erase(0,1) + "," + x[2].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1)+ ",0";
         vYearRunLumiEvt.insert(thisOne);
       }
     }
@@ -1348,7 +1351,7 @@ void readResVeto_Sig1D(string whichYear, string model) {
           std::vector<std::string> mNLSP = split(sample[3], '_');
           if (mNLSP[0]!=NLSPmass) continue;
         }
-        string thisOne = x[1].erase(0,1) + "," + x[2].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1);
+        string thisOne = x[1].erase(0,1) + "," + x[2].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1)+ ",0";
         vYearRunLumiEvt.insert(thisOne);
       }
     }
@@ -1356,7 +1359,8 @@ void readResVeto_Sig1D(string whichYear, string model) {
 }
 
 void readResVeto_Sig2D(string whichYear, string model) {
-  string in_dir = "evtCount/"; string line;
+  string in_dir = "../src/evtCount/";
+  string line;
   if (model=="T5HH") {std::cout<<"Res veto not setup for this!!"<<std::endl; return;}
 
   if (whichYear!="all") {
@@ -1370,8 +1374,7 @@ void readResVeto_Sig2D(string whichYear, string model) {
       while (std::getline(file, line)) {
         std::vector<std::string> x = split(line, ',');
         string checkNLSPMass = x[6].erase(0,1); if (checkNLSPMass!=NLSPmass) continue;
-        string checkLSPMass = x[7].erase(0,1); if (checkLSPMass!=LSPmass) continue;
-        string thisOne = x[1].erase(0,1) + "," + x[2].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1);
+        string thisOne = x[1].erase(0,1)+","+x[2].erase(0,1)+","+x[3].erase(0,1)+","+x[4].erase(0,1)+","+x[7].erase(0,1);
         vYearRunLumiEvt.insert(thisOne);
       }
     }
@@ -1391,8 +1394,7 @@ void readResVeto_Sig2D(string whichYear, string model) {
       while (std::getline(file, line)) {
         std::vector<std::string> x = split(line, ',');
         string checkNLSPMass = x[6].erase(0,1); if (checkNLSPMass!=NLSPmass) continue;
-        string checkLSPMass = x[7].erase(0,1); if (checkLSPMass!=LSPmass) continue;
-        string thisOne = x[1].erase(0,1) + "," + x[2].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1);
+        string thisOne = x[1].erase(0,1) + "," + x[2].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1)+","+x[7].erase(0,1);
         vYearRunLumiEvt.insert(thisOne);
       }
     }
@@ -1400,16 +1402,18 @@ void readResVeto_Sig2D(string whichYear, string model) {
 }
 
 
-template<typename ntupleType> bool resEventFound(ntupleType* ntuple) {
+template<typename ntupleType> bool resEventFound(ntupleType* ntuple,string yearStr) {
   TString filename = ntuple->fChain->GetFile()->GetName();
   string runNumber;  string lumiNumber; string evtNumber;
   runNumber = std::to_string(ntuple->RunNum);
   lumiNumber = std::to_string(ntuple->LumiBlockNum);
   evtNumber = std::to_string(ntuple->EvtNum);
-  string check = "";
-  if (filename.Contains("2016")) check = "2016," + runNumber + "," + lumiNumber + "," + evtNumber;
-  else if (filename.Contains("2017")) check = "2017," + runNumber + "," + lumiNumber + "," + evtNumber;
-  else if (filename.Contains("2018")) check = "2018," + runNumber + "," + lumiNumber + "," + evtNumber;
+  string thisLSP = "0";
+  if (LSPmass!="0") {
+    int lspmass = LSPmass.Atoi();
+    thisLSP = std::to_string(lspmass);
+  }
+  string check = yearStr+","+runNumber+","+lumiNumber+","+evtNumber+","+thisLSP;
 
   bool foundEvent = false;
   set<string>::iterator it = vYearRunLumiEvt.find(check);
@@ -1420,7 +1424,17 @@ template<typename ntupleType> bool resEventFound(ntupleType* ntuple) {
 }
 
 template<typename ntupleType> bool resVetoCutflow(ntupleType* ntuple) {
-  bool isFound = resEventFound(ntuple);
+  TString filename = ntuple->fChain->GetFile()->GetName();
+  string thisyearinstring = "2016";
+  if (filename.Contains("2017")) thisyearinstring = "2017";
+  else if (filename.Contains("2018")) thisyearinstring = "2018";
+  bool isFound = resEventFound(ntuple,thisyearinstring);
+  return !isFound;
+}
+
+template<typename ntupleType> bool resVetoCutflowAll(ntupleType* ntuple) {
+  TString filename = ntuple->fChain->GetFile()->GetName();
+  bool isFound = resEventFound(ntuple,"all");
   return !isFound;
 }
 ////////////////////////////////////////////////////////////

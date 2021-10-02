@@ -16,9 +16,12 @@ int main(int argc, char** argv){
   TString Year(argv[2]); //MC2016
   int runVeto(0); runVeto = atoi(argv[3]); //remove events that overlap with resolved
   int mass2D(0); mass2D = atoi(argv[4]); //For running over signal
+  std::string mass2D_string = std::to_string(mass2D);
+
+  setMasses(mass2D_string,"1");
   bool runData = true; //only useful for regions 0,3,4,5
   bool applySFs_ = true; //btag SFs, SFs for photons, electrons, and muons - only used for MC/data comparisons
-  bool runFullSIM = true; //only for 1D T5HH
+  bool runFullSIM = false; //only for 1D T5HH
 
   string yearStr = "2016"; if (Year=="MC2017") yearStr = "2017"; if (Year=="MC2018") yearStr = "2018";
 
@@ -60,8 +63,6 @@ int main(int argc, char** argv){
 
   cout <<"In ALPHABET region: "<<regionName<<", veto?: "<<runVeto<<endl;
   string out_dir = "./";
-  std::string mass2D_string = std::to_string(mass2D);
-
   TString fileName = "ALPHABET"+Year+"_V18_"+regionName+dataCut+cutName+mass2D_string+".root";
   TFile* outputFile = new TFile(fileName,"RECREATE");
 
@@ -228,7 +229,9 @@ int main(int argc, char** argv){
   std::vector<TEfficiency*> eTrigEff_; if (region == 5) eTrigEff_ = photonTrigEffHist(Year);
 
   if (runVeto) {
-    if (region==1 && !runFullSIM) readResVeto_Sig1D(yearStr,"TChiHH");
+    if (region==1 && !runFullSIM) {
+      readResVeto_Sig1D(yearStr,"TChiHH");
+    }
     else if (region==1 && runFullSIM) readResVeto_Sig1D(yearStr,"T5HH");
     else if (region==2) readResVeto_Sig2D(yearStr,"TChiHH");
     else if (region==0 && runData) readResVeto_Data(yearStr);
@@ -266,14 +269,13 @@ int main(int argc, char** argv){
 
     int TotalEvents = 0; TH1F* h_norm;
     if (startFilename.Contains("TChiHH_HToBB") || startFilename.Contains("T5qqqqZH") || startFilename.Contains("T5HH") ) {
-      h_norm = (TH1F*)fin->Get("PDFNorm"); //used for scales for signal systematics
       if (startFilename.Contains("TChiHH_HToBB") || runFullSIM) {
         fin = TFile::Open(startFilename);
+        h_norm = (TH1F*)fin->Get("PDFNorm"); //used for scales for signal systematics
         TH1F *nEventsHisto = (TH1F*)fin->Get("nEventProc");
         TotalEvents = nEventsHisto->GetBinContent(1); //used to fix weight branch in signal
       }
     }
-
 
     // For b-tag corrections (mostly for 0H+b region)
     if (applySFs_) btagsf_ = new BTagSF();
@@ -314,7 +316,7 @@ int main(int argc, char** argv){
 
 
       if (runVeto){
-        if (resEventFound(ntuple)) continue;
+        if (resEventFound(ntuple,yearStr)) continue;
       }
 
       TString thisFilename = ntuple->fChain->GetFile()->GetName();
@@ -487,7 +489,7 @@ int main(int argc, char** argv){
 
       //Toggle whether or not we veto resolved events
       if (runVeto && region==0){
-        if (resEventFound(ntuple)) continue;
+        if (resEventFound(ntuple,yearStr)) continue;
       }
 
       for (unsigned int i = 0; i < baselinePlots.size(); i++) {baselinePlots[i].fillData(ntuple);}
