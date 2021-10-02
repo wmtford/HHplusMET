@@ -38,8 +38,6 @@ def ExtractFile(iname, m1):
 
 if __name__ == '__main__':
 	results = []; results2 = []; results3 = []; results4 = [];
-	f2016=ROOT.TFile(idir+"CMS-SUS-17-006_Figure_003.root", "READ")
-	obs2016_glu=f2016.Get("ObservedLimitT5qqqqHH");
 
 	#Combo, ResolvedOnly+BoostedVeto
 	results.append( ExtractFile(idir+'higgsCombine1DT5HH1000_LSP1_Data_Combo.AsymptoticLimits.mH120.root','1000') );
@@ -293,7 +291,6 @@ if __name__ == '__main__':
 		leg.SetHeader("95% CL Upper Limit")
 		leg.AddEntry(g_obs,"Observed","l")
 		leg.AddEntry(g_exp,"Expected","l")
-		# leg.AddEntry(obs2016_glu,"2016 observed","l")
 		leg.AddEntry(g_2sig,"#pm2 #sigma_{experiment}","f")
 		leg.AddEntry(g_1sig,"#pm1 #sigma_{experiment}","f")
 
@@ -308,7 +305,6 @@ if __name__ == '__main__':
 	g_2sig.SetFillColor(ROOT.kOrange);g_2sig.SetFillStyle(3244);
 	g_exp.SetLineStyle(2); g_exp.SetLineColor(ROOT.kBlack);
 	g_exp.SetLineWidth(3); g_obs.SetLineWidth(2);
-	obs2016_glu.SetLineWidth(2); obs2016_glu.SetLineStyle(1); obs2016_glu.SetLineColor(ROOT.kBlue);
 
 	g_exp.SetLineColor(ROOT.kBlack); g_exp.SetLineWidth(2); g_exp.SetLineStyle(2);
 	g_obs.SetLineColor(ROOT.kBlack); g_obs.SetLineWidth(2); g_obs.SetLineStyle(1);
@@ -329,7 +325,6 @@ if __name__ == '__main__':
 		g_1sig.Draw('fsames');
 		g_obs.Draw('lsames');
 		g_exp.Draw('lsames');
-		# obs2016_glu.Draw("lsames");
 
 	txta.Draw(); txtc.Draw(); txtd.Draw();
 	leg.Draw(); leg2.Draw();
