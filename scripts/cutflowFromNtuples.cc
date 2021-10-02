@@ -37,72 +37,42 @@
 
 using namespace std;
 
+//Don't use for 2D
 int main(int argc, char** argv) {
   int region(0); region = atoi(argv[1]); // 0=1DTChiHH, 1=1DT5HH
   int NLSPmass(0); NLSPmass = atoi(argv[2]);
   std::string strNLSPmass = std::to_string(NLSPmass);
   int doDetailed(0); doDetailed = atoi(argv[3]);
   //if doDetailed, include all filters and everything before HadronicBaseline. Also only 4b events
-  //doDetailed should only be run over TChiHH950 and T5HH1000
-  //if not doDetailed, should only be run over T5HH 1000,1600,2200
-
-  TString strLSPmass = "1";
-  if (doDetailed==1) {
-    if (region==0) { strNLSPmass = "950"; strLSPmass = "0"; }
-    else if (region==1) { strNLSPmass = "1000"; }
-  }
-  setMasses(strNLSPmass,strLSPmass);
-
-  TChain *chain = new TChain("tree");
-  if (doDetailed) {
-    if (region==0){
-      chain->Add("root://cmsxrootd.fnal.gov//store/user/lpcsusyhad/SusyRA2Analysis2015/Run2ProductionV18/scan/TChiHH_HToBB_HToBB_mMother-950_mLSP-1_MC2016_fast.root");
-      chain->Add("root://cmsxrootd.fnal.gov//store/user/lpcsusyhad/SusyRA2Analysis2015/Run2ProductionV18/scan/TChiHH_HToBB_HToBB_mMother-950_mLSP-1_MC2017_fast.root");
-      chain->Add("root://cmsxrootd.fnal.gov//store/user/lpcsusyhad/SusyRA2Analysis2015/Run2ProductionV18/scan/TChiHH_HToBB_HToBB_mMother-950_mLSP-1_MC2018_fast.root");
-    }
-    else if (region==1){
-    //   chain->Add("root://cmsxrootd.fnal.gov//store/user/lpcsusyhad/SusyRA2Analysis2015/Run2ProductionV18/scan/T5qqqqZH-mGluino-1000to2500_mMother-1000_mLSP-1_MC2016.root");
-    //   chain->Add("root://cmsxrootd.fnal.gov//store/user/lpcsusyhad/SusyRA2Analysis2015/Run2ProductionV18/scan/T5qqqqZH-mGluino-1000to2500_mMother-1000_mLSP-1_MC2017.root");
-    //   chain->Add("root://cmsxrootd.fnal.gov//store/user/lpcsusyhad/SusyRA2Analysis2015/Run2ProductionV18/scan/T5qqqqZH-mGluino-1000to2500_mMother-1000_mLSP-1_MC2018.root");
-    chain->Add("root://cmsxrootd.fnal.gov//store/user/lpcsusyhad/SusyRA2Analysis2015/Run2ProductionV18/scan/T5qqqqZH-mGluino-1000to2500_mMother-2000_mLSP-1_MC2016.root");
-    chain->Add("root://cmsxrootd.fnal.gov//store/user/lpcsusyhad/SusyRA2Analysis2015/Run2ProductionV18/scan/T5qqqqZH-mGluino-1000to2500_mMother-2000_mLSP-1_MC2017.root");
-    chain->Add("root://cmsxrootd.fnal.gov//store/user/lpcsusyhad/SusyRA2Analysis2015/Run2ProductionV18/scan/T5qqqqZH-mGluino-1000to2500_mMother-2000_mLSP-1_MC2018.root");
-
-    }
-  }
-  else {
-    //From skims
-    // TString filename = "root://cmseos.fnal.gov//store/user/emacdona/Skims/Run2ProductionV18/scan/tree_signal_METVars_FullSIM/tree_T5qqqqZH-mGluino-1000to2500_"+strNLSPmass+"_1_MC2016.root";
-    // chain->Add(filename);
-    // filename = "root://cmseos.fnal.gov//store/user/emacdona/Skims/Run2ProductionV18/scan/tree_signal_METVars_FullSIM/tree_T5qqqqZH-mGluino-1000to2500_"+strNLSPmass+"_1_MC2017.root";
-    // chain->Add(filename);
-    // filename = "root://cmseos.fnal.gov//store/user/emacdona/Skims/Run2ProductionV18/scan/tree_signal_METVars_FullSIM/tree_T5qqqqZH-mGluino-1000to2500_"+strNLSPmass+"_1_MC2018.root";
-    // chain->Add(filename);
-
-
-    //From ntuples
-    TString filename = "root://cmsxrootd.fnal.gov//store/user/lpcsusyhad/SusyRA2Analysis2015/Run2ProductionV18/scan/T5qqqqZH-mGluino-1000to2500_mMother-"+strNLSPmass+"_mLSP-1_MC2016.root";
-    chain->Add(filename);
-    filename = "root://cmsxrootd.fnal.gov//store/user/lpcsusyhad/SusyRA2Analysis2015/Run2ProductionV18/scan/T5qqqqZH-mGluino-1000to2500_mMother-"+strNLSPmass+"_mLSP-1_MC2017.root";
-    chain->Add(filename);
-    filename = "root://cmsxrootd.fnal.gov//store/user/lpcsusyhad/SusyRA2Analysis2015/Run2ProductionV18/scan/T5qqqqZH-mGluino-1000to2500_mMother-"+strNLSPmass+"_mLSP-1_MC2018.root";
-    chain->Add(filename);
-  }
-
-  RA2bTree* ntuple = new RA2bTree(chain);
 
   bool runVeto = true;
   bool runFullSIM = false;  if (region==1) runFullSIM=true;
   bool runData = false;
   bool printToScreen = true; //Print cutflow in latex format to screen - do NOT use for auxilary material! Just quick checks
 
-  TString thisSample = "";
-  if (doDetailed==1) { //strNLSPmass argument doesn't matter, base off regions
-    thisSample="TChiHH950";
-    // if (region==1) thisSample = "T5HH1000";
-    if (region==1) thisSample = "T5HH2200";
+
+  TString strLSPmass = "1";
+  setMasses(strNLSPmass,strLSPmass);
+
+  // TString fileStart = "root://cmsxrootd.fnal.gov/";
+  TString fileStart = "/eos/uscms";
+
+  TChain *chain = new TChain("tree");
+  if (region==0){
+    chain->Add(fileStart+"/store/user/lpcsusyhad/SusyRA2Analysis2015/Run2ProductionV18/scan/TChiHH_HToBB_HToBB_mMother-"+strNLSPmass+"_mLSP-1_MC2016_fast.root");
+    chain->Add(fileStart+"/store/user/lpcsusyhad/SusyRA2Analysis2015/Run2ProductionV18/scan/TChiHH_HToBB_HToBB_mMother-"+strNLSPmass+"_mLSP-1_MC2017_fast.root");
+    chain->Add(fileStart+"/store/user/lpcsusyhad/SusyRA2Analysis2015/Run2ProductionV18/scan/TChiHH_HToBB_HToBB_mMother-"+strNLSPmass+"_mLSP-1_MC2018_fast.root");
   }
-  else thisSample="T5HH"+strNLSPmass;
+  else if (region==1) {
+    chain->Add(fileStart+"/store/user/lpcsusyhad/SusyRA2Analysis2015/Run2ProductionV18/scan/T5qqqqZH-mGluino-1000to2500_mMother-"+strNLSPmass+"_mLSP-1_MC2016.root");
+    chain->Add(fileStart+"/store/user/lpcsusyhad/SusyRA2Analysis2015/Run2ProductionV18/scan/T5qqqqZH-mGluino-1000to2500_mMother-"+strNLSPmass+"_mLSP-1_MC2017.root");
+    chain->Add(fileStart+"/store/user/lpcsusyhad/SusyRA2Analysis2015/Run2ProductionV18/scan/T5qqqqZH-mGluino-1000to2500_mMother-"+strNLSPmass+"_mLSP-1_MC2018.root");
+  }
+
+  RA2bTree* ntuple = new RA2bTree(chain);
+  TString thisSample = "";
+  thisSample="TChiHH"+strNLSPmass;
+  if (region==1) thisSample = "T5HH"+strNLSPmass;
 
   TString detailString = ""; if (doDetailed==1) detailString = "_detailedMOREPLOTS";
   TString outputFileName = "cutflow_allYears_"+thisSample+detailString+".root";
