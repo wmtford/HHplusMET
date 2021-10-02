@@ -23,6 +23,7 @@ glu = "#tilde{g}#scale[0.55]{_{ }}"
 signalSkimsT5HHDIR = "/eos/uscms/store/user/emacdona/Skims/Run2ProductionV18/scan/tree_signal_METVars_FullSIM/"
 signalSkimsTChiHHDIR = "/eos/uscms/store/user/kaulmer/Skims/Run2ProductionV18/scan/tree_signal_METVars/"
 datacardsDIR = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/boostedHiggsPlusMET/datacards/"
+srcDIR = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/boostedHiggsPlusMET/src/"
 outDIR = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/boostedHiggsPlusMET/output/"
 
 def higgsinoCrossSection1D(hig_mass):
@@ -183,11 +184,11 @@ def saveEff(model):
     Numerator is the sum of the signal regions from the datacards
     Denominator is all H decays for T5HH, and only H->bb decays for TChiHH/N1N2
     '''
-    effFile=open(datacardsDIR+"efficiency_"+model+".txt", 'w');
+    effFile=open(srcDIR+"efficiency_"+model+".txt", 'w');
     NLSPmass = []; LSPmass = [];
     if model=="N1N2":
         effFile.write("#NLSPmass LSPmass boostEff resEff totalEff\n")
-        fNames=open(datacardsDIR+"higgsino2DFileNames.txt", 'r');
+        fNames=open(srcDIR+"higgsino2DFileNames.txt", 'r');
         for line in fNames:
             x = line.split('_')
             if (int(x[5])>800): continue;
@@ -268,7 +269,7 @@ def saveEff(model):
 
 def readInValues(model, which):
     vmx=array('d',[]); vmy=array('d',[]); veff=array('d',[]);
-    fcard=open(datacardsDIR+"efficiency_"+model+".txt", 'r');
+    fcard=open(srcDIR+"efficiency_"+model+".txt", 'r');
     for line in fcard:
         if "#" in line: continue;
         thisLine = line.split()

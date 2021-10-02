@@ -21,6 +21,7 @@ using namespace std;
 
 int num_smooth_ = 0; // Number of times to smooth TH2D
 string in_dir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/boostedHiggsPlusMET/datacards/";
+string src_dir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/boostedHiggsPlusMET/src/";
 string out_dir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/boostedHiggsPlusMET/output/";
 string tag = "";
 
@@ -58,7 +59,7 @@ void ReadPointsCombo(vector<double> &vmx, vector<double> &vmy, vector<double> &v
                      vector<double> &vup2, vector<double> &vdown2
                     ) {
 
-  TString  txtname(in_dir+"/limitsCombined_"+model_+"_data.txt");
+  TString  txtname(src_dir+"/limitsCombined_"+model_+"_data.txt");
   ifstream infile(txtname); string line;
 
   while(getline(infile, line)) {
@@ -118,9 +119,9 @@ void ReadPointsAll(vector<double> &vmxComb,
               ) {
 
 
-  TString  txtname(in_dir+"/limitsCombined_"+model_+"_data.txt");
-  TString txtname2(in_dir+"/limitsBoostOnly_"+model_+"_data.txt");
-  TString txtname3(in_dir+"/limitsResOnly_"+model_+"_data.txt");
+  TString  txtname(src_dir+"/limitsCombined_"+model_+"_data.txt");
+  TString txtname2(src_dir+"/limitsBoostOnly_"+model_+"_data.txt");
+  TString txtname3(src_dir+"/limitsResOnly_"+model_+"_data.txt");
 
   ifstream infile(txtname);
   ifstream infile2(txtname2);
@@ -476,9 +477,9 @@ void SetupColors() {
 }
 
 void SaveRootFile() {
-  TString  txtname(in_dir+"/limitsCombined_"+model_+"_data.txt");
-  TString  txtname2(in_dir+"/limitsBoostOnly_"+model_+"_data.txt");
-  TString  txtname3(in_dir+"/limitsResOnly_"+model_+"_data.txt");
+  TString  txtname(src_dir+"/limitsCombined_"+model_+"_data.txt");
+  TString  txtname2(src_dir+"/limitsBoostOnly_"+model_+"_data.txt");
+  TString  txtname3(src_dir+"/limitsResOnly_"+model_+"_data.txt");
   ifstream infile(txtname); string line;
   ifstream infile2(txtname2); string line2;
   ifstream infile3(txtname3); string line3;
