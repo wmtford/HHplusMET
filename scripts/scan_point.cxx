@@ -20,6 +20,7 @@ void higgsino2DCrossSection(int hig_mass, double &xsec, double &xsec_unc);
 void gluino2DCrossSection(int hig_mass, double &xsec, double &xsec_unc);
 
 string in_dir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/boostedHiggsPlusMET/datacards";
+string src_dir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/boostedHiggsPlusMET/src";
 string out_dir = in_dir;
 string model = "N1N2";
 // string model = "Gluino";
@@ -29,13 +30,13 @@ string which = "comb";
 // string which = "boost";
 
 void scan_point() {
-  string inFile = in_dir+"/higgsino2DFileNames.txt";
-  if (model=="Gluino") inFile = in_dir+"/Gluino2DScanNames.txt";
+  string inFile = src_dir+"/higgsino2DFileNames.txt";
+  if (model=="Gluino") inFile = src_dir+"/Gluino2DScanNames.txt";
   ifstream file(inFile);
   string line; TString filename;
-  string txtname(out_dir+"/limitsCombined_"+model+"_data.txt");
-  if (which=="res") txtname = out_dir+"/limitsResOnly_"+model+"_data.txt";
-  else if (which=="boost") txtname = out_dir+"/limitsBoostOnly_"+model+"_data.txt";
+  string txtname(src_dir+"/limitsCombined_"+model+"_data.txt");
+  if (which=="res") txtname = src_dir+"/limitsResOnly_"+model+"_data.txt";
+  else if (which=="boost") txtname = src_dir+"/limitsBoostOnly_"+model+"_data.txt";
   ofstream txtfile(txtname);
 
   while(std::getline(file, line)) {
