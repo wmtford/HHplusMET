@@ -6,6 +6,7 @@ src/**/*.pdf
 src/**/*.eps
 **/*~
 **/*root
+!src/*root
 !output/*root
 **/*exe
 **/*stdout
