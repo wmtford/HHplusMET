@@ -14,6 +14,7 @@ src/**/*.eps
 **/*dag*
 **/*pyc
 src/*/
+!src/evtCount
 **/*.d
 **/*.so
 **/*.pcm
@@ -23,7 +24,6 @@ bin/*
 datacards/*
 !datacards/*.py
 !datacards/*emplate*.txt
-!datacards/evtCount
 scripts/ALPHABET
 scripts/cutflow
 scripts/cutflowFromNtuples
