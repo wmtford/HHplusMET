@@ -22,6 +22,7 @@ int main(int argc, char** argv){
   bool runData = true; //only useful for regions 0,3,4,5
   bool applySFs_ = true; //btag SFs, SFs for photons, electrons, and muons - only used for MC/data comparisons
   bool runFullSIM = false; //only for 1D T5HH
+  bool saveBoostedEvt = false; //for WX
 
   string yearStr = "2016"; if (Year=="MC2017") yearStr = "2017"; if (Year=="MC2018") yearStr = "2018";
 
@@ -445,6 +446,31 @@ int main(int argc, char** argv){
     h_baseline->Write(); h_0H->Write(); h_1H->Write(); h_2H->Write();
   } // end sample loop
 
+  ofstream txtfile_2HSR; ofstream txtfile_2HSB;
+  ofstream txtfile_1HSR; ofstream txtfile_1HSB;
+  ofstream txtfile_0HSR; ofstream txtfile_0HSB; ofstream txtfile_0Hb;
+  if (saveBoostedEvt) {
+    string txtname1 = "evtCount_boosted_2HSR_"+yearStr+".txt";
+    string txtname2 = "evtCount_boosted_2HSB_"+yearStr+".txt";
+    string txtname3 = "evtCount_boosted_1HSR_"+yearStr+".txt";
+    string txtname4 = "evtCount_boosted_1HSB_"+yearStr+".txt";
+    string txtname5 = "evtCount_boosted_0HSR_"+yearStr+".txt";
+    string txtname6 = "evtCount_boosted_0HSB_"+yearStr+".txt";
+    string txtname7 = "evtCount_boosted_0Hb_"+yearStr+".txt";
+
+    txtfile_2HSR.open(txtname1); txtfile_2HSB.open(txtname2);
+    txtfile_1HSR.open(txtname3); txtfile_1HSB.open(txtname4);
+    txtfile_0HSR.open(txtname5); txtfile_0HSB.open(txtname6); txtfile_0Hb.open(txtname7);
+
+    txtfile_2HSR<<"//SR1,2HSR\n//RunNumber:Lumi:EventNumber"<<endl;
+    txtfile_2HSB<<"//CR1,2HSB\n//RunNumber:Lumi:EventNumber"<<endl;
+    txtfile_1HSR<<"//SR2,1HSR\n//RunNumber:Lumi:EventNumber"<<endl;
+    txtfile_1HSB<<"//CR2,1HSB\n//RunNumber:Lumi:EventNumber"<<endl;
+    txtfile_0HSR<<"//CR3,0HSR\n//RunNumber:Lumi:EventNumber"<<endl;
+    txtfile_0HSB<<"//CR4,0HSB\n//RunNumber:Lumi:EventNumber"<<endl;
+    txtfile_0Hb<<"//CR5,0Hb\n//RunNumber:Lumi:EventNumber"<<endl;
+  }
+
   // Begin data
   if (region!=1 && region!=2 && runData) {
     RA2bTree* ntuple = skims.dataNtuple;
@@ -473,6 +499,7 @@ int main(int argc, char** argv){
        //because I never re-ran skims, so at least only do necessary calcualtions once per event
       setMET(ntuple); setHT(ntuple,"none"); setJetPT(ntuple);
       setJetMass(ntuple,false); //true smears AK8 mass for signal systematic, so don't
+      setDeltaPhis(ntuple);
 
       passBaseline=true;
       for (auto baselineCut : baselineCuts) {
@@ -492,30 +519,51 @@ int main(int argc, char** argv){
         if (resEventFound(ntuple,yearStr)) continue;
       }
 
+      string runLumiEvt = std::to_string(ntuple->RunNum) + ":" + std::to_string(ntuple->LumiBlockNum) + ":" + std::to_string(ntuple->EvtNum);
+
       for (unsigned int i = 0; i < baselinePlots.size(); i++) {baselinePlots[i].fillData(ntuple);}
       h_baseline_data->Fill(fillLeadingJetMass(ntuple),fillSubLeadingJetMass(ntuple));
 
       // first check for 2H
       if (doubleTaggingLooseCut(ntuple)) {
         if (doubletagSRCut(ntuple)) {
+          if (saveBoostedEvt) txtfile_2HSR << runLumiEvt << endl;
           for (unsigned int i = 0; i < doubletagSRPlots.size(); i++) doubletagSRPlots[i].fillData(ntuple);
         }
-        else if (doubletagSBCut(ntuple)) for (unsigned int i = 0; i < doubletagSBPlots.size(); i++) {doubletagSBPlots[i].fillData(ntuple);}
+        else if (doubletagSBCut(ntuple)) {
+          for (unsigned int i = 0; i < doubletagSBPlots.size(); i++) {doubletagSBPlots[i].fillData(ntuple);}
+          if (saveBoostedEvt) txtfile_2HSB << runLumiEvt << endl;
+        }
         h_2H_data->Fill(fillLeadingJetMass(ntuple),fillSubLeadingJetMass(ntuple));
       } //end 2H
 
       //then check for 1H
       else if (singleHiggsTagLooseCut(ntuple)) {
-        if (tagSRCut(ntuple)) for (unsigned int i = 0; i < tagSRPlots.size(); i++) tagSRPlots[i].fillData(ntuple);
-        else if (tagSBCut(ntuple)) for (unsigned int i = 0; i < tagSBPlots.size(); i++) tagSBPlots[i].fillData(ntuple);
+        if (tagSRCut(ntuple)) {
+          for (unsigned int i = 0; i < tagSRPlots.size(); i++) tagSRPlots[i].fillData(ntuple);
+          if (saveBoostedEvt) txtfile_1HSR << runLumiEvt << endl;
+        }
+        else if (tagSBCut(ntuple)) {
+          for (unsigned int i = 0; i < tagSBPlots.size(); i++) tagSBPlots[i].fillData(ntuple);
+          if (saveBoostedEvt) txtfile_1HSB << runLumiEvt << endl;
+        }
         h_1H_data->Fill(fillLeadingJetMass(ntuple),fillSubLeadingJetMass(ntuple));
       } //end 1H
 
       //then check for 0H
       else if (antiTaggingLooseCut(ntuple)) {
-        if (antitagPlusBCut(ntuple)) for (unsigned int i = 0; i < antitagBTagPlots.size(); i++) antitagBTagPlots[i].fillData(ntuple);
-        if (antitagSRCut(ntuple)) for (unsigned int i = 0; i < antitagSRPlots.size(); i++) antitagSRPlots[i].fillData(ntuple);
-        else if (antitagSBCut(ntuple)) for (unsigned int i = 0; i < antitagSBPlots.size(); i++) antitagSBPlots[i].fillData(ntuple);
+        if (antitagPlusBCut(ntuple)) {
+          for (unsigned int i = 0; i < antitagBTagPlots.size(); i++) antitagBTagPlots[i].fillData(ntuple);
+          if (saveBoostedEvt) txtfile_0Hb << runLumiEvt << endl;
+        }
+        if (antitagSRCut(ntuple)) {
+          for (unsigned int i = 0; i < antitagSRPlots.size(); i++) antitagSRPlots[i].fillData(ntuple);
+          if (saveBoostedEvt) txtfile_0HSR << runLumiEvt << endl;
+        }
+        else if (antitagSBCut(ntuple)) {
+          for (unsigned int i = 0; i < antitagSBPlots.size(); i++) antitagSBPlots[i].fillData(ntuple);
+          if (saveBoostedEvt) txtfile_0HSB << runLumiEvt << endl;
+        }
         h_0H_data->Fill(fillLeadingJetMass(ntuple),fillSubLeadingJetMass(ntuple));
       } //end 0H region
     } // end event loop
