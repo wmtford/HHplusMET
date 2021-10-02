@@ -23,3 +23,6 @@ bin/*
 datacards/*
 !datacards/*.py
 !datacards/*emplate*.txt
+scripts/ALPHABET
+scripts/cutflow
+scripts/cutflowFromNtuples
