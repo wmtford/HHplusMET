@@ -20,3 +20,6 @@ src/*/
 plots/*
 bin/*
 !data/PileupHistograms_0121_69p2mb_pm4p6.root
+datacards/*
+!datacards/*.py
+!datacards/*emplate*.txt
