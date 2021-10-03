@@ -19,7 +19,7 @@ int main(int argc, char** argv){
   std::string mass2D_string = std::to_string(mass2D);
 
   setMasses(mass2D_string,"1");
-  bool runData = true; //only useful for regions 0,3,4,5
+  bool runData = false; //only useful for regions 0,3,4,5
   bool applySFs_ = true; //btag SFs, SFs for photons, electrons, and muons - only used for MC/data comparisons
   bool runFullSIM = false; //only for 1D T5HH
   bool saveBoostedEvt = false; //for WX
@@ -292,6 +292,7 @@ int main(int argc, char** argv){
     }
 
     //Counters are for filling the signal mass points for the 2D mass plots in the paper
+    //Specifically for 1D T5HH1600
     int counter2HSR = 0; int counter2HSB = 0;
     int counter1HSR = 0; int counter1HSB = 0;
     int counter0HSR = 0; int counter0HSB = 0;

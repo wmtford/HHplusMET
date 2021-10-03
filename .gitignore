@@ -7,7 +7,7 @@ src/**/*.eps
 **/*~
 **/*root
 !src/*root
-!output/*root
+output/*
 **/*exe
 **/*stdout
 **/*stderr
