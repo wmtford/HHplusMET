@@ -52,7 +52,7 @@ void limit_scan() {
   }
   MakeLimitPlotCombo(vmx, vmy, vlim, vobs, vobsup, vobsdown, vobsup2, vobsdown2, vexp, vup, vdown, vup2, vdown2);
 
-  // SaveRootFile(); //For HEPdata
+  SaveRootFile(); //For HEPdata
   std::exit(1);
 }
 
