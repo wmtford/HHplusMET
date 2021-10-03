@@ -2,7 +2,6 @@
 submitDir=$PWD
 branch=$1
 
-#outputDir=extraPlots
 outputDir=cutflow_veto
 vetoOpt=1
 
