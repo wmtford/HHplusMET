@@ -13,9 +13,7 @@ gROOT.SetBatch(True)
 import tdrstyle
 tdrstyle.setTDRStyle()
 
-compareLimits = False #Runs BoostedOnly vs ResolvedOnly
-saveRootFile = False #For HEPdata
-idir = "../datacards/";
+idir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/HHplusMET/datacards/";
 odir = "../output/";
 
 def columnToList(fn,col):
@@ -36,7 +34,7 @@ def ExtractFile(iname, m1):
 		lims.append( t.limit )
 	return lims;
 
-if __name__ == '__main__':
+def makeBrazilFlag(compareLimits,saveRootFile):
 	results = []; results2 = []; results3 = []; results4 = [];
 
 	#Combo, ResolvedOnly+BoostedVeto
@@ -372,3 +370,13 @@ if __name__ == '__main__':
 		g_obs.Write("ObservedLimit_Combo");
 
 		fNEW.Close();
+
+def main():
+	#First argument is compareLimits
+	#Second is saveRootFile, does the same thing regardless of first argument
+	makeBrazilFlag(True,True) #boostedOnly vs resolvedOnly
+	makeBrazilFlag(False,False) #Combination with 1- and 2-sigma bands
+
+
+if __name__ == "__main__":
+    main()

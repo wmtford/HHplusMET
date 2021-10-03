@@ -18,25 +18,26 @@ using namespace std;
 std::vector<std::string> split(const std::string& s, char delimiter);
 void higgsino2DCrossSection(int hig_mass, double &xsec, double &xsec_unc);
 void gluino2DCrossSection(int hig_mass, double &xsec, double &xsec_unc);
+void saveLimits(string model, string which);
 
-string in_dir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/boostedHiggsPlusMET/datacards";
-string src_dir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/boostedHiggsPlusMET/src";
-string out_dir = in_dir;
-string model = "N1N2";
-// string model = "Gluino";
+string in_dir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/HHplusMET/datacards";
+string out_dir = "../src";
 
-string which = "comb";
-// string which = "res";
-// string which = "boost";
+//model = "N1N2" or "Gluino", but probably don't run gluino
+//which = "comb" "boost" or "res"
+void scan_point(string model, string which) {
+  saveLimits(model,which);
+  std::exit(1);
+}
 
-void scan_point() {
-  string inFile = src_dir+"/higgsino2DFileNames.txt";
-  if (model=="Gluino") inFile = src_dir+"/Gluino2DScanNames.txt";
+void saveLimits(string model, string which) {
+  string inFile = out_dir+"/higgsino2DFileNames.txt";
+  if (model=="Gluino") inFile = out_dir+"/Gluino2DScanNames.txt";
   ifstream file(inFile);
   string line; TString filename;
-  string txtname(src_dir+"/limitsCombined_"+model+"_data.txt");
-  if (which=="res") txtname = src_dir+"/limitsResOnly_"+model+"_data.txt";
-  else if (which=="boost") txtname = src_dir+"/limitsBoostOnly_"+model+"_data.txt";
+  string txtname(out_dir+"/limitsCombined_"+model+"_data.txt");
+  if (which=="res") txtname = out_dir+"/limitsResOnly_"+model+"_data.txt";
+  else if (which=="boost") txtname = out_dir+"/limitsBoostOnly_"+model+"_data.txt";
   ofstream txtfile(txtname);
 
   while(std::getline(file, line)) {

@@ -17,12 +17,14 @@
 #include "TLatex.h"
 #include "TLine.h"
 
+#include <sys/stat.h> //to check if file exists
+#include <unistd.h>
+
 using namespace std;
 
-int num_smooth_ = 0; // Number of times to smooth TH2D
-string in_dir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/boostedHiggsPlusMET/datacards/";
-string src_dir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/boostedHiggsPlusMET/src/";
-string out_dir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/boostedHiggsPlusMET/output/";
+// string in_dir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/boostedHiggsPlusMET/datacards/";
+string src_dir = "../src/";
+string out_dir = "../output/";
 string tag = "";
 
 string model_ = "N1N2";
@@ -39,6 +41,7 @@ TGraph DrawContours(TGraph2D &g2, int color, int style, double width, double val
 TGraph* joinGraphs(TGraph *graph1, TGraph *graph2);
 void ReverseGraph(TGraph &graph);
 void SetupColors();
+bool doesFileExist (const std::string& name);
 
 void limit_scan() {
   vector<double> vmx, vmy, vxsec, vobs, vobsup, vobsdown,vobsup2, vobsdown2, vexp, vup, vdown, vup2, vdown2;
@@ -50,6 +53,7 @@ void limit_scan() {
   MakeLimitPlotCombo(vmx, vmy, vlim, vobs, vobsup, vobsdown, vobsup2, vobsdown2, vexp, vup, vdown, vup2, vdown2);
 
   // SaveRootFile(); //For HEPdata
+  std::exit(1);
 }
 
 void ReadPointsCombo(vector<double> &vmx, vector<double> &vmy, vector<double> &vxsec,
@@ -59,7 +63,11 @@ void ReadPointsCombo(vector<double> &vmx, vector<double> &vmy, vector<double> &v
                      vector<double> &vup2, vector<double> &vdown2
                     ) {
 
-  TString  txtname(src_dir+"/limitsCombined_"+model_+"_data.txt");
+  string txtname = src_dir+"/limitsCombined_"+model_+"_data.txt";
+  if (!doesFileExist(txtname)) {
+    std::cout<<"You need to run scan_point.cxx first! Exiting..."<<std::endl;
+    std::exit(1);
+  }
   ifstream infile(txtname); string line;
 
   while(getline(infile, line)) {
@@ -67,10 +75,9 @@ void ReadPointsCombo(vector<double> &vmx, vector<double> &vmy, vector<double> &v
     double pmx, pmy, pxsec, pxsecunc, pobs, pexp, pup, pdown, pup2, pdown2;
     iss >> pmx >> pmy >> pxsec >> pxsecunc >> pobs >> pexp >> pup >> pdown >> pup2 >> pdown2;
 
-    //Regular N2N1-only xsec OR gluino
     vmx.push_back(pmx);
     if (pmy==1.0){
-      vmy.push_back(-0.01);
+      vmy.push_back(-0.01); //shift for plotting purposes
     }
     else {
       vmy.push_back(pmy);
@@ -646,4 +653,9 @@ void SaveRootFile() {
   cup2_res.Write("ExpectedLimit2SigmaUp_Resolved"); cdown2_res.Write("ExpectedLimit2SigmaDown_Resolved");
 
   fNEW->Close();
+}
+
+bool doesFileExist (const std::string& name) {
+  struct stat buffer;
+  return (stat (name.c_str(), &buffer) == 0);
 }

@@ -14,11 +14,7 @@ gROOT.SetBatch(True)
 import tdrstyle
 tdrstyle.setTDRStyle()
 
-runBoostedOnly = False #just boosted limits
-compareLimits = True #boostedOnly vs resolvedOnly
-saveRootFile = False #For HEPdata
-
-idir = "../datacards/";
+idir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/HHplusMET/datacards/";
 odir = "../output/";
 
 def columnToList(fn,col):
@@ -102,7 +98,7 @@ def higgsinoCrossSection(hig_mass):
 		print("Cross section not found for mass of %s" %(hig_mass))
 	return xsec*1000.0
 
-if __name__ == '__main__':
+def makeBrazilFlag(compareLimits,saveRootFile):
 	results = []; results2 = []; results3 = []; results_hino = [];
 
 	#BoostedOnly
@@ -229,43 +225,17 @@ if __name__ == '__main__':
 	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH1300_LSP1_Data_Combo.AsymptoticLimits.mH120.root','1300', '1') );
 	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH1400_LSP1_Data_Combo.AsymptoticLimits.mH120.root','1400', '1') );
 
-
-	# results_hino=results3
-	results_hino.append( ExtractFile(idir+'higgsCombine1DTChiHH150_LSP1_Data_Combo.AsymptoticLimits.mH120.root','150', '1') );
-	results_hino.append( ExtractFile(idir+'higgsCombine1DTChiHH200_LSP1_Data_Combo.AsymptoticLimits.mH120.root','200', '1') );
-	results_hino.append( ExtractFile(idir+'higgsCombine1DTChiHH250_LSP1_Data_Combo.AsymptoticLimits.mH120.root','250', '1') );
-	results_hino.append( ExtractFile(idir+'higgsCombine1DTChiHH300_LSP1_Data_Combo.AsymptoticLimits.mH120.root','300', '1') );
-	results_hino.append( ExtractFile(idir+'higgsCombine1DTChiHH350_LSP1_Data_Combo.AsymptoticLimits.mH120.root','350', '1') );
-	results_hino.append( ExtractFile(idir+'higgsCombine1DTChiHH400_LSP1_Data_Combo.AsymptoticLimits.mH120.root','400', '1') );
-	results_hino.append( ExtractFile(idir+'higgsCombine1DTChiHH450_LSP1_Data_Combo.AsymptoticLimits.mH120.root','450', '1') );
-	results_hino.append( ExtractFile(idir+'higgsCombine1DTChiHH500_LSP1_Data_Combo.AsymptoticLimits.mH120.root','500', '1') );
-	results_hino.append( ExtractFile(idir+'higgsCombine1DTChiHH550_LSP1_Data_Combo.AsymptoticLimits.mH120.root','550', '1') );
-	results_hino.append( ExtractFile(idir+'higgsCombine1DTChiHH600_LSP1_Data_Combo.AsymptoticLimits.mH120.root','600', '1') );
-	results_hino.append( ExtractFile(idir+'higgsCombine1DTChiHH650_LSP1_Data_Combo.AsymptoticLimits.mH120.root','650', '1') );
-	results_hino.append( ExtractFile(idir+'higgsCombine1DTChiHH700_LSP1_Data_Combo.AsymptoticLimits.mH120.root','700', '1') );
-	results_hino.append( ExtractFile(idir+'higgsCombine1DTChiHH750_LSP1_Data_Combo.AsymptoticLimits.mH120.root','750', '1') );
-	results_hino.append( ExtractFile(idir+'higgsCombine1DTChiHH800_LSP1_Data_Combo.AsymptoticLimits.mH120.root','800', '1') );
-	results_hino.append( ExtractFile(idir+'higgsCombine1DTChiHH850_LSP1_Data_Combo.AsymptoticLimits.mH120.root','850', '1') );
-	results_hino.append( ExtractFile(idir+'higgsCombine1DTChiHH900_LSP1_Data_Combo.AsymptoticLimits.mH120.root','900', '1') );
-	results_hino.append( ExtractFile(idir+'higgsCombine1DTChiHH950_LSP1_Data_Combo.AsymptoticLimits.mH120.root','950', '1') );
-	results_hino.append( ExtractFile(idir+'higgsCombine1DTChiHH1000_LSP1_Data_Combo.AsymptoticLimits.mH120.root','1000', '1') );
-	results_hino.append( ExtractFile(idir+'higgsCombine1DTChiHH1100_LSP1_Data_Combo.AsymptoticLimits.mH120.root','1100', '1') );
-	results_hino.append( ExtractFile(idir+'higgsCombine1DTChiHH1200_LSP1_Data_Combo.AsymptoticLimits.mH120.root','1200', '1') );
-	results_hino.append( ExtractFile(idir+'higgsCombine1DTChiHH1300_LSP1_Data_Combo.AsymptoticLimits.mH120.root','1300', '1') );
-	results_hino.append( ExtractFile(idir+'higgsCombine1DTChiHH1400_LSP1_Data_Combo.AsymptoticLimits.mH120.root','1400', '1') );
-
-	#N2N1, 200-1200 (every 50 until 1000, then 1100,1200,1300,1400)
+	#N2N1, 150-1200 (every 50 until 1000, then 1100,1200,1300,1400)
+	names_hino=[150,200,250,300,350,400,450,500,550,600,650,700,750,800,850,900,950,1000,1100,1200,1300,1400]
 	xsec_hino=[715.14,244.213,104.252, 50.9994, 27.3286, 15.6691, 9.44017, 5.90757, 3.8167, 2.53015, 1.71418, 1.18113, 0.826366, 0.586211, 0.420556, 0.305935, 0.22285, 0.16428,0.0912469,0.0516263,0.0299353,0.0175031] #this doesn't include the 25 GeV and 75 GeV mass points
 
 	names=[]; l_obs=[]; l_m2sig=[]; l_m1sig=[]; l_exp=[]; l_p1sig=[]; l_p2sig=[]; count=0;
 	names2=[]; l_obs2=[]; l_m2sig2=[]; l_m1sig2=[]; l_exp2=[]; l_p1sig2=[]; l_p2sig2=[]; count2=0;
 	names3=[]; l_obs3=[]; l_m2sig3=[]; l_m1sig3=[]; l_exp3=[]; l_p1sig3=[]; l_p2sig3=[]; count3=0;
 	names4=[]; l_obs4=[]; l_m2sig4=[]; l_m1sig4=[]; l_exp4=[]; l_p1sig4=[]; l_p2sig4=[]; count4=0;
-	LSP_m=[];
+	LSP_m=[]; xsecs = []
 
-	names_hino=[]; count_hino=0; xsecs = []
 	# BR=1.0 #BR set in ALPHABET
-
 	for r in results:
 		names.append(r[0]);#chi20 mass
 		LSP_m.append(r[1]);#LSP mass
@@ -300,10 +270,6 @@ if __name__ == '__main__':
 		l_p2sig3.append(r[6]*this_xsec);
 		l_obs3.append(r[7]*this_xsec);
 		count3=count3+1
-
-	for r in results_hino:
-		names_hino.append(r[0]);
-		count_hino=count_hino+1
 
 	a_xax = array('d', []); a2_xax = array('d', []);
 	a_exp = array('d', []); a_obs = array('d', []);
@@ -457,15 +423,9 @@ if __name__ == '__main__':
 	leg.SetTextFont(42); leg.SetBorderSize(0);
 	leg.SetTextSize(0.045);
 
-	#Boosted only
-	if runBoostedOnly:
-		leg.AddEntry(g_exp, "Expected","l")
-		leg.AddEntry(g_obs,"Observed","l")
-		leg.AddEntry(g_2sig,"Expected 2#sigma","f")
-		leg.AddEntry(g_1sig,"Expected 1#sigma","f")
 
 	#Compare limits
-	elif compareLimits:
+	if compareLimits:
 		leg.SetHeader("95% CL Upper Limit")
 		leg.AddEntry(g_obs, "Observed (boosted)","l")
 		leg.AddEntry(g_obs2,"Observed (resolved)","l")
@@ -500,13 +460,7 @@ if __name__ == '__main__':
 	g_exp3.SetLineStyle(2); g_exp3.SetLineColor(ROOT.kBlack);
 	g_exp3.SetLineWidth(3); g_obs3.SetLineWidth(2);
 
-	if runBoostedOnly:
-		g_2sig.Draw('f');
-		g_1sig.Draw('fsames');
-		g_obs.Draw('lsames');
-		g_exp.Draw('lsames');
-
-	elif compareLimits:
+	if compareLimits:
 		g_obs.SetLineColor(ROOT.kRed); g_obs.SetLineWidth(2);
 		g_obs2.SetLineColor(ROOT.kBlue); g_obs2.SetLineWidth(2);
 		g_obs3.SetLineColor(ROOT.kBlack); g_obs3.SetLineWidth(3);
@@ -530,7 +484,7 @@ if __name__ == '__main__':
 	leg.Draw(); leg2.Draw();
 	g_xsec.SetLineStyle(2); g_xsec.SetLineWidth(3);
 	g_xsec.SetLineColor(ROOT.kRed);
-	if compareLimits and not runBoostedOnly: g_xsec.SetLineColor(ROOT.kBlack);
+	if compareLimits: g_xsec.SetLineColor(ROOT.kBlack);
 	g_xsec.Draw("lsame")
 
 	#Second xsec (https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SUSYCrossSections13TeVn1n2hino)
@@ -539,8 +493,7 @@ if __name__ == '__main__':
 	g_xsec_hino.SetLineColor(ROOT.kMagenta);
 	if not compareLimits: g_xsec_hino.Draw("lsame")
 
-	if runBoostedOnly: can.SaveAs(odir+'TChiHHResults_V18_BoostedOnly_Data.pdf');
-	elif compareLimits:
+	if compareLimits:
 		can.SaveAs(odir+'TChiHHResults_V18_Combo_CompareObsExpAll.pdf');
 		txtb.Draw();
 		can.SaveAs(odir+'TChiHHResults_V18_Combo_CompareObsExpAll_prelim.pdf');
@@ -579,3 +532,13 @@ if __name__ == '__main__':
 		g_obs3.Write("ObservedLimit_Combo");
 
 		fNEW.Close();
+
+def main():
+	#First argument is compareLimits
+	#Second is saveRootFile, does the same thing regardless of first argument
+	makeBrazilFlag(True,True) #boostedOnly vs resolvedOnly
+	makeBrazilFlag(False,False) #Combination with 1- and 2-sigma bands
+
+
+if __name__ == "__main__":
+    main()

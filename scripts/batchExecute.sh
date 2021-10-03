@@ -43,7 +43,7 @@ tar -xf workingArea.tar
 cd CMSSW_10_2_13/src/
 eval `scramv1 runtime -sh`
 echo "step 2"
-cd boostedHiggsPlusMET
+cd HHplusMET
 export PATH=$PWD/src/:$PATH
 export PATH=$PWD/scripts/:$PATH
 echo "PWD ${PWD}"

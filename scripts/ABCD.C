@@ -4118,4 +4118,5 @@ void ABCD() {
   gROOT->SetBatch(1);
   runABCD();
   runMass2D();
+  std::exit(1);
 }
