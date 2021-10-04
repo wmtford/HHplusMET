@@ -237,46 +237,44 @@ int main(int argc, char** argv){
   ofstream txtfile_2HSR; ofstream txtfile_2HSB;
   ofstream txtfile_1HSR; ofstream txtfile_1HSB;
   ofstream txtfile_0HSR; ofstream txtfile_0HSB; ofstream txtfile_0Hb;
-  if (saveBoostedEvt) {
-    string thisRegion = "MC_";
-    if (region==1) thisRegion = "1DTChiHH"+mass2D_string+"_";
-    if (region==1 && runFullSIM) thisRegion = "1DT5HH"+mass2D_string+"FullSIM_";
-    else if (region == 2) thisRegion = "2DTChiHH"+mass2D_string+"_";
-
-    string txtname1 = "evtCount_boosted_2HSR_"+thisRegion+yearStr+".txt";
-    string txtname2 = "evtCount_boosted_2HSB_"+thisRegion+yearStr+".txt";
-    string txtname3 = "evtCount_boosted_1HSR_"+thisRegion+yearStr+".txt";
-    string txtname4 = "evtCount_boosted_1HSB_"+thisRegion+yearStr+".txt";
-    string txtname5 = "evtCount_boosted_0HSR_"+thisRegion+yearStr+".txt";
-    string txtname6 = "evtCount_boosted_0HSB_"+thisRegion+yearStr+".txt";
-    string txtname7 = "evtCount_boosted_0Hb_"+thisRegion+yearStr+".txt";
-
-    txtfile_2HSR.open(outDir_evtCount+txtname1); txtfile_2HSB.open(outDir_evtCount+txtname2);
-    txtfile_1HSR.open(outDir_evtCount+txtname3); txtfile_1HSB.open(outDir_evtCount+txtname4);
-    txtfile_0HSR.open(outDir_evtCount+txtname5); txtfile_0HSB.open(outDir_evtCount+txtname6);
-    txtfile_0Hb.open(outDir_evtCount+txtname7);
-
-    txtfile_2HSR<<"#SR1,2HSR\n#Run:Lumi:EvtNum:MET"<<endl;
-    txtfile_2HSB<<"#CR1,2HSB\n#Run:Lumi:EvtNum:MET"<<endl;
-    txtfile_1HSR<<"#SR2,1HSR\n#Run:Lumi:EvtNum:MET"<<endl;
-    txtfile_1HSB<<"#CR2,1HSB\n#Run:Lumi:EvtNum:MET"<<endl;
-    txtfile_0HSR<<"#CR3,0HSR\n#Run:Lumi:EvtNum:MET"<<endl;
-    txtfile_0HSB<<"#CR4,0HSB\n#Run:Lumi:EvtNum:MET"<<endl;
-    txtfile_0Hb<<"#CR5,0Hb\n#Run:Lumi:EvtNum:MET"<<endl;
-  }
-
-
-  if (runVeto) {
-    if (region==1 && !runFullSIM) {
-      readResVeto_Sig1D(yearStr,"TChiHH");
-    }
-    else if (region==1 && runFullSIM) readResVeto_Sig1D(yearStr,"T5HH");
-    else if (region==2) readResVeto_Sig2D(yearStr,"TChiHH");
-    else if (region==0 && runData) readResVeto_Data(yearStr);
-    else readResVeto_MC(yearStr);
-  }
 
   if (runMC) {
+    if (saveBoostedEvt) {
+      string thisRegion = "MC_";
+      if (region==1) thisRegion = "1DTChiHH"+mass2D_string+"_";
+      if (region==1 && runFullSIM) thisRegion = "1DT5HH"+mass2D_string+"FullSIM_";
+      else if (region == 2) thisRegion = "2DTChiHH"+mass2D_string+"_";
+
+      string txtname1 = "evtCount_boosted_2HSR_"+thisRegion+yearStr+".txt";
+      string txtname2 = "evtCount_boosted_2HSB_"+thisRegion+yearStr+".txt";
+      string txtname3 = "evtCount_boosted_1HSR_"+thisRegion+yearStr+".txt";
+      string txtname4 = "evtCount_boosted_1HSB_"+thisRegion+yearStr+".txt";
+      string txtname5 = "evtCount_boosted_0HSR_"+thisRegion+yearStr+".txt";
+      string txtname6 = "evtCount_boosted_0HSB_"+thisRegion+yearStr+".txt";
+      string txtname7 = "evtCount_boosted_0Hb_"+thisRegion+yearStr+".txt";
+
+      txtfile_2HSR.open(outDir_evtCount+txtname1); txtfile_2HSB.open(outDir_evtCount+txtname2);
+      txtfile_1HSR.open(outDir_evtCount+txtname3); txtfile_1HSB.open(outDir_evtCount+txtname4);
+      txtfile_0HSR.open(outDir_evtCount+txtname5); txtfile_0HSB.open(outDir_evtCount+txtname6);
+      txtfile_0Hb.open(outDir_evtCount+txtname7);
+
+      txtfile_2HSR<<"#SR1,2HSR\n#Run:Lumi:EvtNum:MET"<<endl;
+      txtfile_2HSB<<"#CR1,2HSB\n#Run:Lumi:EvtNum:MET"<<endl;
+      txtfile_1HSR<<"#SR2,1HSR\n#Run:Lumi:EvtNum:MET"<<endl;
+      txtfile_1HSB<<"#CR2,1HSB\n#Run:Lumi:EvtNum:MET"<<endl;
+      txtfile_0HSR<<"#CR3,0HSR\n#Run:Lumi:EvtNum:MET"<<endl;
+      txtfile_0HSB<<"#CR4,0HSB\n#Run:Lumi:EvtNum:MET"<<endl;
+      txtfile_0Hb<<"#CR5,0Hb\n#Run:Lumi:EvtNum:MET"<<endl;
+    }
+
+    if (runVeto) {
+      if (region==1 && !runFullSIM)  readResVeto_Sig1D(yearStr,"TChiHH");
+      else if (region==1 && runFullSIM) readResVeto_Sig1D(yearStr,"T5HH");
+      else if (region==2) readResVeto_Sig2D(yearStr,"TChiHH");
+      else readResVeto_MC(yearStr);
+    }
+
+
     // MC samples - setup to not run 0-lepton MC if you run the data as well
     for (unsigned int iSample = 0; iSample < skims.ntuples.size(); iSample++) {
       RA2bTree* ntuple = skims.ntuples[iSample];
@@ -506,6 +504,7 @@ int main(int argc, char** argv){
 
   // Begin data
   if (region!=1 && region!=2 && runData) {
+    if (region==0 && runVeto) readResVeto_Data(yearStr);
     RA2bTree* ntuple = skims.dataNtuple;
     for (unsigned int i = 0; i < baselinePlots.size(); i++) {
       baselinePlots[i].addDataNtuple(ntuple,"baseline_data");
