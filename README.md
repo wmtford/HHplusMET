@@ -81,10 +81,19 @@ To run:
 ./ALPHABET 0 MC2016 0 0
 ```
 
-The first argument is the region (0=SM background), second is the year, third is a bool to remove events that overlap with the resolved method, and fourth is the NLSP mass for signal
-samples (which doesn't matter for anything else).
+The first argument is the region (0=SM background, 1=1DTChiHH signal, etc), second is the year, third is a bool to remove events that overlap with the resolved method (1 means remove the overlap events), and fourth is the NLSP mass for signal
+samples (600 for TChiHH, but doesn't matter for anything else so I usually do 0).
 
 You can also batch-submit the ALPHABET code.
+
+#### To run boosted event counts
+If you need to run boosted event counts for overlap studies, there is a bool at the top of `ALPHABET.cc` that does just that "saveBoostedEvt".
+The text files are created for each analysis region, and for the same arguments you pass `ALPHABET.cc` (region, year, resVeto, NLSP mass).
+- If you wish to run on data, set the bool "runData" at the top of the ALPHABET code to true, and run with the argument region=0. This
+is currently setup so that if runData=true, the MC will not run.
+- I also did not set this up to include multiple signal mass points in the same text file!
+- These text files are also not transfered to an eos area, so I would suggest running locally.
+- The files are output into *src/evtCount/boost/*
 
 ## Plotting distributions from ALPHABET
 `ABCD.C` contains loads of functions that make different plots. It is currently setup to only run the plots that are put into the published paper, but you can easily change it

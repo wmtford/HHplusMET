@@ -1246,7 +1246,7 @@ int getTotHHEvents(TString NLSPmass, TString LSPmass) {
 /////////////////////// FOR RESOLVED ///////////////////////
 ////////////////////////////////////////////////////////////
 void readResVeto_MC(string whichYear) {
-  string in_dir = "../src/evtCount/";
+  string in_dir = "../src/evtCount/res/";
   string line;
   if (whichYear != "all") {
     string fileName1 = in_dir+"processed_resolved_list_SR_met300_SCAN_MC_"+whichYear+".txt";
@@ -1284,7 +1284,7 @@ void readResVeto_MC(string whichYear) {
 
 
 void readResVeto_Data(string whichYear) {
-  string in_dir = "../src/evtCount/";
+  string in_dir = "../src/evtCount/res/";
   string line;
   if (whichYear=="all") {std::cout<<"Res veto not setup for all years!"; return;}
   string fileName1 = in_dir+"processed_resolved_list_SR_met300_SCAN_DATA_"+whichYear+".txt";
@@ -1303,7 +1303,7 @@ void readResVeto_Data(string whichYear) {
 
 
 void readResVeto_Sig1D(string whichYear, string model) {
-  string in_dir = "../src/evtCount/";
+  string in_dir = "../src/evtCount/res/";
   string line;
   if (whichYear!="all") {
     string fileName1 = in_dir+"processed_resolved_list_SR_met300_SCAN_"+model+"1D_"+whichYear+".txt";
@@ -1359,7 +1359,7 @@ void readResVeto_Sig1D(string whichYear, string model) {
 }
 
 void readResVeto_Sig2D(string whichYear, string model) {
-  string in_dir = "../src/evtCount/";
+  string in_dir = "../src/evtCount/res/";
   string line;
   if (model=="T5HH") {std::cout<<"Res veto not setup for this!!"<<std::endl; return;}
 
