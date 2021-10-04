@@ -1,2 +1,0 @@
-#SR2,1HSR
-#Run:Lumi:EvtNum:MET
