@@ -153,6 +153,8 @@ g++ -o cutflowFromNtuples cutflowFromNtuples.cc `root-config --cflags --libs`
 - The first argument is the region (0=TChiHH, 1=T5HH), second is the NLSP mass, third is a bool for a more detailed cutflow (breaking down filters etc).
 
 ## Making datacards
+You will need the combine package in your CMSSW_10_2_13/src/ area. Follow the instructions here: https://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/
+
 Before making the datacards, you'll need to run `ALPHABET.cc` to create the necessary histograms, see above.
 You will also need to run all of the necessary signal systematic variations, or switch the bool at the top "runSysts" to False.
 
