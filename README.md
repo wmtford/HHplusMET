@@ -154,7 +154,7 @@ g++ -o cutflowFromNtuples cutflowFromNtuples.cc `root-config --cflags --libs`
 
 ## Making datacards
 Before making the datacards, you'll need to run `ALPHABET.cc` to create the necessary histograms, see above.
-You will also need to run all of the necessary signal systematic variations, or comment out the part of the codes below that pull those files.
+You will also need to run all of the necessary signal systematic variations, or switch the bool at the top "runSysts" to False.
 
 The main codes for making the datacards are `datacards/QuickDataCardsABCDNorm_Higgsino.py` and `datacards/QuickDataCardsABCDNorm_Gluino.py`. The first runs rather the 1D or 2D TChiHH models
 (you need to change the bool "run2D").
@@ -177,32 +177,54 @@ or you can run them all at once from the *scripts* directory:
 python -b runABCDNormHiggsino.py
 python -b runABCDNormGluino.py
 ```
-The first has a configurable option to run the 1D or 2D scan.
+The first has a configurable option to run the 1D or 2D scan. If you change to run over the 2D TChiHH, you will also need to change the bool
+in `datacards/QuickDataCardsABCDNorm_Higgsino.py`.
 
+
+The output datacards and combine root files (with the limits) will be saved in the *datacards* directory.
 
 ## Making limits plots
-After running the datacards, you can make the final limits plots from the *scripts* directory.
+After running the datacards, you can make the final limits plots from the *scripts* directory. If you wish to run over different datacards, you'll need
+to change the directory.
+
+
 For the 1D TChiHH model, this currently makes both the combined limit plot and the resolved vs boosted overlay plot:
 ```bash
 python -b brazilHiggsinoLims.py
 ```
+To change the directory where the datacards are stored: https://github.com/emacdonald16/HHplusMET/blob/v2021/scripts/brazilHiggsinoLims.py#L17
+This currently also saves the root file for HEPData, with all limits included.
+You can change what you want to run and save at the bottom of the code.
+
+
+
+
 For the 1D T5HH model, this currently makes only the combined limit plot (but is configurable to make the resolved vs boosted overlay plot, too):
 ```bash
 python -b brazilGluinoLims.py
 ```
+To change the directory where the datacards are stored: https://github.com/emacdonald16/HHplusMET/blob/v2021/scripts/brazilGluinoLims.py#L16
+This currently also saves the root file for HEPData, with all limits included.
+You can change what you want to run and save at the bottom of the code.
+
+
+
 Finally, for the 2D TChiHH model, this currently makes the combined 2D limit plot:
 ```bash
 root -l -b limit_scan.cxx
 ```
-The code is setup to also run for boosted only and resolved only, you just need to change a few things.
+The code is setup to also run for boosted only and resolved only, you just need to change the strings "which" at the time.
+I've written this to run over the 2D gluino model as well, but I haven't tested it in awhile since we didn't have samples.
 If you haven't, you'll need to run `scan_point.cxx` before running the 2D limits plot. You'll get a warning that tells you you need to if you haven't.
 ```bash
 root -l 'scan_point.cxx("N1N2","comb")'
 ```
-The first argument is the model (N1N2 for 2D TChiHH, and Gluino for 2D T5HH which you shouldn't run). The second argument is the type you want:
+The first argument is the model (N1N2 for 2D TChiHH, and Gluino for 2D T5HH). The second argument is the type you want:
 "comb" for the combination, "res" for resolved only, and "boost" for boosted only.
+Currently, the production of the root file for HEPData is commented out.
 
-All three of the above codes by default produce the root files needed for HEPData. The final plots are in the *output* directory.
+
+All of the final plots are in the *output* directory.
 
 
 
@@ -211,14 +233,17 @@ The following code pieces in the *scripts* directory create different plots and 
 - `grabMatrices.py`: Opens the root files automagically made from the combine checks from pre-approval, pulls out the correlation matrix and saves it to a new root file.
 Additionally, pulls out the covariance matrix, takes only the signal region bins (from boosted and resolved), and saves that new matrix to the same root file.
 No idea if this is the correct thing to do right now! Currently, this input is in the *src* directory (fitDiagnostics_t0.root).
+Output root file is in the *output* directory.
 - `signalEfficiency.py`: Creates the signal efficiency plots from the datacards. Creates for resolved only, boosted only, and combination for all 3 signal models
 (1DTChiHH, 2DTChiHH, 1DT5HH). The denominator of the T5HH is all H decays (but HH events only), whereas the TChiHH denominator is only H->bb events,
-since that's how the signal samples were generated. Currently also creates a root file with all of these histograms saved into it for HEPData. Also for
-HEPData, produces a root file with the signal efficiency/contamination in all boosted regions for a single mass point of T5HH.
-- `significance.py`: Creates the significance plot for the combination only for TChiHH and T5HH. Also creates the root file for HEPData. Would need to
+since that's how the signal samples were generated.
+Can also creates a root file with all of these histograms saved into it for HEPData (commented out right now). Also for
+HEPData, can produce a root file with the signal efficiency/contamination in all boosted regions for a single mass point of T5HH (commented out right now). The directory for the datacards is at the top of the code. Output PDF and root files are in the *output* directory.
+- `significance.py`: Creates the significance plot for the combination only for TChiHH and T5HH. Also creates the root file for HEPData (currently commented out). Would need to
 modify `QuickDataCardsABCDNorm_Higgsino.py` and `QuickDataCardsABCDNorm_Gluino.py` to have combine run the significance (commented out at the bottom)
-if these don't exist yet.
+if these don't exist yet. You can the directory of the datacards at the top of the code. Output PDF and root files are in the *output* directory.
 - `writeCutflow.py`: Creates a txt file with Latex-style output used in the auxiliary material for the cutflow table. Can also be modified to write out the
 more-detailed cutflow. You need to first run `cutflowFromNtuples.cc` for this to work, but it's setup to use ones I've already ran.
-- `ABCD.C`: Houses a lot of the plots and tables in both the auxilary materials and the AN. Unfortunately for you, it isn't currently setup to do that easily.
-But I'm sure you can figure out what you need and how to run it! There are bools at the top that you can customize to make certain things.
+- `ABCD.C`: The main plotting script for the boosted part of the analysis, making a lot of the plots and tables in the paper, AN, and the auxilary materials.
+It is currently setup to only run the plots in the paper.
+There are bools at the top that you can change to run other plots.

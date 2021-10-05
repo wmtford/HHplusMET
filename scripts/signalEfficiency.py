@@ -4,7 +4,15 @@ import sys
 import array
 from array import array
 from ROOT import gROOT
+import os.path
 gROOT.SetBatch(True)
+
+
+signalSkimsT5HHDIR = "/eos/uscms/store/user/emacdona/Skims/Run2ProductionV18/scan/tree_signal_METVars_FullSIM/"
+signalSkimsTChiHHDIR = "/eos/uscms/store/user/kaulmer/Skims/Run2ProductionV18/scan/tree_signal_METVars/"
+datacardsDIR = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/myVersion/CMSSW_10_2_13/src/boostedHiggsPlusMET/datacards/"
+srcDIR = "../src/"
+outDIR = "../output/"
 
 
 chi03 = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0}}}#kern[-0.9]{#scale[0.85]{_{3}}}";
@@ -19,12 +27,6 @@ chi0pmi = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0,#pm  }}}#kern
 chi0mpj = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0,#mp }}}#kern[-1.1]{#scale[0.85]{_{j   }}}";
 glu = "#tilde{g}#scale[0.55]{_{ }}"
 
-
-signalSkimsT5HHDIR = "/eos/uscms/store/user/emacdona/Skims/Run2ProductionV18/scan/tree_signal_METVars_FullSIM/"
-signalSkimsTChiHHDIR = "/eos/uscms/store/user/kaulmer/Skims/Run2ProductionV18/scan/tree_signal_METVars/"
-datacardsDIR = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/HHplusMET/datacards/"
-srcDIR = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/HHplusMET/src/"
-outDIR = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/HHplusMET/output/"
 
 def higgsinoCrossSection1D(hig_mass):
     xsec = 1.0;
@@ -269,7 +271,18 @@ def saveEff(model):
 
 def readInValues(model, which):
     vmx=array('d',[]); vmy=array('d',[]); veff=array('d',[]);
-    fcard=open(srcDIR+"efficiency_"+model+".txt", 'r');
+    effFileName = srcDIR+"efficiency_"+model+".txt"
+    file_exists = os.path.exists(effFileName)
+    if not file_exists:
+        print("File not find. Trying to make...")
+        saveEff(model)
+        file_exists2 = os.path.exists(effFileName)
+        if file_exists2: print("Made the file!")
+        else:
+            print("OK couldn't make it I guess. Exiting...")
+            sys.exit(0)
+
+    fcard=open(effFileName, 'r');
     for line in fcard:
         if "#" in line: continue;
         thisLine = line.split()
@@ -502,26 +515,45 @@ def saveSigEffMassRootFile(model, mass, printEff):
     h_sigEff.SaveAs(outDIR+"CMS-SUS-20-004_aux_Table_002.root")
 
 def main():
-    # findWhichBins() # prints out indices of rate vector when reading from a datacard
+    # findWhichBins() # prints out indices of rate vector when reading from a datacard - for debugging
+    '''
+    Saves the efficiencies into a text file (boosted only, resolved only, combined)
+    Will run automatically if the needed txt file can't be found
+    arg1, model: "N1N2", "TChiHH", "T5HH"
+    '''
+    #saveEff("N1N2")
 
-    saveEff("N1N2") # saves the efficiencies into a text file
-    saveEff("TChiHH")
-    saveEff("T5HH")
 
-    #makeCanvas(arg1, arg2),
-    #arg1, model: "N1N2", "TChiHH", "T5HH"
-    #arg2, plotting: "comb", "boost", "res", "all" - "all" plots all three lines on the same canvas so doesn't work for 2D
-
+    '''
+    Creates and saves the signal efficiency plots in the paper
+    makeCanvas(arg1, arg2),
+    arg1, model: "N1N2", "TChiHH", "T5HH"
+    arg2, plotting: "comb", "boost", "res", "all" - "all" plots all three lines on the same canvas so doesn't work for 2D
+    '''
     makeCanvas("TChiHH", "all")
     makeCanvas("T5HH", "all")
     makeCanvas("N1N2", "boost")
     makeCanvas("N1N2", "res")
     makeCanvas("N1N2", "comb")
 
-    #save root file for HEPData (not setup for 2D models), 3rd argument is printing efficiencies to screen
-    saveSigEffMassRootFile("T5HH", "2200", False)
 
-    saveSigEffRootFile()
+    '''
+    Save the root file for HEPData (not setup for 2D models)
+    This is the signal efficiency for all boosted bins, Table 2 in the auxilary material
+    saveSigEffMassRootFile(arg1, arg2, arg3)
+    arg1, model: "N1N2", "TChiHH", "T5HH"
+    arg2, mass point
+    arg3, prints the efficiency for each bin to the screen
+    '''
+    #saveSigEffMassRootFile("T5HH", "2200", False)
+
+
+    '''
+    Save the root file for HEPData
+    This saves the signal efficiency plots in the auxilary material (boosted only, resolved only, combined) for the three signal models
+    '''
+    #saveSigEffRootFile()
+
 
 if __name__ == "__main__":
     main()

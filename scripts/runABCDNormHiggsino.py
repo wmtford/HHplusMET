@@ -1,7 +1,7 @@
 import os
 from ROOT import *
 
-run1Donly = True
+run1Donly = True #if set to false, you need to manually change the bool run2D in QuickDataCardsABCDNorm_Higgsino.py
 if run1Donly:
         for i in range(0, 54):
                 h=175+i*25

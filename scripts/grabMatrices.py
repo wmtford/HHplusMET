@@ -6,7 +6,7 @@ from array import array
 from ROOT import gROOT
 gROOT.SetBatch(True)
 
-file_DIR = "../datacards/";
+file_DIR = "../src/";
 out_DIR = "../output/";
 
 def returnCovarHisto(which,covarNew):

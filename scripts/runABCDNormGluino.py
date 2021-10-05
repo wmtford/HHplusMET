@@ -1,7 +1,7 @@
 import os
 from ROOT import *
 
-for i in range(0, 17):
+for i in range(0, 16):
         g=1000+i*100
         os.system("python -b ../datacards/QuickDataCardsABCDNorm_Gluino.py %d 1" %(g))
 

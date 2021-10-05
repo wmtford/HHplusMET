@@ -7,8 +7,8 @@ from ROOT import gROOT
 gROOT.SetBatch(True)
 
 '''
-Make sure you run cutflowFromNtuples.cc (signal only, run directly from ntuples) to produce the root files
-There are only a few samples this was run on, so I am assuming you are aware of that
+Make sure you run cutflowFromNtuples.cc (signal only, run directly from ntuples) to produce the root files first.
+There are only a few samples this was run on, so I am assuming you are aware of that!ß
 '''
 fileDir = "/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/cutflow_veto/"
 outDir = "../output/"
@@ -142,7 +142,6 @@ def makeCutflowRootFile():
 
     whichFile = 0
     for fileName in vecFiles:
-        # print("For file: "+fileName)
         file = TFile(fileDir+fileName, "r")
         listOfHistos = TIter(file.GetListOfKeys())
         histo = TH1F()
@@ -150,7 +149,6 @@ def makeCutflowRootFile():
         eventCounts = []
         for key in listOfHistos:
             i=i+1
-            # if (i==4 or i==5): continue #Only need last year of res veto
             histo = key.ReadObj()
             eventCounts.append(histo.Integral(0,21))
         fileName1H = vecFiles_1H[whichFile]
@@ -172,8 +170,20 @@ def makeCutflowRootFile():
 
 
 def main():
+    '''
+    Write the cutflow in LaTeX-style and save it into a txt file.
+    If run with arg1=True, runs and saves the more detailed cutflow (for investigative purposes)
+    '''
     writeCutflow(False)
-    writeCutflow(True)
-    makeCutflowRootFile() #Only prints the root file for the cutflow in supplementary material
+
+
+    '''
+    Can only print the root file for the cutflow in supplementary material
+    '''
+    makeCutflowRootFile()
+
+
+
+
 if __name__ == "__main__":
     main()

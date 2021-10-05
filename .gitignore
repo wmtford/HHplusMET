@@ -21,6 +21,7 @@ output/*.root
 **/*pyc
 src/*/
 !src/evtCount
+!src/*root
 **/*.d
 **/*.so
 **/*.pcm

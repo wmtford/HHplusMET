@@ -20,10 +20,10 @@ void higgsino2DCrossSection(int hig_mass, double &xsec, double &xsec_unc);
 void gluino2DCrossSection(int hig_mass, double &xsec, double &xsec_unc);
 void saveLimits(string model, string which);
 
-string in_dir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/HHplusMET/datacards";
+string in_dir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/myVersion/CMSSW_10_2_13/src/boostedHiggsPlusMET/datacards";
 string out_dir = "../src";
 
-//model = "N1N2" or "Gluino", but probably don't run gluino
+//model = "N1N2" or "Gluino", but not sure if Gluino works
 //which = "comb" "boost" or "res"
 void scan_point(string model, string which) {
   saveLimits(model,which);

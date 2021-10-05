@@ -9,8 +9,8 @@ from array import array
 from ROOT import *
 gROOT.SetBatch(True)
 
-in_dir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/boostedHiggsPlusMET/datacards/"
-out_dir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/boostedHiggsPlusMET/output/"
+datacardsDIR = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/myVersion/CMSSW_10_2_13/src/boostedHiggsPlusMET/datacards/"
+outDIR = "../output/"
 
 def columnToList(fn,col):
     f = open(fn,'r');
@@ -32,7 +32,7 @@ def ExtractFile(iname):
 def saveCanvas(model):
     vmx=array('d',[]); vmy=array('d',[]); vsig=array('d',[]);
     if model=="N1N2":
-        namesFile=open(in_dir+"higgsino2DFileNames.txt", 'r');
+        namesFile=open(datacardsDIR+"higgsino2DFileNames.txt", 'r');
         for line in namesFile:
             x = line.split('_')
             hino_mass = int(x[5])
@@ -45,7 +45,7 @@ def saveCanvas(model):
             if hino_mass==300 and LSP_mass==150: continue;
 
             vmx.append(hino_mass); vmy.append(LSP_mass)
-            thisSig = ExtractFile(in_dir+"higgsCombine2DTChiHH%s_LSP%s_Data_Combo.Significance.mH120.root" %(x[5], x[6]))
+            thisSig = ExtractFile(datacardsDIR+"higgsCombine2DTChiHH%s_LSP%s_Data_Combo.Significance.mH120.root" %(x[5], x[6]))
 
             #Smoothing diagonal
             if hino_mass==150 and LSP_mass==23: thisSig = 0.5
@@ -74,7 +74,7 @@ def saveCanvas(model):
         for h in hino:
             vmx.append(h)
             vmy.append(1.0)
-            thisSig =  ExtractFile(in_dir+"higgsCombine2DTChiHH%i_LSP1_Data_Combo.Significance.mH120.root" %(h))
+            thisSig =  ExtractFile(datacardsDIR+"higgsCombine2DTChiHH%i_LSP1_Data_Combo.Significance.mH120.root" %(h))
             vsig.append(thisSig)
             for lsp in hino:
                 if (lsp+100) > h:
@@ -86,12 +86,12 @@ def saveCanvas(model):
         for i in range(0, 16):
             g=1000+i*100
             vmx.append(g)
-            thisSig =  ExtractFile(in_dir+"higgsCombine1DT5HH%i_LSP1_Data_Combo.Significance.mH120.root" %(g))
+            thisSig =  ExtractFile(datacardsDIR+"higgsCombine1DT5HH%i_LSP1_Data_Combo.Significance.mH120.root" %(g))
             vsig.append(thisSig)
 
     canv = TCanvas()
-    if model == "N1N2": canv = TCanvas("","",1200,1100)
-    elif model == "T5HH": canv = TCanvas("","",800,800)
+    if model == "N1N2": canv = TCanvas(model,"",1200,1100)
+    elif model == "T5HH": canv = TCanvas(model,"",800,800)
     canv.cd()
     canv.SetLeftMargin(0.13)
     canv.SetBottomMargin(0.11)
@@ -136,11 +136,11 @@ def saveCanvas(model):
     ltitle.Draw("same")
     rtitle.Draw("same")
 
-    canv.SaveAs(out_dir+"significance_"+model+".pdf","PDF")
+    canv.SaveAs(outDIR+"significance_"+model+".pdf","PDF")
 
 def saveRootFile():
     vmx=array('d',[]); vmy=array('d',[]); vsig=array('d',[]);
-    namesFile=open(in_dir+"higgsino2DFileNames.txt", 'r');
+    namesFile=open(datacardsDIR+"higgsino2DFileNames.txt", 'r');
     for line in namesFile:
         x = line.split('_')
         hino_mass = int(x[5])
@@ -154,7 +154,7 @@ def saveRootFile():
 
         vmx.append(hino_mass)
         vmy.append(LSP_mass)
-        thisSig = ExtractFile(in_dir+"higgsCombine2DTChiHH%s_LSP%s_Data_Combo.Significance.mH120.root" %(x[5], x[6]))
+        thisSig = ExtractFile(datacardsDIR+"higgsCombine2DTChiHH%s_LSP%s_Data_Combo.Significance.mH120.root" %(x[5], x[6]))
 
         #Smoothing diagonal
         if hino_mass==150 and LSP_mass==23: thisSig = 0.5
@@ -184,7 +184,7 @@ def saveRootFile():
     for h in hino:
         vmx.append(h)
         vmy.append(1.0)
-        thisSig =  ExtractFile(in_dir+"higgsCombine2DTChiHH%i_LSP1_Data_Combo.Significance.mH120.root" %(h))
+        thisSig =  ExtractFile(datacardsDIR+"higgsCombine2DTChiHH%i_LSP1_Data_Combo.Significance.mH120.root" %(h))
         vsig.append(thisSig)
         for lsp in hino:
             if (lsp+100) > h:
@@ -196,7 +196,7 @@ def saveRootFile():
     for i in range(0, 16):
         g=1000+i*100
         vmx_g.append(g)
-        thisSig =  ExtractFile(in_dir+"higgsCombine1DT5HH%i_LSP1_Data_Combo.Significance.mH120.root" %(g))
+        thisSig =  ExtractFile(datacardsDIR+"higgsCombine1DT5HH%i_LSP1_Data_Combo.Significance.mH120.root" %(g))
         vsig_g.append(thisSig)
 
 
@@ -225,12 +225,21 @@ def saveRootFile():
     SignifScan_g.GetXaxis().SetRangeUser(975.0,2525.0);
     SignifScan_g.SetMarkerStyle(20); SignifScan_g.SetMarkerSize(1.0); SignifScan_g.SetMarkerColor(kBlack); SignifScan_g.SetLineColor(kBlack);
 
-    fNEW = TFile(out_dir+"CMS-SUS-20-004_aux_significance.root", "recreate")
+    fNEW = TFile(outDIR+"CMS-SUS-20-004_aux_significance.root", "recreate")
     SignifScan.Write("TChiHH")
     SignifScan_g.Write("T5HH")
     fNEW.Close()
 
 if __name__ == '__main__':
-    # saveCanvas("N1N2")
+    '''
+    Save the canvases of the significance for the combination only
+    Can run for 2D TChiHH "N1N2" or the 1D T5HH "T5HH"
+    '''
+    saveCanvas("N1N2")
     saveCanvas("T5HH")
+
+
+    '''
+    Save the root file containing the significance plots for both TChiHH and T5HH for HEPData
+    '''
     # saveRootFile()

@@ -30,6 +30,10 @@ string tag = "";
 string model_ = "N1N2";
 // string model_ = "Gluino";
 
+string which = "comb";
+// string which = "boost";
+// string which = "res";
+
 void ReadPointsCombo(vector<double> &vmx,vector<double> &vmy,vector<double> &vxsec,vector<double> &vobs,vector<double> &vobsup,vector<double> &vobsdown, vector<double> &vobsup2,vector<double> &vobsdown2, vector<double> &vexp,vector<double> &vup,vector<double> &vdown, vector<double> &vup2,vector<double> &vdown2);
 void ReadPointsAll(vector<double> &vmxComb,vector<double> &vmyComb,vector<double> &vxsecComb,vector<double> &vobsBoost,vector<double> &vobsRes,vector<double> &vobsComb);
 void SaveRootFile();
@@ -52,8 +56,9 @@ void limit_scan() {
   }
   MakeLimitPlotCombo(vmx, vmy, vlim, vobs, vobsup, vobsdown, vobsup2, vobsdown2, vexp, vup, vdown, vup2, vdown2);
 
-  SaveRootFile(); //For HEPdata
-  std::exit(1);
+  //SaveRootFile(); //For HEPdata
+
+  std::exit(1); //so it exits when run in the shell script
 }
 
 void ReadPointsCombo(vector<double> &vmx, vector<double> &vmy, vector<double> &vxsec,
@@ -64,6 +69,8 @@ void ReadPointsCombo(vector<double> &vmx, vector<double> &vmy, vector<double> &v
                     ) {
 
   string txtname = src_dir+"/limitsCombined_"+model_+"_data.txt";
+  if (which=="boost") txtname = src_dir+"/limitsBoostOnly_"+model_+"_data.txt";
+  else if (which=="res") txtname = src_dir+"/limitsResOnly_"+model_+"_data.txt";
   if (!doesFileExist(txtname)) {
     std::cout<<"You need to run scan_point.cxx first! Exiting..."<<std::endl;
     std::exit(1);
@@ -190,7 +197,9 @@ void MakeLimitPlotCombo(vector<double> vmx, vector<double> vmy, vector<double> v
   string chi02_str = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0}}}#kern[-0.95]{#scale[0.85]{_{2}}}";
   TString chi02 = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0}}}#kern[-0.95]{#scale[0.85]{_{2}}}";
   TString chi01 = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0 }}}#kern[-1.2]{#scale[0.85]{_{1 }}}";
-  string title = ";m("+chi02_str+") [GeV];m("+yparticle+") [GeV];Cross section upper limit (95% CL) [fb]";
+
+
+  string title = ";m("+xparticle+") [GeV];m("+yparticle+") [GeV];Cross section upper limit (95% CL) [fb]";
 
   TGraph2D glim("", title.c_str(), vlim.size(), &vmx.at(0), &vmy.at(0), &vlim.at(0));
   TGraph2D gobs("", "Observed Limit", vobs.size(), &vmx.at(0), &vmy.at(0), &vobs.at(0));
@@ -381,7 +390,7 @@ void MakeLimitPlotAll(vector<double> vmx, vector<double> vmy, vector<double> vli
 
 void GetParticleNames(string &xparticle, string &yparticle) {
   if (model_=="N1N2") {
-    xparticle = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0}}}#kern[-1.3]{#scale[0.85]{_{2}}}";
+    xparticle = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0}}}#kern[-0.95]{#scale[0.85]{_{2}}}";
     yparticle = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0}}}#kern[-1.3]{#scale[0.85]{_{1}}}";
   }
   else {

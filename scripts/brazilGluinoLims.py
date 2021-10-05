@@ -13,7 +13,7 @@ gROOT.SetBatch(True)
 import tdrstyle
 tdrstyle.setTDRStyle()
 
-idir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/HHplusMET/datacards/";
+idir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/myVersion/CMSSW_10_2_13/src/boostedHiggsPlusMET/datacards/";
 odir = "../output/";
 
 def columnToList(fn,col):

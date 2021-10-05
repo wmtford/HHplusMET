@@ -26,9 +26,14 @@ runVeto = True
 runResAlone = True
 useData = True
 run2D = False
-dataMCString ="MC"
+
+
+runSysts = True
+
+
+#Naming conventions
+dataMCString ="MC"; whichDString ="1D"
 if useData==True: dataMCString ="Data"
-whichDString ="1D"
 if run2D==True: whichDString ="2D"
 
 
@@ -104,6 +109,8 @@ SignalC=f2.Get("MET_antitagSR_%s%d_LSP%d" %(signal,hino,LSP)); SignalD=f2.Get("M
 SignalMET=f2.Get("MET_antitagOpt1_%s%d_LSP%d" %(signal,hino,LSP));
 SignalMET.SetBinContent(3,SignalMET.GetBinContent(3)+SignalMET.GetBinContent(4)); SignalMET.SetBinContent(4,0.0);
 
+
+
 #genMET
 SignalA2_gen=f2_genMET.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP)); SignalA1_gen=f2_genMET.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP));
 SignalA2_gen.SetBinContent(3,SignalA2_gen.GetBinContent(3)+SignalA2_gen.GetBinContent(4)); SignalA2_gen.SetBinContent(4,0.0);
@@ -140,6 +147,7 @@ if runVeto==True:
 	norm2HVeto=sumRegionB2Veto*sumRegionCVeto/sumRegionDVeto
 	norm1HVeto=sumRegionB1Veto*sumRegionCVeto/sumRegionDVeto
 
+
 for i in range(1,4):
 	Predictions2H.SetBinContent(i, norm2H*bkgFracHisto.GetBinContent(i))
 	Predictions1H.SetBinContent(i, norm1H*bkgFracHisto.GetBinContent(i))
@@ -148,109 +156,110 @@ for i in range(1,4):
 		Predictions1HVeto.SetBinContent(i, norm1HVeto*bkgFracHistoVeto.GetBinContent(i))
 
 #Start systematics
-baseDir = "/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/";
-sysDir = "boosted_noVeto_FinalSyst";
+if runSysts==True:
+	baseDir = "/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/";
+	sysDir = "boosted_noVeto_FinalSyst";
 
-if run2D==False:
-	fNominal=TFile(baseDir+"/boosted_noVeto_FastSIMSFs/ALPHABET_1DSignal.root", "READ");
-	fNominal_gen=TFile(baseDir+"/boosted_noVeto_FastSIMSFs_genMET/ALPHABET_1DSignal.root", "READ");
+	if run2D==False:
+		fNominal=TFile(baseDir+"/boosted_noVeto_FastSIMSFs/ALPHABET_1DSignal.root", "READ");
+		fNominal_gen=TFile(baseDir+"/boosted_noVeto_FastSIMSFs_genMET/ALPHABET_1DSignal.root", "READ");
 
-	fISRUp=TFile(baseDir+sysDir+"/ISRup/ALPHABET_1DSignal.root", "READ");
-	fISRDown=TFile(baseDir+sysDir+"/ISRdown/ALPHABET_1DSignal.root", "READ");
-	fSmear=TFile(baseDir+sysDir+"/massSmear/ALPHABET_1DSignal.root", "READ");
-	fFastMassUp=TFile(baseDir+sysDir+"/massFastSIMup/ALPHABET_1DSignal.root", "READ");
-	fFastMassDown=TFile(baseDir+sysDir+"/massFastSIMdown/ALPHABET_1DSignal.root", "READ");
-	fFastBBUp=TFile(baseDir+sysDir+"/bbFastSIMup/ALPHABET_1DSignal.root", "READ");
-	fFastBBDown=TFile(baseDir+sysDir+"/bbFastSIMdown/ALPHABET_1DSignal.root", "READ");
-	ftrigUp=TFile(baseDir+sysDir+"/trigUp/ALPHABET_1DSignal.root", "READ");
-	ftrigDown=TFile(baseDir+sysDir+"/trigDown/ALPHABET_1DSignal.root", "READ");
-	fpreDown=TFile(baseDir+sysDir+"/prefireDown/ALPHABET_1DSignal.root", "READ");
-	fpreUp=TFile(baseDir+sysDir+"/prefireUp/ALPHABET_1DSignal.root", "READ");
-	fpuUp=TFile(baseDir+sysDir+"/PUup/ALPHABET_1DSignal.root", "READ");
-	fpuDown=TFile(baseDir+sysDir+"/PUdown/ALPHABET_1DSignal.root", "READ");
-	fbbtagUp=TFile(baseDir+sysDir+"/bbTagUp/ALPHABET_1DSignal.root", "READ");
-	fbbtagDown=TFile(baseDir+sysDir+"/bbTagDown/ALPHABET_1DSignal.root", "READ");
-	fjecUp=TFile(baseDir+sysDir+"/JECup/ALPHABET_1DSignal.root", "READ");
-	fjecDown=TFile(baseDir+sysDir+"/JECdown/ALPHABET_1DSignal.root", "READ");
-	fjerUp=TFile(baseDir+sysDir+"/JERup/ALPHABET_1DSignal.root", "READ");
-	fjerDown=TFile(baseDir+sysDir+"/JERdown/ALPHABET_1DSignal.root", "READ");
-	fScaleUp=TFile(baseDir+sysDir+"/scalesUp/ALPHABET_1DSignal.root", "READ");
-	fScaleDown=TFile(baseDir+sysDir+"/scalesDown/ALPHABET_1DSignal.root", "READ");
+		fISRUp=TFile(baseDir+sysDir+"/ISRup/ALPHABET_1DSignal.root", "READ");
+		fISRDown=TFile(baseDir+sysDir+"/ISRdown/ALPHABET_1DSignal.root", "READ");
+		fSmear=TFile(baseDir+sysDir+"/massSmear/ALPHABET_1DSignal.root", "READ");
+		fFastMassUp=TFile(baseDir+sysDir+"/massFastSIMup/ALPHABET_1DSignal.root", "READ");
+		fFastMassDown=TFile(baseDir+sysDir+"/massFastSIMdown/ALPHABET_1DSignal.root", "READ");
+		fFastBBUp=TFile(baseDir+sysDir+"/bbFastSIMup/ALPHABET_1DSignal.root", "READ");
+		fFastBBDown=TFile(baseDir+sysDir+"/bbFastSIMdown/ALPHABET_1DSignal.root", "READ");
+		ftrigUp=TFile(baseDir+sysDir+"/trigUp/ALPHABET_1DSignal.root", "READ");
+		ftrigDown=TFile(baseDir+sysDir+"/trigDown/ALPHABET_1DSignal.root", "READ");
+		fpreDown=TFile(baseDir+sysDir+"/prefireDown/ALPHABET_1DSignal.root", "READ");
+		fpreUp=TFile(baseDir+sysDir+"/prefireUp/ALPHABET_1DSignal.root", "READ");
+		fpuUp=TFile(baseDir+sysDir+"/PUup/ALPHABET_1DSignal.root", "READ");
+		fpuDown=TFile(baseDir+sysDir+"/PUdown/ALPHABET_1DSignal.root", "READ");
+		fbbtagUp=TFile(baseDir+sysDir+"/bbTagUp/ALPHABET_1DSignal.root", "READ");
+		fbbtagDown=TFile(baseDir+sysDir+"/bbTagDown/ALPHABET_1DSignal.root", "READ");
+		fjecUp=TFile(baseDir+sysDir+"/JECup/ALPHABET_1DSignal.root", "READ");
+		fjecDown=TFile(baseDir+sysDir+"/JECdown/ALPHABET_1DSignal.root", "READ");
+		fjerUp=TFile(baseDir+sysDir+"/JERup/ALPHABET_1DSignal.root", "READ");
+		fjerDown=TFile(baseDir+sysDir+"/JERdown/ALPHABET_1DSignal.root", "READ");
+		fScaleUp=TFile(baseDir+sysDir+"/scalesUp/ALPHABET_1DSignal.root", "READ");
+		fScaleDown=TFile(baseDir+sysDir+"/scalesDown/ALPHABET_1DSignal.root", "READ");
 
-else:
-	fNominal=TFile(baseDir+"/boosted_noVeto_FastSIMSFs/ALPHABET_2DSignal.root", "READ");
-	fNominal_gen=TFile(baseDir+"/boosted_noVeto_FastSIMSFs_genMET/ALPHABET_2DSignal.root", "READ");
-	fISRUp=TFile(baseDir+sysDir+"/ISRup/ALPHABET_2DSignal.root", "READ");
-	fISRDown=TFile(baseDir+sysDir+"/ISRdown/ALPHABET_2DSignal.root", "READ");
-	fSmear=TFile(baseDir+sysDir+"/massSmear/ALPHABET_2DSignal.root", "READ");
-	fFastMassUp=TFile(baseDir+sysDir+"/massFastSIMup/ALPHABET_2DSignal.root", "READ");
-	fFastMassDown=TFile(baseDir+sysDir+"/massFastSIMdown/ALPHABET_2DSignal.root", "READ");
-	fFastBBUp=TFile(baseDir+sysDir+"/bbFastSIMup/ALPHABET_2DSignal.root", "READ");
-	fFastBBDown=TFile(baseDir+sysDir+"/bbFastSIMdown/ALPHABET_2DSignal.root", "READ");
-	ftrigUp=TFile(baseDir+sysDir+"/trigUp/ALPHABET_2DSignal.root", "READ");
-	ftrigDown=TFile(baseDir+sysDir+"/trigDown/ALPHABET_2DSignal.root", "READ");
-	fpreDown=TFile(baseDir+sysDir+"/prefireDown/ALPHABET_2DSignal.root", "READ");
-	fpreUp=TFile(baseDir+sysDir+"/prefireUp/ALPHABET_2DSignal.root", "READ");
-	fpuUp=TFile(baseDir+sysDir+"/PUup/ALPHABET_2DSignal.root", "READ");
-	fpuDown=TFile(baseDir+sysDir+"/PUdown/ALPHABET_2DSignal.root", "READ");
-	fbbtagUp=TFile(baseDir+sysDir+"/bbTagUp/ALPHABET_2DSignal.root", "READ");
-	fbbtagDown=TFile(baseDir+sysDir+"/bbTagDown/ALPHABET_2DSignal.root", "READ");
-	fjecUp=TFile(baseDir+sysDir+"/JECup/ALPHABET_2DSignal.root", "READ");
-	fjecDown=TFile(baseDir+sysDir+"/JECdown/ALPHABET_2DSignal.root", "READ");
-	fjerUp=TFile(baseDir+sysDir+"/JERup/ALPHABET_2DSignal.root", "READ");
-	fjerDown=TFile(baseDir+sysDir+"/JERdown/ALPHABET_2DSignal.root", "READ");
-	fScaleUp=TFile(baseDir+sysDir+"/scalesUp/ALPHABET_2DSignal.root", "READ");
-	fScaleDown=TFile(baseDir+sysDir+"/scalesDown/ALPHABET_2DSignal.root", "READ");
+	else:
+		fNominal=TFile(baseDir+"/boosted_noVeto_FastSIMSFs/ALPHABET_2DSignal.root", "READ");
+		fNominal_gen=TFile(baseDir+"/boosted_noVeto_FastSIMSFs_genMET/ALPHABET_2DSignal.root", "READ");
+		fISRUp=TFile(baseDir+sysDir+"/ISRup/ALPHABET_2DSignal.root", "READ");
+		fISRDown=TFile(baseDir+sysDir+"/ISRdown/ALPHABET_2DSignal.root", "READ");
+		fSmear=TFile(baseDir+sysDir+"/massSmear/ALPHABET_2DSignal.root", "READ");
+		fFastMassUp=TFile(baseDir+sysDir+"/massFastSIMup/ALPHABET_2DSignal.root", "READ");
+		fFastMassDown=TFile(baseDir+sysDir+"/massFastSIMdown/ALPHABET_2DSignal.root", "READ");
+		fFastBBUp=TFile(baseDir+sysDir+"/bbFastSIMup/ALPHABET_2DSignal.root", "READ");
+		fFastBBDown=TFile(baseDir+sysDir+"/bbFastSIMdown/ALPHABET_2DSignal.root", "READ");
+		ftrigUp=TFile(baseDir+sysDir+"/trigUp/ALPHABET_2DSignal.root", "READ");
+		ftrigDown=TFile(baseDir+sysDir+"/trigDown/ALPHABET_2DSignal.root", "READ");
+		fpreDown=TFile(baseDir+sysDir+"/prefireDown/ALPHABET_2DSignal.root", "READ");
+		fpreUp=TFile(baseDir+sysDir+"/prefireUp/ALPHABET_2DSignal.root", "READ");
+		fpuUp=TFile(baseDir+sysDir+"/PUup/ALPHABET_2DSignal.root", "READ");
+		fpuDown=TFile(baseDir+sysDir+"/PUdown/ALPHABET_2DSignal.root", "READ");
+		fbbtagUp=TFile(baseDir+sysDir+"/bbTagUp/ALPHABET_2DSignal.root", "READ");
+		fbbtagDown=TFile(baseDir+sysDir+"/bbTagDown/ALPHABET_2DSignal.root", "READ");
+		fjecUp=TFile(baseDir+sysDir+"/JECup/ALPHABET_2DSignal.root", "READ");
+		fjecDown=TFile(baseDir+sysDir+"/JECdown/ALPHABET_2DSignal.root", "READ");
+		fjerUp=TFile(baseDir+sysDir+"/JERup/ALPHABET_2DSignal.root", "READ");
+		fjerDown=TFile(baseDir+sysDir+"/JERdown/ALPHABET_2DSignal.root", "READ");
+		fScaleUp=TFile(baseDir+sysDir+"/scalesUp/ALPHABET_2DSignal.root", "READ");
+		fScaleDown=TFile(baseDir+sysDir+"/scalesDown/ALPHABET_2DSignal.root", "READ");
 
-Nom1H=fNominal.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); Nom2H=fNominal.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
-NomGen_1H=fNominal_gen.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); NomGen_2H=fNominal_gen.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
-PreUp1H=fpreUp.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); PreUp2H=fpreUp.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
-PreDown1H=fpreDown.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); PreDown2H=fpreDown.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
-PUUp1H=fpuUp.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); PUUp2H=fpuUp.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
-PUDown1H=fpuDown.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); PUDown2H=fpuDown.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
-ISRUp1H=fISRUp.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); ISRUp2H=fISRUp.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
-ISRDown1H=fISRDown.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); ISRDown2H=fISRDown.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
-JECUp1H=fjecUp.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); JECUp2H=fjecUp.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
-JECDown1H=fjecDown.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); JECDown2H=fjecDown.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
-JERUp1H=fjerUp.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); JERUp2H=fjerUp.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
-JERDown1H=fjerDown.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); JERDown2H=fjerDown.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
-BBTagUp1H=fbbtagUp.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); BBTagUp2H=fbbtagUp.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
-BBTagDown1H=fbbtagDown.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); BBTagDown2H=fbbtagDown.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
-massSmear1H=fSmear.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); massSmear2H=fSmear.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
-FastMassUp1H=fFastMassUp.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); FastMassUp2H=fFastMassUp.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
-FastMassDown1H=fFastMassDown.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); FastMassDown2H=fFastMassDown.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
-FastBBUp1H=fFastBBUp.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); FastBBUp2H=fFastBBUp.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
-FastBBDown1H=fFastBBDown.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); FastBBDown2H=fFastBBDown.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
-trigUp1H=ftrigUp.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); trigUp2H=ftrigUp.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
-trigDown1H=ftrigDown.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); trigDown2H=ftrigDown.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
-ScaleUp1H=fScaleUp.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); ScaleUp2H=fScaleUp.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
-ScaleDown1H=fScaleDown.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); ScaleDown2H=fScaleDown.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
-
-
-MCStat2H=Nom2H.Clone("MCStat2H");MCStat2H.Reset();
-METFastSyst2H=Nom2H.Clone("METFastSyst2H");METFastSyst2H.Reset();
-for i in range(1, Nom2H.GetNbinsX()+1):
-	StatErr=Nom2H.GetBinError(i);
-	if StatErr<=0 or Nom2H.GetBinContent(i)<=0:StatErr=1.0; #changed these for the range plot
-	else: StatErr=(StatErr/Nom2H.GetBinContent(i)+1.0) #changed these for the range plot
-	MCStat2H.SetBinContent(i, StatErr);
-	yAvg = (Nom2H.GetBinContent(i)+NomGen_2H.GetBinContent(i))/2
-	if yAvg==0.0: fastMETBin=1.0
-	else: fastMETBin = abs(Nom2H.GetBinContent(i)-NomGen_2H.GetBinContent(i))/(2*yAvg)
-	METFastSyst2H.SetBinContent(i,fastMETBin+1.0)
+	Nom1H=fNominal.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); Nom2H=fNominal.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
+	NomGen_1H=fNominal_gen.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); NomGen_2H=fNominal_gen.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
+	PreUp1H=fpreUp.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); PreUp2H=fpreUp.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
+	PreDown1H=fpreDown.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); PreDown2H=fpreDown.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
+	PUUp1H=fpuUp.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); PUUp2H=fpuUp.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
+	PUDown1H=fpuDown.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); PUDown2H=fpuDown.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
+	ISRUp1H=fISRUp.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); ISRUp2H=fISRUp.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
+	ISRDown1H=fISRDown.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); ISRDown2H=fISRDown.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
+	JECUp1H=fjecUp.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); JECUp2H=fjecUp.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
+	JECDown1H=fjecDown.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); JECDown2H=fjecDown.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
+	JERUp1H=fjerUp.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); JERUp2H=fjerUp.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
+	JERDown1H=fjerDown.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); JERDown2H=fjerDown.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
+	BBTagUp1H=fbbtagUp.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); BBTagUp2H=fbbtagUp.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
+	BBTagDown1H=fbbtagDown.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); BBTagDown2H=fbbtagDown.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
+	massSmear1H=fSmear.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); massSmear2H=fSmear.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
+	FastMassUp1H=fFastMassUp.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); FastMassUp2H=fFastMassUp.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
+	FastMassDown1H=fFastMassDown.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); FastMassDown2H=fFastMassDown.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
+	FastBBUp1H=fFastBBUp.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); FastBBUp2H=fFastBBUp.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
+	FastBBDown1H=fFastBBDown.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); FastBBDown2H=fFastBBDown.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
+	trigUp1H=ftrigUp.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); trigUp2H=ftrigUp.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
+	trigDown1H=ftrigDown.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); trigDown2H=ftrigDown.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
+	ScaleUp1H=fScaleUp.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); ScaleUp2H=fScaleUp.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
+	ScaleDown1H=fScaleDown.Get("MET_tagSR_%s%d_LSP%d" %(signal,hino,LSP)); ScaleDown2H=fScaleDown.Get("MET_doubletagSR_%s%d_LSP%d" %(signal,hino,LSP))
 
 
-MCStat1H=Nom1H.Clone("MCStat1H");MCStat1H.Reset();
-METFastSyst1H=Nom1H.Clone("METFastSyst1H");METFastSyst1H.Reset();
-for i in range(1, Nom1H.GetNbinsX()+1):
-	StatErr=Nom1H.GetBinError(i);
-	if StatErr<=0 or Nom1H.GetBinContent(i)<=0:StatErr=1.0;
-	else: StatErr=(StatErr/Nom1H.GetBinContent(i)+1.0)
-	MCStat1H.SetBinContent(i, StatErr);
-	yAvg = (Nom1H.GetBinContent(i)+NomGen_1H.GetBinContent(i))/2
-	if yAvg==0.0: fastMETBin=1.0
-	else: fastMETBin = abs(Nom1H.GetBinContent(i)-NomGen_1H.GetBinContent(i))/(2*yAvg)
-	METFastSyst1H.SetBinContent(i,1.0+fastMETBin)
+	MCStat2H=Nom2H.Clone("MCStat2H");MCStat2H.Reset();
+	METFastSyst2H=Nom2H.Clone("METFastSyst2H");METFastSyst2H.Reset();
+	for i in range(1, Nom2H.GetNbinsX()+1):
+		StatErr=Nom2H.GetBinError(i);
+		if StatErr<=0 or Nom2H.GetBinContent(i)<=0:StatErr=1.0; #changed these for the range plot
+		else: StatErr=(StatErr/Nom2H.GetBinContent(i)+1.0) #changed these for the range plot
+		MCStat2H.SetBinContent(i, StatErr);
+		yAvg = (Nom2H.GetBinContent(i)+NomGen_2H.GetBinContent(i))/2
+		if yAvg==0.0: fastMETBin=1.0
+		else: fastMETBin = abs(Nom2H.GetBinContent(i)-NomGen_2H.GetBinContent(i))/(2*yAvg)
+		METFastSyst2H.SetBinContent(i,fastMETBin+1.0)
+
+
+	MCStat1H=Nom1H.Clone("MCStat1H");MCStat1H.Reset();
+	METFastSyst1H=Nom1H.Clone("METFastSyst1H");METFastSyst1H.Reset();
+	for i in range(1, Nom1H.GetNbinsX()+1):
+		StatErr=Nom1H.GetBinError(i);
+		if StatErr<=0 or Nom1H.GetBinContent(i)<=0:StatErr=1.0;
+		else: StatErr=(StatErr/Nom1H.GetBinContent(i)+1.0)
+		MCStat1H.SetBinContent(i, StatErr);
+		yAvg = (Nom1H.GetBinContent(i)+NomGen_1H.GetBinContent(i))/2
+		if yAvg==0.0: fastMETBin=1.0
+		else: fastMETBin = abs(Nom1H.GetBinContent(i)-NomGen_1H.GetBinContent(i))/(2*yAvg)
+		METFastSyst1H.SetBinContent(i,1.0+fastMETBin)
 
 
 #BoostedOnly
@@ -264,56 +273,56 @@ for line in fcard:
 		newline="rate "
 		newline=newline+" %.4f 1.0 %.4f 1.0 %.4f 1.0 %.4f 1.0 %.4f 1.0 %.4f 1.0 \n"  %((SignalA2.GetBinContent(1)+SignalA2_gen.GetBinContent(1))/2,(SignalA2.GetBinContent(2)+SignalA2_gen.GetBinContent(2))/2, (SignalA2.GetBinContent(3)+SignalA2_gen.GetBinContent(3))/2,(SignalA1.GetBinContent(1)+SignalA1_gen.GetBinContent(1))/2,(SignalA1.GetBinContent(2)+SignalA1_gen.GetBinContent(2))/2, (SignalA1.GetBinContent(3)+SignalA1_gen.GetBinContent(3))/2)
 		fcardout.write(newline);
-	elif "TrigSyst" in line:
+	elif "TrigSyst" in line and runSysts==True:
 		newline="TrigSyst lnN %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - \n" %(systBinContent(Nom2H,trigDown2H,1),systBinContent(Nom2H,trigUp2H,1), systBinContent(Nom2H,trigDown2H,2),systBinContent(Nom2H,trigUp2H,2),systBinContent(Nom2H,trigDown2H,3),systBinContent(Nom2H,trigUp2H,3), systBinContent(Nom1H,trigDown1H,1),systBinContent(Nom1H,trigUp1H,1), systBinContent(Nom1H,trigDown1H,2),systBinContent(Nom1H,trigUp1H,2),systBinContent(Nom1H,trigDown1H,3),systBinContent(Nom1H,trigUp1H,3))
 		fcardout.write(newline);
-	elif "ISRSyst" in line:
+	elif "ISRSyst" in line and runSysts==True:
 		newline="ISRSyst lnN %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - \n" %(systBinContent(Nom2H,ISRDown2H,1),systBinContent(Nom2H,ISRUp2H,1), systBinContent(Nom2H,ISRDown2H,2),systBinContent(Nom2H,ISRUp2H,2),systBinContent(Nom2H,ISRDown2H,3),systBinContent(Nom2H,ISRUp2H,3), systBinContent(Nom1H,ISRDown1H,1),systBinContent(Nom1H,ISRUp1H,1), systBinContent(Nom1H,ISRDown1H,2),systBinContent(Nom1H,ISRUp1H,2),systBinContent(Nom1H,ISRDown1H,3),systBinContent(Nom1H,ISRUp1H,3))
 		fcardout.write(newline);
-	elif "SignalStat2H" in line:
-		line="SignalStat1_2H lnN %.4f - - - - - - - - - - - \n" %(MCStat2H.GetBinContent(1))
-		fcardout.write(line)
-		line="SignalStat2_2H lnN - - %.4f - - - - - - - - - \n" %(MCStat2H.GetBinContent(2))
-		fcardout.write(line)
-		line="SignalStat3_2H lnN - - - - %.4f - - - - - - - \n" %(MCStat2H.GetBinContent(3))
-		fcardout.write(line)
+	elif "SignalStat2H" in line and runSysts==True:
+		newline="SignalStat1_2H lnN %.4f - - - - - - - - - - - \n" %(MCStat2H.GetBinContent(1))
+		fcardout.write(newline)
+		newline="SignalStat2_2H lnN - - %.4f - - - - - - - - - \n" %(MCStat2H.GetBinContent(2))
+		fcardout.write(newline)
+		newline="SignalStat3_2H lnN - - - - %.4f - - - - - - - \n" %(MCStat2H.GetBinContent(3))
+		fcardout.write(newline)
 		continue
-	elif "SignalStat1H" in line:
-		line="SignalStat1_1H lnN - - - - - - %.4f - - - - -\n" %(MCStat1H.GetBinContent(1))
-		fcardout.write(line)
-		line="SignalStat2_1H lnN - - - - - - - - %.4f - - -\n" %(MCStat1H.GetBinContent(2))
-		fcardout.write(line)
-		line="SignalStat3_1H lnN - - - - - - - - - - %.4f -\n" %(MCStat1H.GetBinContent(3))
-		fcardout.write(line)
+	elif "SignalStat1H" in line and runSysts==True:
+		newline="SignalStat1_1H lnN - - - - - - %.4f - - - - -\n" %(MCStat1H.GetBinContent(1))
+		fcardout.write(newline)
+		newline="SignalStat2_1H lnN - - - - - - - - %.4f - - -\n" %(MCStat1H.GetBinContent(2))
+		fcardout.write(newline)
+		newline="SignalStat3_1H lnN - - - - - - - - - - %.4f -\n" %(MCStat1H.GetBinContent(3))
+		fcardout.write(newline)
 		continue
-	elif "SignalJEC" in line:
+	elif "SignalJEC" in line and runSysts==True:
 		newline="SignalJEC lnN %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - \n" %(systBinContent(Nom2H,JECDown2H,1),systBinContent(Nom2H,JECUp2H,1), systBinContent(Nom2H,JECDown2H,2),systBinContent(Nom2H,JECUp2H,2),systBinContent(Nom2H,JECDown2H,3),systBinContent(Nom2H,JECUp2H,3), systBinContent(Nom1H,JECDown1H,1),systBinContent(Nom1H,JECUp1H,1), systBinContent(Nom1H,JECDown1H,2),systBinContent(Nom1H,JECUp1H,2),systBinContent(Nom1H,JECDown1H,3),systBinContent(Nom1H,JECUp1H,3))
 		fcardout.write(newline);
-	elif "SignalJER" in line:
+	elif "SignalJER" in line and runSysts==True:
 		newline="SignalJER lnN %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - \n" %(systBinContent(Nom2H,JERDown2H,1),systBinContent(Nom2H,JERUp2H,1), systBinContent(Nom2H,JERDown2H,2),systBinContent(Nom2H,JERUp2H,2),systBinContent(Nom2H,JERDown2H,3),systBinContent(Nom2H,JERUp2H,3), systBinContent(Nom1H,JERDown1H,1),systBinContent(Nom1H,JERUp1H,1), systBinContent(Nom1H,JERDown1H,2),systBinContent(Nom1H,JERUp1H,2),systBinContent(Nom1H,JERDown1H,3),systBinContent(Nom1H,JERUp1H,3))
 		fcardout.write(newline);
-	elif "SignalRes" in line:
+	elif "SignalRes" in line and runSysts==True:
 		newline="SignalRes lnN %.4f - %.4f - %.4f - %.4f - %.4f - %.4f - \n" %(systBinContent(Nom2H,massSmear2H,1),systBinContent(Nom2H,massSmear2H,2),systBinContent(Nom2H,massSmear2H,3), systBinContent(Nom1H,massSmear1H,1),systBinContent(Nom1H,massSmear1H,2),systBinContent(Nom1H,massSmear1H,3))
 		fcardout.write(newline);
-	elif "SignalPrefire" in line:
+	elif "SignalPrefire" in line and runSysts==True:
 		newline="SignalPrefire lnN %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - \n" %(systBinContent(Nom2H,PreDown2H,1),systBinContent(Nom2H,PreUp2H,1), systBinContent(Nom2H,PreDown2H,2),systBinContent(Nom2H,PreUp2H,2),systBinContent(Nom2H,PreDown2H,3),systBinContent(Nom2H,PreUp2H,3), systBinContent(Nom1H,PreDown1H,1),systBinContent(Nom1H,PreUp1H,1), systBinContent(Nom1H,PreDown1H,2),systBinContent(Nom1H,PreUp1H,2),systBinContent(Nom1H,PreDown1H,3),systBinContent(Nom1H,PreUp1H,3))
 		fcardout.write(newline);
-	elif "SignalPU" in line:
+	elif "SignalPU" in line and runSysts==True:
 		newline="SignalPU lnN %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - \n" %(systBinContent(Nom2H,PUDown2H,1),systBinContent(Nom2H,PUUp2H,1), systBinContent(Nom2H,PUDown2H,2),systBinContent(Nom2H,PUUp2H,2),systBinContent(Nom2H,PUDown2H,3),systBinContent(Nom2H,PUUp2H,3), systBinContent(Nom1H,PUDown1H,1),systBinContent(Nom1H,PUUp1H,1), systBinContent(Nom1H,PUDown1H,2),systBinContent(Nom1H,PUUp1H,2),systBinContent(Nom1H,PUDown1H,3),systBinContent(Nom1H,PUUp1H,3))
 		fcardout.write(newline);
-	elif "SignalScale" in line:
+	elif "SignalScale" in line and runSysts==True:
 		newline="SignalScale lnN %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - \n" %(systBinContent(Nom2H,ScaleDown2H,1),systBinContent(Nom2H,ScaleUp2H,1), systBinContent(Nom2H,ScaleDown2H,2),systBinContent(Nom2H,ScaleUp2H,2),systBinContent(Nom2H,ScaleDown2H,3),systBinContent(Nom2H,ScaleUp2H,3), systBinContent(Nom1H,ScaleDown1H,1),systBinContent(Nom1H,ScaleUp1H,1), systBinContent(Nom1H,ScaleDown1H,2), systBinContent(Nom1H,ScaleUp1H,2), systBinContent(Nom1H,ScaleDown1H,3), systBinContent(Nom1H,ScaleUp1H,3))
 		fcardout.write(newline);
-	elif "SignalBBTag" in line:
+	elif "SignalBBTag" in line and runSysts==True:
 		newline="SignalBBTag lnN %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - \n" %(systBinContent(Nom2H,BBTagDown2H,1), systBinContent(Nom2H,BBTagUp2H,1), systBinContent(Nom2H,BBTagDown2H,2), systBinContent(Nom2H,BBTagUp2H,2),systBinContent(Nom2H,BBTagDown2H,3),systBinContent(Nom2H,BBTagUp2H,3), systBinContent(Nom1H,BBTagDown1H,1),systBinContent(Nom1H,BBTagUp1H,1), systBinContent(Nom1H,BBTagDown1H,2), systBinContent(Nom1H,BBTagUp1H,2), systBinContent(Nom1H,BBTagDown1H,3), systBinContent(Nom1H,BBTagUp1H,3))
 		fcardout.write(newline);
-	elif "SignalFastBBTag" in line:
+	elif "SignalFastBBTag" in line and runSysts==True:
 		newline="SignalFastBBTag lnN %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - \n" %(systBinContent(Nom2H,FastBBDown2H,1),systBinContent(Nom2H,FastBBUp2H,1), systBinContent(Nom2H,FastBBDown2H,2),systBinContent(Nom2H,FastBBUp2H,2),systBinContent(Nom2H,FastBBDown2H,3),systBinContent(Nom2H,FastBBUp2H,3), systBinContent(Nom1H,FastBBDown1H,1),systBinContent(Nom1H,FastBBUp1H,1), systBinContent(Nom1H,FastBBDown1H,2),systBinContent(Nom1H,FastBBUp1H,2),systBinContent(Nom1H,FastBBDown1H,3),systBinContent(Nom1H,FastBBUp1H,3))
 		fcardout.write(newline);
-	elif "SignalFastMass" in line:
+	elif "SignalFastMass" in line and runSysts==True:
 		newline="SignalFastMass lnN %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - \n" %(systBinContent(Nom2H,FastMassDown2H,1),systBinContent(Nom2H,FastMassUp2H,1), systBinContent(Nom2H,FastMassDown2H,2), systBinContent(Nom2H,FastMassUp2H,2), systBinContent(Nom2H,FastMassDown2H,3),systBinContent(Nom2H,FastMassUp2H,3), systBinContent(Nom1H,FastBBDown1H,1),systBinContent(Nom1H,FastBBUp1H,1), systBinContent(Nom1H,FastBBDown1H,2), systBinContent(Nom1H,FastBBUp1H,2), systBinContent(Nom1H,FastBBDown1H,3), systBinContent(Nom1H,FastBBUp1H,3))
 		fcardout.write(newline);
-	elif "SignalMETFastSIM" in line:
+	elif "SignalMETFastSIM" in line and runSysts==True:
 		newline="SignalMETFastSIM lnN %.4f - %.4f - %.4f - %.4f - %.4f - %.4f - \n" %(METFastSyst2H.GetBinContent(1),METFastSyst2H.GetBinContent(2),METFastSyst2H.GetBinContent(3), METFastSyst1H.GetBinContent(1),METFastSyst1H.GetBinContent(2),METFastSyst1H.GetBinContent(3))
 		fcardout.write(newline);
 	else: fcardout.write(line);
@@ -337,7 +346,7 @@ for line in fcard:
 		newline="Beta_1H rateParam SidebandRegion1H bkg %.4f [0.000,%.4f] \n" %(sumRegionB1, sumRegionB1*10.0)
 		fcardout.write(newline);
 	else: fcardout.write(line);
-fcardout.close()
+fcardout.close(); fcard.close()
 
 fcardout=open("CRCMerge_%s%s%d_LSP%d_%s.txt" %(whichDString,signal,hino,LSP,dataMCString) , 'w')
 fcard=open("RegionCTemplateScaleMergeBkg.txt", 'r');
@@ -353,7 +362,7 @@ for line in fcard:
 		newline="Gamma rateParam AntitagRegion0 bkg %.4f [0.000,%.4f] \n" %(sumRegionC, sumRegionC*10.0)
 		fcardout.write(newline);
 	else: fcardout.write(line);
-fcardout.close()
+fcardout.close(); fcard.close()
 
 fcardout=open("CRDMerge_%s%s%d_LSP%d_%s.txt" %(whichDString,signal,hino,LSP,dataMCString) , 'w')
 fcard=open("RegionDTemplateScaleMergeBkg.txt", 'r');
@@ -369,7 +378,7 @@ for line in fcard:
 		newline="Delta rateParam AntiSidebandRegion0 bkg %.4f [0.000,%.4f] \n" %(sumRegionD, sumRegionD*10.0)
 		fcardout.write(newline);
 	else: fcardout.write(line);
-fcardout.close()
+fcardout.close(); fcard.close()
 
 fcardout=open("CREMerge_%s%s%d_LSP%d_%s.txt" %(whichDString,signal,hino,LSP,dataMCString) , 'w')
 fcard=open("METShapeTemplate.txt", 'r');
@@ -391,11 +400,11 @@ for line in fcard:
 		newline="Epsilon3 rateParam METShape_3 bkg %.4f [0.000,%.4f] \n" %(bkgFrac_C.GetBinContent(3), bkgFrac_C.GetBinContent(3)*10.0)
 		fcardout.write(newline);
 	else: fcardout.write(line);
-fcardout.close()
+fcardout.close(); fcard.close()
 
-##########################################
-#Boosted w/ veto
-##########################################
+#########################################
+###          Boosted w/ veto          ###
+#########################################
 if runVeto==True:
 	fcard=open("SingleDatacardTemplate.txt", 'r');
 	fcardout=open("SRMerge_%s%s%d_LSP%d_%s_veto.txt" %(whichDString,signal,hino,LSP,dataMCString) , 'w')
@@ -407,13 +416,13 @@ if runVeto==True:
 			newline="rate "
 			newline=newline+" %.4f 1.0 %.4f 1.0 %.4f 1.0 %.4f 1.0 %.4f 1.0 %.4f 1.0 \n" %((SignalA2Veto.GetBinContent(1)+SignalA2Veto_gen.GetBinContent(1))/2,(SignalA2Veto.GetBinContent(2)+SignalA2Veto_gen.GetBinContent(2))/2,(SignalA2Veto.GetBinContent(3)+SignalA2Veto_gen.GetBinContent(3))/2,(SignalA1Veto.GetBinContent(1)+SignalA1Veto_gen.GetBinContent(1))/2, (SignalA1Veto.GetBinContent(2)+SignalA1Veto_gen.GetBinContent(2))/2, (SignalA1Veto.GetBinContent(3)+SignalA1Veto_gen.GetBinContent(3))/2)
 			fcardout.write(newline);
-		elif "TrigSyst" in line:
+		elif "TrigSyst" in line  and runSysts==True:
 			newline="TrigSyst lnN %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - \n" %(systBinContent(Nom2H,trigDown2H,1),systBinContent(Nom2H,trigUp2H,1), systBinContent(Nom2H,trigDown2H,2),systBinContent(Nom2H,trigUp2H,2),systBinContent(Nom2H,trigDown2H,3),systBinContent(Nom2H,trigUp2H,3), systBinContent(Nom1H,trigDown1H,1),systBinContent(Nom1H,trigUp1H,1), systBinContent(Nom1H,trigDown1H,2),systBinContent(Nom1H,trigUp1H,2),systBinContent(Nom1H,trigDown1H,3),systBinContent(Nom1H,trigUp1H,3))
 			fcardout.write(newline);
-		elif "ISRSyst" in line:
+		elif "ISRSyst" in line  and runSysts==True:
 			newline="ISRSyst lnN %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - \n" %(systBinContent(Nom2H,ISRDown2H,1),systBinContent(Nom2H,ISRUp2H,1), systBinContent(Nom2H,ISRDown2H,2),systBinContent(Nom2H,ISRUp2H,2),systBinContent(Nom2H,ISRDown2H,3),systBinContent(Nom2H,ISRUp2H,3), systBinContent(Nom1H,ISRDown1H,1),systBinContent(Nom1H,ISRUp1H,1), systBinContent(Nom1H,ISRDown1H,2),systBinContent(Nom1H,ISRUp1H,2),systBinContent(Nom1H,ISRDown1H,3),systBinContent(Nom1H,ISRUp1H,3))
 			fcardout.write(newline);
-		elif "SignalStat2H" in line:
+		elif "SignalStat2H" in line  and runSysts==True:
 			line="SignalStat1_2H lnN %.4f - - - - - - - - - - - \n" %(MCStat2H.GetBinContent(1))
 			fcardout.write(line)
 			line="SignalStat2_2H lnN - - %.4f - - - - - - - - - \n" %(MCStat2H.GetBinContent(2))
@@ -421,7 +430,7 @@ if runVeto==True:
 			line="SignalStat3_2H lnN - - - - %.4f - - - - - - - \n" %(MCStat2H.GetBinContent(3))
 			fcardout.write(line)
 			continue
-		elif "SignalStat1H" in line:
+		elif "SignalStat1H" in line  and runSysts==True:
 			line="SignalStat1_1H lnN - - - - - - %.4f - - - - -\n" %(MCStat1H.GetBinContent(1))
 			fcardout.write(line)
 			line="SignalStat2_1H lnN - - - - - - - - %.4f - - -\n" %(MCStat1H.GetBinContent(2))
@@ -429,34 +438,34 @@ if runVeto==True:
 			line="SignalStat3_1H lnN - - - - - - - - - - %.4f -\n" %(MCStat1H.GetBinContent(3))
 			fcardout.write(line)
 			continue
-		elif "SignalJEC" in line:
+		elif "SignalJEC" in line and runSysts==True:
 			newline="SignalJEC lnN %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - \n" %(systBinContent(Nom2H,JECDown2H,1),systBinContent(Nom2H,JECUp2H,1), systBinContent(Nom2H,JECDown2H,2),systBinContent(Nom2H,JECUp2H,2),systBinContent(Nom2H,JECDown2H,3),systBinContent(Nom2H,JECUp2H,3), systBinContent(Nom1H,JECDown1H,1),systBinContent(Nom1H,JECUp1H,1), systBinContent(Nom1H,JECDown1H,2),systBinContent(Nom1H,JECUp1H,2),systBinContent(Nom1H,JECDown1H,3),systBinContent(Nom1H,JECUp1H,3))
 			fcardout.write(newline);
-		elif "SignalJER" in line:
+		elif "SignalJER" in line and runSysts==True:
 			newline="SignalJER lnN %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - \n" %(systBinContent(Nom2H,JERDown2H,1),systBinContent(Nom2H,JERUp2H,1), systBinContent(Nom2H,JERDown2H,2),systBinContent(Nom2H,JERUp2H,2),systBinContent(Nom2H,JERDown2H,3),systBinContent(Nom2H,JERUp2H,3), systBinContent(Nom1H,JERDown1H,1),systBinContent(Nom1H,JERUp1H,1), systBinContent(Nom1H,JERDown1H,2),systBinContent(Nom1H,JERUp1H,2),systBinContent(Nom1H,JERDown1H,3),systBinContent(Nom1H,JERUp1H,3))
 			fcardout.write(newline);
-		elif "SignalRes" in line:
+		elif "SignalRes" in line and runSysts==True:
 			newline="SignalRes lnN %.4f - %.4f - %.4f - %.4f - %.4f - %.4f - \n" %(systBinContent(Nom2H,massSmear2H,1),systBinContent(Nom2H,massSmear2H,2),systBinContent(Nom2H,massSmear2H,3), systBinContent(Nom1H,massSmear1H,1),systBinContent(Nom1H,massSmear1H,2),systBinContent(Nom1H,massSmear1H,3))
 			fcardout.write(newline);
-		elif "SignalPrefire" in line:
+		elif "SignalPrefire" in line and runSysts==True:
 			newline="SignalPrefire lnN %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - \n" %(systBinContent(Nom2H,PreDown2H,1),systBinContent(Nom2H,PreUp2H,1), systBinContent(Nom2H,PreDown2H,2),systBinContent(Nom2H,PreUp2H,2),systBinContent(Nom2H,PreDown2H,3),systBinContent(Nom2H,PreUp2H,3), systBinContent(Nom1H,PreDown1H,1),systBinContent(Nom1H,PreUp1H,1), systBinContent(Nom1H,PreDown1H,2),systBinContent(Nom1H,PreUp1H,2),systBinContent(Nom1H,PreDown1H,3),systBinContent(Nom1H,PreUp1H,3))
 			fcardout.write(newline);
-		elif "SignalPU" in line:
+		elif "SignalPU" in line and runSysts==True:
 			newline="SignalPU lnN %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - \n" %(systBinContent(Nom2H,PUDown2H,1),systBinContent(Nom2H,PUUp2H,1), systBinContent(Nom2H,PUDown2H,2),systBinContent(Nom2H,PUUp2H,2),systBinContent(Nom2H,PUDown2H,3),systBinContent(Nom2H,PUUp2H,3), systBinContent(Nom1H,PUDown1H,1),systBinContent(Nom1H,PUUp1H,1), systBinContent(Nom1H,PUDown1H,2),systBinContent(Nom1H,PUUp1H,2),systBinContent(Nom1H,PUDown1H,3),systBinContent(Nom1H,PUUp1H,3))
 			fcardout.write(newline);
-		elif "SignalScale" in line:
+		elif "SignalScale" in line and runSysts==True:
 			newline="SignalScale lnN %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - \n" %(systBinContent(Nom2H,ScaleDown2H,1),systBinContent(Nom2H,ScaleUp2H,1), systBinContent(Nom2H,ScaleDown2H,2),systBinContent(Nom2H,ScaleUp2H,2),systBinContent(Nom2H,ScaleDown2H,3),systBinContent(Nom2H,ScaleUp2H,3), systBinContent(Nom1H,ScaleDown1H,1),systBinContent(Nom1H,ScaleUp1H,1), systBinContent(Nom1H,ScaleDown1H,2), systBinContent(Nom1H,ScaleUp1H,2), systBinContent(Nom1H,ScaleDown1H,3), systBinContent(Nom1H,ScaleUp1H,3))
 			fcardout.write(newline);
-		elif "SignalBBTag" in line:
+		elif "SignalBBTag" in line and runSysts==True:
 			newline="SignalBBTag lnN %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - \n" %(systBinContent(Nom2H,BBTagDown2H,1), systBinContent(Nom2H,BBTagUp2H,1), systBinContent(Nom2H,BBTagDown2H,2), systBinContent(Nom2H,BBTagUp2H,2),systBinContent(Nom2H,BBTagDown2H,3),systBinContent(Nom2H,BBTagUp2H,3), systBinContent(Nom1H,BBTagDown1H,1),systBinContent(Nom1H,BBTagUp1H,1), systBinContent(Nom1H,BBTagDown1H,2), systBinContent(Nom1H,BBTagUp1H,2), systBinContent(Nom1H,BBTagDown1H,3), systBinContent(Nom1H,BBTagUp1H,3))
 			fcardout.write(newline);
-		elif "SignalFastBBTag" in line:
+		elif "SignalFastBBTag" in line and runSysts==True:
 			newline="SignalFastBBTag lnN %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - \n" %(systBinContent(Nom2H,FastBBDown2H,1),systBinContent(Nom2H,FastBBUp2H,1), systBinContent(Nom2H,FastBBDown2H,2),systBinContent(Nom2H,FastBBUp2H,2),systBinContent(Nom2H,FastBBDown2H,3),systBinContent(Nom2H,FastBBUp2H,3), systBinContent(Nom1H,FastBBDown1H,1),systBinContent(Nom1H,FastBBUp1H,1), systBinContent(Nom1H,FastBBDown1H,2),systBinContent(Nom1H,FastBBUp1H,2),systBinContent(Nom1H,FastBBDown1H,3),systBinContent(Nom1H,FastBBUp1H,3))
 			fcardout.write(newline);
-		elif "SignalFastMass" in line:
+		elif "SignalFastMass" in line and runSysts==True:
 			newline="SignalFastMass lnN %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - %g/%g - \n" %(systBinContent(Nom2H,FastMassDown2H,1),systBinContent(Nom2H,FastMassUp2H,1), systBinContent(Nom2H,FastMassDown2H,2), systBinContent(Nom2H,FastMassUp2H,2), systBinContent(Nom2H,FastMassDown2H,3),systBinContent(Nom2H,FastMassUp2H,3), systBinContent(Nom1H,FastBBDown1H,1),systBinContent(Nom1H,FastBBUp1H,1), systBinContent(Nom1H,FastBBDown1H,2), systBinContent(Nom1H,FastBBUp1H,2), systBinContent(Nom1H,FastBBDown1H,3), systBinContent(Nom1H,FastBBUp1H,3))
 			fcardout.write(newline);
-		elif "SignalMETFastSIM" in line:
+		elif "SignalMETFastSIM" in line and runSysts==True:
 			newline="SignalMETFastSIM lnN %.4f - %.4f - %.4f - %.4f - %.4f - %.4f - \n" %(METFastSyst2H.GetBinContent(1),METFastSyst2H.GetBinContent(2),METFastSyst2H.GetBinContent(3), METFastSyst1H.GetBinContent(1),METFastSyst1H.GetBinContent(2),METFastSyst1H.GetBinContent(3))
 			fcardout.write(newline);
 		else: fcardout.write(line);
@@ -480,7 +489,7 @@ if runVeto==True:
 			newline="Beta_1H rateParam SidebandRegion1H bkg %.4f [0.000,%.4f] \n" %(sumRegionB1Veto, sumRegionB1Veto*10.0)
 			fcardout.write(newline);
 		else: fcardout.write(line);
-	fcardout.close()
+	fcardout.close(); fcard.close()
 
 	fcardout=open("CRCMerge_%s%s%d_LSP%d_%s_veto.txt" %(whichDString,signal,hino,LSP,dataMCString) , 'w')
 	fcard=open("RegionCTemplateScaleMergeBkg.txt", 'r');
@@ -497,7 +506,7 @@ if runVeto==True:
 			fcardout.write(newline);
 		else:
 			fcardout.write(line);
-	fcardout.close()
+	fcardout.close(); fcard.close()
 
 	fcardout=open("CRDMerge_%s%s%d_LSP%d_%s_veto.txt" %(whichDString,signal,hino,LSP,dataMCString) , 'w')
 	fcard=open("RegionDTemplateScaleMergeBkg.txt", 'r');
@@ -513,7 +522,7 @@ if runVeto==True:
 			newline="Delta rateParam AntiSidebandRegion0 bkg %.4f [0.000,%.4f] \n" %(sumRegionDVeto, sumRegionDVeto*10.0)
 			fcardout.write(newline);
 		else: fcardout.write(line);
-	fcardout.close()
+	fcardout.close(); fcard.close()
 
 	fcardout=open("CREMerge_%s%s%d_LSP%d_%s_veto.txt" %(whichDString,signal,hino,LSP,dataMCString) , 'w')
 	fcard=open("METShapeTemplate.txt", 'r');
@@ -535,13 +544,18 @@ if runVeto==True:
 			newline="Epsilon3 rateParam METShape_3 bkg %.4f [0.000,%.4f] \n" %(bkgFrac_CVeto.GetBinContent(3), bkgFrac_CVeto.GetBinContent(3)*10.0)
 			fcardout.write(newline);
 		else: fcardout.write(line);
-	fcardout.close()
+	fcardout.close(); fcard.close()
 ########################################################################
 
 #Boosted only
 print("----------------BoostedOnly----------------")
 os.system("combineCards.py SRMerge_%s%s%d_LSP%d_%s.txt CRBMerge_%s%s%d_LSP%d_%s.txt CRCMerge_%s%s%d_LSP%d_%s.txt CRDMerge_%s%s%d_LSP%d_%s.txt CREMerge_%s%s%d_LSP%d_%s.txt > %s%s%d_LSP%d_BothBoostedH_%s.txt "%(whichDString,signal,hino,LSP,dataMCString,whichDString,signal,hino,LSP,dataMCString,whichDString,signal,hino,LSP,dataMCString,whichDString,signal,hino,LSP,dataMCString,whichDString,signal,hino,LSP,dataMCString,whichDString,signal,hino,LSP,dataMCString))
 os.system("combine -M AsymptoticLimits -n %s%s%d_LSP%d_BothBoostedH_%s %s%s%d_LSP%d_BothBoostedH_%s.txt " %(whichDString,signal,hino,LSP,dataMCString,whichDString,signal,hino,LSP,dataMCString))
+
+#resolved data cards don't end in "3" like ours do... which is good
+resLSP = LSP;
+if (resLSP==1): resLSP=0;
+if (resLSP%5!=0): resLSP=resLSP+2;
 
 #Resolved only
 if runResAlone==True:
@@ -553,11 +567,6 @@ if runResAlone==True:
 #BoostedOnlyVeto
 if runVeto==True:
 	os.system("combineCards.py SRMerge_%s%s%d_LSP%d_%s_veto.txt CRBMerge_%s%s%d_LSP%d_%s_veto.txt CRCMerge_%s%s%d_LSP%d_%s_veto.txt CRDMerge_%s%s%d_LSP%d_%s_veto.txt CREMerge_%s%s%d_LSP%d_%s_veto.txt > %s%s%d_LSP%d_BothBoostedH_%s_veto.txt "%(whichDString,signal,hino,LSP,dataMCString,whichDString,signal,hino,LSP,dataMCString,whichDString,signal,hino,LSP,dataMCString,whichDString,signal,hino,LSP,dataMCString,whichDString,signal,hino,LSP,dataMCString,whichDString,signal,hino,LSP,dataMCString))
-
-	#resolved data cards don't end in "3" like ours do... which is good
-	resLSP = LSP;
-	if (resLSP==1): resLSP=0;
-	if (resLSP%5!=0): resLSP=resLSP+2;
 	os.system("combineCards.py %s%s%d_LSP%d_BothBoostedH_%s_veto.txt resData/%sTChiHH_%s/datacard-%s_mChi-%d_mLSP-%d_Tune_2016,2017,2018_priority1_resolved.txt > %s%s%d_LSP%d_%s_Combo.txt "%(whichDString,signal,hino,LSP,dataMCString,whichDString,dataMCString,signal,hino,resLSP,whichDString,signal,hino,LSP,dataMCString))
 
 	print("----------------Combination----------------")
