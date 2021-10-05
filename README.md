@@ -215,13 +215,18 @@ root -l -b limit_scan.cxx
 ```
 The code is setup to also run for boosted only and resolved only, you just need to change the strings "which" at the time.
 I've written this to run over the 2D gluino model as well, but I haven't tested it in awhile since we didn't have samples.
+Currently, the production of the root file for HEPData is commented out.
+
+
 If you haven't, you'll need to run `scan_point.cxx` before running the 2D limits plot. You'll get a warning that tells you you need to if you haven't.
 ```bash
 root -l 'scan_point.cxx("N1N2","comb")'
 ```
 The first argument is the model (N1N2 for 2D TChiHH, and Gluino for 2D T5HH). The second argument is the type you want:
 "comb" for the combination, "res" for resolved only, and "boost" for boosted only.
-Currently, the production of the root file for HEPData is commented out.
+If you wish to change the directory of the datacards, you can do that here: https://github.com/emacdonald16/HHplusMET/blob/c2ba3a8c0a45c91449bc28437963b7f3fe81c9b7/scripts/scan_point.cxx#L23
+You will need to re-run `scan_point.cxx`, or delete the saved files in the *src* directory and run `runPaperPlots.sh`, which will automatically
+run scan_point if the files don't exist.
 
 
 All of the final plots are in the *output* directory.
