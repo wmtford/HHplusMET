@@ -8,7 +8,7 @@ gROOT.SetBatch(True)
 
 '''
 Make sure you run cutflowFromNtuples.cc (signal only, run directly from ntuples) to produce the root files first.
-There are only a few samples this was run on, so I am assuming you are aware of that!ß
+There are only a few samples this was run on, so I am assuming you are aware of that!
 '''
 fileDir = "/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/cutflow_veto/"
 outDir = "../output/"
