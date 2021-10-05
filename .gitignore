@@ -33,3 +33,5 @@ datacards/*
 scripts/ALPHABET
 scripts/cutflow
 scripts/cutflowFromNtuples
+scripts/jobs/*
+!scripts/jobs/notUsefulTextFile.txt

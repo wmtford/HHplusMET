@@ -25,7 +25,7 @@ int main(int argc, char** argv){
   bool runData = true;
   bool applySFs_ = true; //btag SFs, SFs for photons, electrons, and muons - only used for MC/data comparisons
   bool runFullSIM = false; //only for 1D T5HH
-  bool saveBoostedEvt = true; //for WX, saves the boosted event counts in the analysis regions
+  bool saveBoostedEvt = false; //for WX, saves the boosted event counts in the analysis regions
   string outDir_evtCount = "../src/evtCount/boost/";
 
 
