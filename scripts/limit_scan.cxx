@@ -606,7 +606,8 @@ void SaveRootFile() {
   TGraph2D gdown2_res("ExpectedLimit2SigmaDown_Resolved", "Expected -2#sigma Limit", vdown2_res.size(), &vmx_res.at(0), &vmy_res.at(0), &vdown2_res.at(0));
 
   // Save ROOT file with all limits
-  TFile * fNEW = new TFile("CMS-SUS-20-004_Figure_013.root", "recreate");
+  TString filename = out_dir+"CMS-SUS-20-004_Figure_013.root";
+  TFile * fNEW = new TFile(filename, "recreate");
   glim_res.GetHistogram()->Write();
   glim_boost.GetHistogram()->Write();
   glim.GetHistogram()->Write();
