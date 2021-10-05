@@ -89,6 +89,7 @@ The arguments are as follows:
 - arg2: Year, setup as "MC2016", "MC2017", or "MC2018"
 - arg3: Resolved veto, 0 means do not remove any events, 1 means remove events that overlap with the veto
 - arg4: NLSP mass. This is used for the signal models, so I just put a 0 for anything else
+
 Example running "./ALPHABET 1 MC2016 1 600" - runs the 1D TChiHH(600,1) mass point for 2016, removing the events that overlap with the resolved.
 
 If you wish to run the 1D T5HH FullSIM samples, you will need to change the bool in `skimSamples.cc` (https://github.com/emacdonald16/HHplusMET/blob/v2021/src/skimSamples.cc#L81-L82) and the bool in `ALPHABET.cc` (https://github.com/emacdonald16/HHplusMET/blob/v2021/scripts/ALPHABET.cc#L27).
@@ -198,6 +199,7 @@ For the 1D TChiHH model, this currently makes both the combined limit plot and t
 python -b brazilHiggsinoLims.py
 ```
 To change the directory where the datacards are stored: https://github.com/emacdonald16/HHplusMET/blob/f227a4e88a51027040635d4db52db959d0ced69d/scripts/brazilHiggsinoLims.py#L17
+
 This currently also saves the root file for HEPData, with all limits included.
 You can change what you want to run and save at the bottom of the code.
 
@@ -209,6 +211,7 @@ For the 1D T5HH model, this currently makes only the combined limit plot (but is
 python -b brazilGluinoLims.py
 ```
 To change the directory where the datacards are stored: https://github.com/emacdonald16/HHplusMET/blob/f227a4e88a51027040635d4db52db959d0ced69d/scripts/brazilGluinoLims.py#L16
+
 This currently also saves the root file for HEPData, with all limits included.
 You can change what you want to run and save at the bottom of the code.
 
@@ -230,6 +233,7 @@ root -l 'scan_point.cxx("N1N2","comb")'
 The first argument is the model (N1N2 for 2D TChiHH, and Gluino for 2D T5HH). The second argument is the type you want:
 "comb" for the combination, "res" for resolved only, and "boost" for boosted only.
 If you wish to change the directory of the datacards, you can do that here: https://github.com/emacdonald16/HHplusMET/blob/f227a4e88a51027040635d4db52db959d0ced69d/scripts/scan_point.cxx#L23
+
 You will need to re-run `scan_point.cxx`, or delete the saved files in the *src* directory and run `runPaperPlots.sh`, which will automatically
 run scan_point if the files don't exist.
 
@@ -251,7 +255,7 @@ Can also creates a root file with all of these histograms saved into it for HEPD
 HEPData, can produce a root file with the signal efficiency/contamination in all boosted regions for a single mass point of T5HH (commented out right now). The directory for the datacards is at the top of the code. Output PDF and root files are in the *output* directory.
 - `significance.py`: Creates the significance plot for the combination only for TChiHH and T5HH. Also creates the root file for HEPData (currently commented out). Would need to
 modify `QuickDataCardsABCDNorm_Higgsino.py` and `QuickDataCardsABCDNorm_Gluino.py` to have combine run the significance (commented out at the bottom)
-if these don't exist yet. You can the directory of the datacards at the top of the code. Output PDF and root files are in the *output* directory.
+if these don't exist yet. You can change the directory of the datacards at the top of the code. Output PDF and root files are in the *output* directory.
 - `writeCutflow.py`: Creates a txt file with Latex-style output used in the auxiliary material for the cutflow table. Can also be modified to write out the
 more-detailed cutflow. You need to first run `cutflowFromNtuples.cc` for this to work, but it's setup to use ones I've already ran.
 - `ABCD.C`: The main plotting script for the boosted part of the analysis, making a lot of the plots and tables in the paper, AN, and the auxilary materials.
