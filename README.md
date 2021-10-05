@@ -91,6 +91,10 @@ The arguments are as follows:
 - arg4: NLSP mass. This is used for the signal models, so I just put a 0 for anything else
 Example running "./ALPHABET 1 MC2016 1 600" - runs the 1D TChiHH(600,1) mass point for 2016, removing the events that overlap with the resolved.
 
+If you wish to run the 1D T5HH FullSIM samples, you will need to change the bool in `skimSamples.cc` (https://github.com/emacdonald16/HHplusMET/blob/v2021/src/skimSamples.cc#L81-L82) and the bool in `ALPHABET.cc` (https://github.com/emacdonald16/HHplusMET/blob/v2021/scripts/ALPHABET.cc#L27).
+
+
+
 You can also batch-submit the ALPHABET code, see above.
 
 Included in `ALPHABET` are a variety of bools and functions to run the signal systematics. These are best run using batch submission, changing the
@@ -102,15 +106,15 @@ I have been naming these `ALPHABET_1DSignal.root`, but you can name it what you 
 `ABCD.C` which is the plotting script for distributions.
 
 For the FastSIM samples, you will also need to run ALPHABET using genMET instead of recoMET (the MET is averaged for regular running).
-The bool is set in `src/definitions.cc`: https://github.com/emacdonald16/HHplusMET/blob/01175cc3caa1dd70a566318e40c1f2e8809aaa0d/src/definitions.cc#L412
+The bool is set in `src/definitions.cc`: https://github.com/emacdonald16/HHplusMET/blob/f227a4e88a51027040635d4db52db959d0ced69d/src/definitions.cc#L412
 
 
 #### If you need to change/add signal samples
 The samples that are run are included in `src/skimSamples.cc`. There are bools that define which samples are run, depending on the region
-that is passed from `ALPHABET.cc`. The 1D samples are run using region==1, the 2D samples with region==2. The bools are set further down: https://github.com/emacdonald16/HHplusMET/blob/01175cc3caa1dd70a566318e40c1f2e8809aaa0d/src/skimSamples.cc#L81-L82
+that is passed from `ALPHABET.cc`. The 1D samples are run using region==1, the 2D samples with region==2. The bools are set further down: https://github.com/emacdonald16/HHplusMET/blob/v2021/src/skimSamples.cc#L81-L82
 
 If you wish to add/change signal samples, this is where you do it. It is not conveniently set up. The directory of the skims is defined at the top,
-and you can change/add signal samples closer to the bottom: https://github.com/emacdonald16/HHplusMET/blob/01175cc3caa1dd70a566318e40c1f2e8809aaa0d/src/skimSamples.cc#L476-L485
+and you can change/add signal samples closer to the bottom: https://github.com/emacdonald16/HHplusMET/blob/f227a4e88a51027040635d4db52db959d0ced69d/src/skimSamples.cc#L476-L485
 
 `ALPHABET.cc` runs the signal samples per NLSP mass and year.
 
@@ -163,8 +167,7 @@ The main codes for making the datacards are `datacards/QuickDataCardsABCDNorm_Hi
 There are also configurable options to run with or without the overlap events ("runVeto"), whether data or MC should be used for the backgrounds
 ("useData") and if combine should be run for the resolved method alone ("runResAlone"). These bools are toward the top of `datacards/QuickDataCardsABCDNorm_Higgsino.py`.
 Also at the top are the paths to wherever the ALPHABET files are stored. If you make new/different signal samples, you will need to change
-these paths: https://github.com/emacdonald16/HHplusMET/blob/01175cc3caa1dd70a566318e40c1f2e8809aaa0d/datacards/QuickDataCardsABCDNorm_Higgsino.py#L84-L96
-
+these paths: https://github.com/emacdonald16/HHplusMET/blob/f227a4e88a51027040635d4db52db959d0ced69d/datacards/QuickDataCardsABCDNorm_Higgsino.py#L89-L101
 
 
 These codes create the datacards from the output of ALPHABET, including all the signal systematics that would need to be run. After creating the datacards, they also run combine to
@@ -194,7 +197,7 @@ For the 1D TChiHH model, this currently makes both the combined limit plot and t
 ```bash
 python -b brazilHiggsinoLims.py
 ```
-To change the directory where the datacards are stored: https://github.com/emacdonald16/HHplusMET/blob/v2021/scripts/brazilHiggsinoLims.py#L17
+To change the directory where the datacards are stored: https://github.com/emacdonald16/HHplusMET/blob/f227a4e88a51027040635d4db52db959d0ced69d/scripts/brazilHiggsinoLims.py#L17
 This currently also saves the root file for HEPData, with all limits included.
 You can change what you want to run and save at the bottom of the code.
 
@@ -205,7 +208,7 @@ For the 1D T5HH model, this currently makes only the combined limit plot (but is
 ```bash
 python -b brazilGluinoLims.py
 ```
-To change the directory where the datacards are stored: https://github.com/emacdonald16/HHplusMET/blob/v2021/scripts/brazilGluinoLims.py#L16
+To change the directory where the datacards are stored: https://github.com/emacdonald16/HHplusMET/blob/f227a4e88a51027040635d4db52db959d0ced69d/scripts/brazilGluinoLims.py#L16
 This currently also saves the root file for HEPData, with all limits included.
 You can change what you want to run and save at the bottom of the code.
 
@@ -226,7 +229,7 @@ root -l 'scan_point.cxx("N1N2","comb")'
 ```
 The first argument is the model (N1N2 for 2D TChiHH, and Gluino for 2D T5HH). The second argument is the type you want:
 "comb" for the combination, "res" for resolved only, and "boost" for boosted only.
-If you wish to change the directory of the datacards, you can do that here: https://github.com/emacdonald16/HHplusMET/blob/c2ba3a8c0a45c91449bc28437963b7f3fe81c9b7/scripts/scan_point.cxx#L23
+If you wish to change the directory of the datacards, you can do that here: https://github.com/emacdonald16/HHplusMET/blob/f227a4e88a51027040635d4db52db959d0ced69d/scripts/scan_point.cxx#L23
 You will need to re-run `scan_point.cxx`, or delete the saved files in the *src* directory and run `runPaperPlots.sh`, which will automatically
 run scan_point if the files don't exist.
 
