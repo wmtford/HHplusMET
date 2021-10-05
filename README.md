@@ -28,6 +28,7 @@ There are (unfortunately) lots of steps.
 
 To make all the paper plots from pre-existing datacards in Emily's area, you can run:
 <pre>
+cd scripts/
 bash runPaperPlots.sh        
 </pre>
 This creates all the paper plots (and a few more) and writes them to the *output* directory. If you need plots that are in the supplementary materials,
@@ -53,12 +54,13 @@ voms-proxy-init -voms cms -valid 192:00
 ```
 And THEN we submit whatever batch code we want:
 ```
-bash submitBatch.sh
+./submitBatch.sh
 ```
-It actually might be `./submitBatch.sh`, I don't remember.
 
 - `submitBatch.sh` runs the ALPHABET code or a cutflow (off of skims only). Modify the script to run what you want, and change the outgoing directory name.
 - `submitBatchCutflow.sh` runs cutflowFromNtuples.cc for signal samples only, from the ntuples.
+
+The processed files are moved to /eos/uscms/store/user/${USER}/boostedHiggsPlusMET/, so make sure you have a *boostedHiggsPlusMET* directory in your eos area.
 
 ## Region descriptions/definitions
 `src/definitions.cc` contains the region definitions, baseline selections, useful functions, and the veto option that removes events that overlap with the resolved method.
@@ -73,20 +75,46 @@ make datacards and for plots of baseline and region variables.
 
 To compile:
 ``` bash
+cd scripts/
 g++ -o ALPHABET ALPHABET.cc `root-config --cflags --libs`
 ```
 
 To run:
 ``` bash
-./ALPHABET 0 MC2016 0 0
+./ALPHABET arg1 arg2 arg3 arg4
 ```
 
-The first argument is the region (0=SM background, 1=1DTChiHH signal, etc), second is the year, third is a bool to remove events that overlap with the resolved method (1 means remove the overlap events), and fourth is the NLSP mass for signal
-samples (600 for TChiHH, but doesn't matter for anything else so I usually do 0).
+The arguments are as follows:
+- arg1: This is the region definition (0 = SM background, 1 = 1D signal, 2 = 2D signal, 3 = single muon, 4 = single electron, 5 = single photon)
+- arg2: Year, setup as "MC2016", "MC2017", or "MC2018"
+- arg3: Resolved veto, 0 means do not remove any events, 1 means remove events that overlap with the veto
+- arg4: NLSP mass. This is used for the signal models, so I just put a 0 for anything else
+Example running "./ALPHABET 1 MC2016 1 600" - runs the 1D TChiHH(600,1) mass point for 2016, removing the events that overlap with the resolved.
 
-You can also batch-submit the ALPHABET code.
+You can also batch-submit the ALPHABET code, see above.
 
-#### To run boosted event counts
+Included in `ALPHABET` are a variety of bools and functions to run the signal systematics. These are best run using batch submission, changing the
+necessary bools and function arguments for every individual systematic and variation (yes there are a lot). The batch code is setup to easily change the
+name of the output directory (example, "JECUp") to keep track of all of these.
+
+If you re-run the signal samples, you will need to hadd them to create a single file for the datacards and the plotting scripts to find.
+I have been naming these `ALPHABET_1DSignal.root`, but you can name it what you like as long as you change the input for the datacards and/or
+`ABCD.C` which is the plotting script for distributions.
+
+For the FastSIM samples, you will also need to run ALPHABET using genMET instead of recoMET (the MET is averaged for regular running).
+The bool is set in `src/definitions.cc`: https://github.com/emacdonald16/HHplusMET/blob/01175cc3caa1dd70a566318e40c1f2e8809aaa0d/src/definitions.cc#L412
+
+
+#### If you need to change/add signal samples
+The samples that are run are included in `src/skimSamples.cc`. There are bools that define which samples are run, depending on the region
+that is passed from `ALPHABET.cc`. The 1D samples are run using region==1, the 2D samples with region==2. The bools are set further down: https://github.com/emacdonald16/HHplusMET/blob/01175cc3caa1dd70a566318e40c1f2e8809aaa0d/src/skimSamples.cc#L81-L82
+
+If you wish to add/change signal samples, this is where you do it. It is not conveniently set up. The directory of the skims is defined at the top,
+and you can change/add signal samples closer to the bottom: https://github.com/emacdonald16/HHplusMET/blob/01175cc3caa1dd70a566318e40c1f2e8809aaa0d/src/skimSamples.cc#L476-L485
+
+`ALPHABET.cc` runs the signal samples per NLSP mass and year.
+
+#### To run boosted event counts (for WX overlap studies)
 If you need to run boosted event counts for overlap studies, there is a bool at the top of `ALPHABET.cc` that does just that "saveBoostedEvt".
 The text files are created for each analysis region, and for the same arguments you pass `ALPHABET.cc` (region, year, resVeto, NLSP mass).
 - If you wish to run on data, set the bool "runData" at the top of the ALPHABET code to true, and run with the argument region=0. This
@@ -98,6 +126,7 @@ is currently setup so that if runData=true, the MC will not run.
 ## Plotting distributions from ALPHABET
 `ABCD.C` contains loads of functions that make different plots. It is currently setup to only run the plots that are put into the published paper, but you can easily change it
 to run the plots that go into the supplementary materials and the AN.
+IT DOES NOT RUN THE LIMIT PLOTS.
 To run:
 ``` bash
 root -l -b ABCD.C
@@ -114,6 +143,7 @@ g++ -o cutflow cutflow.cc `root-config --cflags --libs`
 ```
 with the same argument definition as ALPHABET. Similarly, you can also batch-submit.
 
+
 If you want to run the cutflow from the ntuples (so without skim-level cuts):
 ```bash
 g++ -o cutflowFromNtuples cutflowFromNtuples.cc `root-config --cflags --libs`
@@ -123,12 +153,20 @@ g++ -o cutflowFromNtuples cutflowFromNtuples.cc `root-config --cflags --libs`
 - The first argument is the region (0=TChiHH, 1=T5HH), second is the NLSP mass, third is a bool for a more detailed cutflow (breaking down filters etc).
 
 ## Making datacards
-The main codes for making the datacards are `datacards/QuickDataCardsABCDNorm_Higgsino.py` and `datacards/QuickDataCardsABCDNorm_Gluino.py`. The first runs both the 1D and 2D models
-(you need to change the bool "run2D"). There are also configurable options to run with or without the overlap events ("runVeto"), whether data or MC should be used for the backgrounds
-("useData") and if combine should be run for the resolved method alone ("runResAlone").
+Before making the datacards, you'll need to run `ALPHABET.cc` to create the necessary histograms, see above.
+You will also need to run all of the necessary signal systematic variations, or comment out the part of the codes below that pull those files.
 
-These codes create the datacards from the output of ALPHABET, including all the signal systematics that would need to be run. After creation of the datacards, they also run combine to
-produce the limit root files.
+The main codes for making the datacards are `datacards/QuickDataCardsABCDNorm_Higgsino.py` and `datacards/QuickDataCardsABCDNorm_Gluino.py`. The first runs rather the 1D or 2D TChiHH models
+(you need to change the bool "run2D").
+There are also configurable options to run with or without the overlap events ("runVeto"), whether data or MC should be used for the backgrounds
+("useData") and if combine should be run for the resolved method alone ("runResAlone"). These bools are toward the top of `datacards/QuickDataCardsABCDNorm_Higgsino.py`.
+Also at the top are the paths to wherever the ALPHABET files are stored. If you make new/different signal samples, you will need to change
+these paths: https://github.com/emacdonald16/HHplusMET/blob/01175cc3caa1dd70a566318e40c1f2e8809aaa0d/datacards/QuickDataCardsABCDNorm_Higgsino.py#L84-L96
+
+
+
+These codes create the datacards from the output of ALPHABET, including all the signal systematics that would need to be run. After creating the datacards, they also run combine to
+produce the limit root files (at the very bottom of the code).
 
 These can be run for a single mass point from the *datacards* directory:
 ```bash
@@ -141,7 +179,7 @@ python -b runABCDNormGluino.py
 ```
 The first has a configurable option to run the 1D or 2D scan.
 
-NOTE: I haven't tried re-running datacards since making this new branch, so I'm not 100% sure it'll work, but it should!
+
 ## Making limits plots
 After running the datacards, you can make the final limits plots from the *scripts* directory.
 For the 1D TChiHH model, this currently makes both the combined limit plot and the resolved vs boosted overlay plot:
