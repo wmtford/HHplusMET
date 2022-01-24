@@ -4,7 +4,15 @@ import sys
 import array
 from array import array
 from ROOT import gROOT
+import os.path
 gROOT.SetBatch(True)
+
+
+signalSkimsT5HHDIR = "/eos/uscms/store/user/emacdona/Skims/Run2ProductionV18/scan/tree_signal_METVars_FullSIM/"
+signalSkimsTChiHHDIR = "/eos/uscms/store/user/kaulmer/Skims/Run2ProductionV18/scan/tree_signal_METVars/"
+datacardsDIR = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/HHplusMET/datacards/"
+srcDIR = "../src/"
+outDIR = "../output/"
 
 
 chi03 = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0}}}#kern[-0.9]{#scale[0.85]{_{3}}}";
@@ -19,12 +27,6 @@ chi0pmi = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0,#pm  }}}#kern
 chi0mpj = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0,#mp }}}#kern[-1.1]{#scale[0.85]{_{j   }}}";
 glu = "#tilde{g}#scale[0.55]{_{ }}"
 
-
-signalSkimsT5HHDIR = "/eos/uscms/store/user/emacdona/Skims/Run2ProductionV18/scan/tree_signal_METVars_FullSIM/"
-signalSkimsTChiHHDIR = "/eos/uscms/store/user/kaulmer/Skims/Run2ProductionV18/scan/tree_signal_METVars/"
-datacardsDIR = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/HHplusMET/datacards/"
-srcDIR = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/HHplusMET/src/"
-outDIR = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/HHplusMET/output/"
 
 def higgsinoCrossSection1D(hig_mass):
     xsec = 1.0;
@@ -86,7 +88,7 @@ def higgsinoCrossSection1D(hig_mass):
     else: xsec = 0;
     return xsec*1000.0;
 
-def higgsinoCrossSection2D( hig_mass):
+def higgsinoCrossSection2D(hig_mass):
     xsec = 1.0;
     if (hig_mass =="127"): xsec = 1.44725;
     elif (hig_mass =="150"): xsec = 0.71514;
@@ -152,7 +154,9 @@ def findWhichBins():
     This will print out the signal bin indices in the datacards
     You can also print out the bin labels and/or the rate
     '''
-    datacardName = "1DT5HH1000_LSP1_Data_Combo.txt"
+    # datacardName = "1DT5HH1000_LSP1_Data_Combo.txt"
+    datacardName = "1DTChiHH150_LSP1_Data_Combo.txt"
+
     datacardFile=open(datacardsDIR+datacardName, 'r');
     rateVec = [];
     binVec1 = []; binVec2= []; binVecFinal = []
@@ -185,40 +189,43 @@ def saveEff(model):
     Denominator is all H decays for T5HH, and only H->bb decays for TChiHH/N1N2
     '''
     effFile=open(srcDIR+"efficiency_"+model+".txt", 'w');
-    NLSPmass = []; LSPmass = [];
+    NLSPmass = []; LSPmass_final = []; LSPmass_skims = [];
     if model=="N1N2":
         effFile.write("#NLSPmass LSPmass boostEff resEff totalEff\n")
         fNames=open(srcDIR+"higgsino2DFileNames.txt", 'r');
         for line in fNames:
             x = line.split('_')
             if (int(x[5])>800): continue;
-            NLSPmass.append(x[5]); LSPmass.append(x[6]);
+            LSP_mass = int(x[6])
+            if (LSP_mass==1): LSP_mass=1;
+            elif (LSP_mass%5!=0): LSP_mass=LSP_mass+2;
+            NLSPmass.append(x[5]); LSPmass_final.append(str(LSP_mass)); LSPmass_skims.append(x[6])
         fNames.close();
-        for h in range(0, 26):
-            thisMass = 175+h*25;
-            NLSPmass.append(str(thisMass)); LSPmass.append("1");
+        for h in range(0, 27):
+            thisMass = 150+h*25;
+            NLSPmass.append(str(thisMass)); LSPmass_final.append("1"); LSPmass_skims.append("1")
     elif model=="TChiHH":
         effFile.write("#LSPmass Gmass boostEff resEff totalEff\n")
-        for h in range(0, 42):
-            thisMass = 175+h*25;
+        for h in range(0, 43):
+            thisMass = 150+h*25;
             if thisMass==1025 or thisMass==1075 or thisMass==1125 or thisMass==1175: continue;
-            NLSPmass.append(str(thisMass)); LSPmass.append("1");
+            NLSPmass.append(str(thisMass)); LSPmass_final.append("1"); LSPmass_skims.append("1")
     elif model=="T5HH":
         effFile.write("#gluinoMass LSPmass boostEff resEff totalEff\n")
         for g in range(0, 16):
             thisMass = 1000+g*100;
-            NLSPmass.append(str(thisMass)); LSPmass.append("1");
+            NLSPmass.append(str(thisMass)); LSPmass_final.append("1"); LSPmass_skims.append("1")
 
     for i in range(len(NLSPmass)):
-        print("For %s, mNLSP=%s and mLSP=%s" %(model, NLSPmass[i],LSPmass[i]))
+        print("For %s, mNLSP=%s and mLSP=%s" %(model, NLSPmass[i],LSPmass_final[i]))
         BR = 0.5823329; convertXsec = 1.0; signalFileName = ""; modelName = ""
         if model=="N1N2":
             BR = 0.5823329; modelName="2DTChiHH"
-            if (LSPmass[i]=="1"):
+            if (LSPmass_final[i]=="1"):
                 signalFileName = signalSkimsTChiHHDIR+"tree_TChiHH_HToBB_HToBB_"+NLSPmass[i]+"_1_MC2016_fast.root"
                 convertXsec = higgsinoCrossSection1D(NLSPmass[i])/higgsinoCrossSection2D(NLSPmass[i])
             else:
-                signalFileName = signalSkimsTChiHHDIR+"tree_TChiHH_HToBB_HToBB_2D_"+NLSPmass[i]+"_"+LSPmass[i]+"_MC2016_fast.root"
+                signalFileName = signalSkimsTChiHHDIR+"tree_TChiHH_HToBB_HToBB_2D_"+NLSPmass[i]+"_"+LSPmass_skims[i]+"_MC2016_fast.root"
         elif model=="TChiHH":
             BR = 0.5823329; modelName="1DTChiHH"
             signalFileName = signalSkimsTChiHHDIR+"tree_TChiHH_HToBB_HToBB_"+NLSPmass[i]+"_1_MC2016_fast.root"
@@ -227,19 +234,7 @@ def saveEff(model):
             signalFileName = signalSkimsT5HHDIR+"tree_T5qqqqZH-mGluino-1000to2500_"+NLSPmass[i]+"_1_MC2016.root"
 
         signalFile = TFile(signalFileName, "r")
-        tree = signalFile.Get("tree"); tree.GetEntry(0);
-        weight=getattr(tree,"Weight");
-        if weight==0:
-            tree.GetEntry(3642); weight=getattr(tree,"Weight");
-            if weight==0:
-                tree.GetEntry(4477); weight=getattr(tree,"Weight");
-                if weight==0:
-                    tree.GetEntry(4483); weight=getattr(tree,"Weight");
-                    if weight==0:
-                        tree.GetEntry(6160); weight=getattr(tree,"Weight");
-                        if weight==0: print("Weight is zero")
-
-        #OK have weight now
+        tree = signalFile.Get("tree"); weight=tree.GetMaximum("Weight")
         if weight==0: print("Weight is zero")
         else: signalFile.Close()
         totalEvt1 = weight*35922.0*BR*BR/convertXsec
@@ -248,7 +243,7 @@ def saveEff(model):
         totalEvt = totalEvt1+totalEvt2+totalEvt3
 
         #open datacard
-        datacardName = modelName+NLSPmass[i]+"_LSP"+LSPmass[i]+"_Data_Combo.txt"
+        datacardName = modelName+NLSPmass[i]+"_LSP"+LSPmass_final[i]+"_Data_Combo.txt"
         datacardFile=open(datacardsDIR+datacardName, 'r');
         for line in datacardFile:
             if line.startswith("rate"):
@@ -262,14 +257,25 @@ def saveEff(model):
         datacardFile.close()
         boostEff = (boost1H+boost2H)/totalEvt; resEff = (res3b+res4b)/totalEvt; totalEff = passCuts/totalEvt
         # print("boostEff: %.4f, resEff: %.4f, totalEff: %.4f" %(boostEff, resEff, totalEff))
-        line = "%s %s %.7f %.7f %.7f\n" %(NLSPmass[i], LSPmass[i], boostEff, resEff, totalEff)
+        line = "%s %s %.7f %.7f %.7f\n" %(NLSPmass[i], LSPmass_final[i], boostEff, resEff, totalEff)
         effFile.write(line)
     effFile.close()
 
 
 def readInValues(model, which):
     vmx=array('d',[]); vmy=array('d',[]); veff=array('d',[]);
-    fcard=open(srcDIR+"efficiency_"+model+".txt", 'r');
+    effFileName = srcDIR+"efficiency_"+model+".txt"
+    file_exists = os.path.exists(effFileName)
+    if not file_exists:
+        print("File not find. Trying to make...")
+        saveEff(model)
+        file_exists2 = os.path.exists(effFileName)
+        if file_exists2: print("Made the file!")
+        else:
+            print("OK couldn't make it I guess. Exiting...")
+            sys.exit(0)
+
+    fcard=open(effFileName, 'r');
     for line in fcard:
         if "#" in line: continue;
         thisLine = line.split()
@@ -285,6 +291,9 @@ def readInValues(model, which):
         return(histo)
 
 def makeCanvas(model, which):
+    if which=="all" and model=="N2N2":
+        print("Can't make signal efficiency plot for 2D TChiHH with all lines included! Run separately. Exiting now...")
+        sys.exit(0)
     SignifScan2 = TGraph2D()
     SignifScan = TGraph(); SignifScanBoost = TGraph(); SignifScanRes = TGraph();
     canvName = model+"_"+which
@@ -323,7 +332,6 @@ def makeCanvas(model, which):
 
     SignifScan.GetYaxis().SetTitleOffset(1.2); SignifScan.GetYaxis().SetTitleSize(0.047)
     SignifScan.GetXaxis().SetTitleOffset(1.0); SignifScan.GetXaxis().SetTitleSize(0.047)
-
     ltitle = TLatex(0.17, 0.87,"#font[62]{CMS}#scale[0.76]{#font[52]{ Simulation Supplementary}}")
     ltitle.SetNDC(); ltitle.SetTextAlign(12);
 
@@ -377,7 +385,18 @@ def makeCanvas(model, which):
     ltitle.Draw("same"); rtitle.Draw("same"); txtd.Draw("same")
     if model=="TChiHH": txte.Draw("same")
 
-    canv.SaveAs(outDIR+model+"_signalEfficiency_"+which+".pdf", "PDF")
+    #save canvas
+    if model=="TChiHH":
+        if which=="all": canv.SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_003-a.pdf", "PDF")
+        else: canv.SaveAs(outDIR+"signalEff_"+model+"_"+which+".pdf", "PDF")
+    elif model=="T5HH":
+        if which=="all": canv.SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_003-b.pdf", "PDF")
+        else: canv.SaveAs(outDIR+"signalEff_"+model+"_"+which+".pdf", "PDF")
+    else:
+        if which=="res": canv.SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_004-a.pdf", "PDF")
+        elif which=="boost": canv.SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_004-b.pdf", "PDF")
+        elif which=="comb": canv.SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_004-c.pdf", "PDF")
+
 
 def saveSigEffRootFile():
     '''
@@ -423,23 +442,44 @@ def saveSigEffRootFile():
     SignifScan1D.Draw(); SignifScan1DBoost.Draw(); SignifScan1DRes.Draw();
     SignifScan1Dglu.Draw(); SignifScan1DgluBoost.Draw(); SignifScan1DgluRes.Draw();
 
+    #Save in individual files
+    fNEW_TChiHH = TFile(outDIR+"CMS-SUS-20-004_Figure-aux_003-a.root", "recreate")
+    SignifScan1D.Write("CombinedSignalEfficiency_TChiHH")
+    SignifScan1DBoost.Write("BoostedSignalEfficiency_TChiHH")
+    SignifScan1DRes.Write("ResolvedSignalEfficiency_TChiHH")
+    fNEW_TChiHH.Close()
 
-    fNEW = TFile(outDIR+"CMS-SUS-20-004_aux_SignalEfficiency.root", "recreate")
-    SignifScan2D.Write("CombinedSignalEfficiency_N1N2"); SignifScan2DBoost.Write("BoostedSignalEfficiency_N1N2"); SignifScan2DRes.Write("ResolvedSignalEfficiency_N1N2");
-    SignifScan1D.Write("CombinedSignalEfficiency_TChiHH"); SignifScan1DBoost.Write("BoostedSignalEfficiency_TChiHH"); SignifScan1DRes.Write("ResolvedSignalEfficiency_TChiHH");
-    SignifScan1Dglu.Write("CombinedSignalEfficiency_T5HH"); SignifScan1DgluBoost.Write("BoostedSignalEfficiency_T5HH"); SignifScan1DgluRes.Write("ResolvedSignalEfficiency_T5HH");
-    fNEW.Close()
+    fNEW_T5HH = TFile(outDIR+"CMS-SUS-20-004_Figure-aux_003-b.root", "recreate")
+    SignifScan1Dglu.Write("CombinedSignalEfficiency_T5HH")
+    SignifScan1DgluBoost.Write("BoostedSignalEfficiency_T5HH")
+    SignifScan1DgluRes.Write("ResolvedSignalEfficiency_T5HH")
+    fNEW_T5HH.Close()
+
+    fNEW_N1N2res = TFile(outDIR+"CMS-SUS-20-004_Figure-aux_004-a.root", "recreate")
+    SignifScan2DRes.Write("ResolvedSignalEfficiency_N1N2")
+    fNEW_N1N2res.Close()
+
+    fNEW_N1N2boost = TFile(outDIR+"CMS-SUS-20-004_Figure-aux_004-b.root", "recreate")
+    SignifScan2DBoost.Write("BoostedSignalEfficiency_N1N2")
+    fNEW_N1N2boost.Close()
+
+    fNEW_N1N2comb = TFile(outDIR+"CMS-SUS-20-004_Figure-aux_004-c.root", "recreate")
+    SignifScan2D.Write("CombinedSignalEfficiency_N1N2")
+    fNEW_N1N2comb.Close()
+
+
+
 
 def saveSigEffMassRootFile(model, mass, printEff):
     '''
     For HEPData, saves a root file with one TH2F for the signal efficiency of the
-    chosen signal model and mass point.
+    chosen 1D signal model and mass point.
     y-axis is binned in MET (integrated, 300-500, 500-700, 700+)
     x-axis is the analysis region bins (Baseline, 0HSB, 0HSR, 1HSB, 1HSR, 2HSB, 2HSR)
     Note: this signal efficiency ignores the fastSIM MET treatment (for TChiHH only), only using the yields from the recoMET
     '''
     #Denominator of efficiency is all H decays for T5HH and only H->bb decays for TChiHH
-    #First, define TH2D to fill, set bin labels, too
+    #First, define TH2D to fill and set bin labels
     h_sigEff = TH2F("sigEff","",7,0,7,4,0,4)
     binLabelsX = ["Baseline", "N_{H} = 0 CSB", "N_{H} = 0 CSR", "N_{H} = 1 SB", "N_{H} = 1 SR", "N_{H} = 2 SB", "N_{H} = 2 SR"]
     binLabelsY = [">300", "300-500", "500-700", ">700"]
@@ -455,15 +495,7 @@ def saveSigEffMassRootFile(model, mass, printEff):
         signalFileName = signalSkimsT5HHDIR+"tree_T5qqqqZH-mGluino-1000to2500_"+mass+"_1_MC2016.root"
 
     signalFile = TFile(signalFileName, "r")
-    tree = signalFile.Get("tree"); tree.GetEntry(0);
-    weight=getattr(tree,"Weight");
-    if weight==0:
-        tree.GetEntry(3642); weight=getattr(tree,"Weight");
-        if weight==0:
-            tree.GetEntry(4477); weight=getattr(tree,"Weight");
-            if weight==0: print("Weight is zero")
-
-    #OK have weight now
+    tree = signalFile.Get("tree"); weight=tree.GetMaximum("Weight")
     if weight==0:
         print("Weight is zero")
         return;
@@ -475,7 +507,6 @@ def saveSigEffMassRootFile(model, mass, printEff):
     if (model=="TChiHH"): subDir = "boosted_veto_FastSIMSFs/"
     ABCD_FileName = "/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/"+subDir+"ALPHABET_1DSignal.root"
     ABCD_File = TFile(ABCD_FileName, "r")
-
     baseline=ABCD_File.Get("MET_baseline_%s%s_LSP1" %(model,mass));
     zeroSB=ABCD_File.Get("MET_antitagSB_%s%s_LSP1" %(model,mass));
     zeroSR=ABCD_File.Get("MET_antitagSR_%s%s_LSP1" %(model,mass));
@@ -483,7 +514,6 @@ def saveSigEffMassRootFile(model, mass, printEff):
     singleSR=ABCD_File.Get("MET_tagSR_%s%s_LSP1" %(model,mass));
     doubleSB=ABCD_File.Get("MET_doubletagSB_%s%s_LSP1" %(model,mass));
     doubleSR=ABCD_File.Get("MET_doubletagSR_%s%s_LSP1" %(model,mass));
-
     vecHists = [baseline,zeroSB,zeroSR,singleSB,singleSR,doubleSB,doubleSR]
 
     for xbin in range(len(vecHists)):
@@ -502,26 +532,47 @@ def saveSigEffMassRootFile(model, mass, printEff):
     h_sigEff.SaveAs(outDIR+"CMS-SUS-20-004_aux_Table_002.root")
 
 def main():
-    # findWhichBins() # prints out indices of rate vector when reading from a datacard
-
-    saveEff("N1N2") # saves the efficiencies into a text file
+    # findWhichBins() # prints out indices of rate vector when reading from a datacard - for debugging
+    '''
+    Saves the efficiencies into a text file (boosted only, resolved only, combined)
+    Will run automatically if the needed txt file can't be found
+    arg1, model: "N1N2", "TChiHH", "T5HH"
+    '''
     saveEff("TChiHH")
+    saveEff("N1N2")
     saveEff("T5HH")
 
-    #makeCanvas(arg1, arg2),
-    #arg1, model: "N1N2", "TChiHH", "T5HH"
-    #arg2, plotting: "comb", "boost", "res", "all" - "all" plots all three lines on the same canvas so doesn't work for 2D
 
+    '''
+    Creates and saves the signal efficiency plots in the paper
+    makeCanvas(arg1, arg2),
+    arg1, model: "N1N2", "TChiHH", "T5HH"
+    arg2, plotting: "comb", "boost", "res", "all" - "all" plots all three lines on the same canvas so doesn't work for 2D
+    '''
     makeCanvas("TChiHH", "all")
     makeCanvas("T5HH", "all")
     makeCanvas("N1N2", "boost")
     makeCanvas("N1N2", "res")
     makeCanvas("N1N2", "comb")
 
-    #save root file for HEPData (not setup for 2D models), 3rd argument is printing efficiencies to screen
-    saveSigEffMassRootFile("T5HH", "2200", False)
 
+    '''
+    Save the root file for HEPData (not setup for 2D models)
+    This is the signal efficiency for all boosted bins, Table 2 in the auxilary material
+    saveSigEffMassRootFile(arg1, arg2, arg3)
+    arg1, model: "TChiHH" or "T5HH"
+    arg2, NLSP/gluino mass point (LSP=1)
+    arg3, prints the efficiency for each bin to the screen
+    '''
+    #saveSigEffMassRootFile("T5HH", "2200", False)
+
+
+    '''
+    Save the root file for HEPData
+    This saves the signal efficiency plots in the auxilary material (boosted only, resolved only, combined) for the three signal models
+    '''
     saveSigEffRootFile()
+
 
 if __name__ == "__main__":
     main()

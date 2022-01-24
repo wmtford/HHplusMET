@@ -55,6 +55,7 @@ eval 'echo g++ -o $executable $executable.cc `root-config --cflags --libs` '
 
 eval `echo ./$executable $args1 $args2 $args3 $args4`
 
+echo "PWD ${PWD}"
 ls *root
 
 for file in $(ls *root)

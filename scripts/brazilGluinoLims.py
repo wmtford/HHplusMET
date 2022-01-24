@@ -280,13 +280,13 @@ def makeBrazilFlag(compareLimits,saveRootFile):
 	leg.SetTextSize(0.045);
 
 	if compareLimits:
-		leg.SetHeader("95% CL Upper Limit")
+		leg.SetHeader("95% CL upper limit")
 		leg.AddEntry(g_obs2, "Observed (boosted)","l")
 		leg.AddEntry(g_obs3,"Observed (resolved)","l")
 		leg.AddEntry(g_exp2, "Expected (boosted)","l")
 		leg.AddEntry(g_exp3,"Expected (resolved)","l")
 	else:
-		leg.SetHeader("95% CL Upper Limit")
+		leg.SetHeader("95% CL upper limit")
 		leg.AddEntry(g_obs,"Observed","l")
 		leg.AddEntry(g_exp,"Expected","l")
 		leg.AddEntry(g_2sig,"#pm2 #sigma_{experiment}","f")
@@ -334,11 +334,15 @@ def makeBrazilFlag(compareLimits,saveRootFile):
 		txtf.Draw();
 	g_xsec.Draw("lsame")
 
-	if compareLimits: can.SaveAs(odir+'T5HHResults_BoostandRes_Data.pdf');
+	for i in range(0,500):
+		if (g_xsec.Eval(2000+i)-g_obs.Eval(2000+i)>0):
+			print "AllH: Mass %d  Obs Excl %g " %(2000+i,g_obs.Eval(2000+i))
+
+	if compareLimits: can.SaveAs(odir+'CMS-SUS-20-004_Figure-aux_001.pdf');
 	else:
-		can.SaveAs(odir+'T5HHResults_ComboOnly_Data.pdf');
-		txtb.Draw(); #Preliminary
-		can.SaveAs(odir+'T5HHResults_ComboOnly_Data_prelim.pdf');
+		can.SaveAs(odir+'Figure_014.pdf');
+		# txtb.Draw(); #Preliminary
+		# can.SaveAs(odir+'T5HHResults_ComboOnly_Data_prelim.pdf');
 
 
 	####### Save ROOT file with all limits

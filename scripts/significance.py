@@ -9,8 +9,8 @@ from array import array
 from ROOT import *
 gROOT.SetBatch(True)
 
-in_dir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/boostedHiggsPlusMET/datacards/"
-out_dir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/boostedHiggsPlusMET/output/"
+datacardsDIR = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/HHplusMET/datacards/"
+outDIR = "../output/"
 
 def columnToList(fn,col):
     f = open(fn,'r');
@@ -29,14 +29,15 @@ def ExtractFile(iname):
     lims =  t.limit
     return lims;
 
-def saveCanvas(model):
+def saveCanvas(model,printSig):
     vmx=array('d',[]); vmy=array('d',[]); vsig=array('d',[]);
+    high_x = 0; high_y = 0; high_sig = 0;
     if model=="N1N2":
-        namesFile=open(in_dir+"higgsino2DFileNames.txt", 'r');
+        namesFile=open(datacardsDIR+"../src/higgsino2DFileNames.txt", 'r');
         for line in namesFile:
-            x = line.split('_')
-            hino_mass = int(x[5])
-            LSP_mass = int(x[6])
+            x = line.split('_'); hino_mass = int(x[5]); LSP_mass = int(x[6])
+            if (LSP_mass==1): LSP_mass=1;
+            elif (LSP_mass%5!=0): LSP_mass=LSP_mass+2;
             if hino_mass>810: break;
             if hino_mass==200 and LSP_mass==50: continue;
             if hino_mass==250 and LSP_mass==75: continue;
@@ -45,27 +46,29 @@ def saveCanvas(model):
             if hino_mass==300 and LSP_mass==150: continue;
 
             vmx.append(hino_mass); vmy.append(LSP_mass)
-            thisSig = ExtractFile(in_dir+"higgsCombine2DTChiHH%s_LSP%s_Data_Combo.Significance.mH120.root" %(x[5], x[6]))
+            thisSig = ExtractFile(datacardsDIR+"higgsCombine2DTChiHH%i_LSP%i_Data_Combo.Significance.mH120.root" %(hino_mass, LSP_mass))
 
             #Smoothing diagonal
-            if hino_mass==150 and LSP_mass==23: thisSig = 0.5
+            if hino_mass==150 and LSP_mass==25: thisSig = 0.5
             if hino_mass==175 and LSP_mass==25: thisSig = 0.5
-            if hino_mass==175 and LSP_mass==48: thisSig = 0.5
-            if hino_mass==225 and LSP_mass==98: thisSig = 1.0
-            if hino_mass==325 and LSP_mass==198: thisSig = 1.0
+            if hino_mass==175 and LSP_mass==50: thisSig = 0.5
+            if hino_mass==225 and LSP_mass==100: thisSig = 1.0
+            if hino_mass==325 and LSP_mass==200: thisSig = 1.0
             if hino_mass==350 and LSP_mass==200: thisSig = 1.0
-            if hino_mass==375 and LSP_mass==248: thisSig = 1.0
+            if hino_mass==375 and LSP_mass==250: thisSig = 1.0
             if hino_mass==400 and LSP_mass==250: thisSig = 1.0
-            if hino_mass==400 and LSP_mass==273: thisSig = 1.0
-            if hino_mass==425 and LSP_mass==298: thisSig = 1.0
+            if hino_mass==400 and LSP_mass==275: thisSig = 1.0
+            if hino_mass==425 and LSP_mass==300: thisSig = 1.0
             if hino_mass==500 and LSP_mass==350: thisSig = 1.0
-            if hino_mass==500 and LSP_mass==373: thisSig = 1.0
-            if hino_mass==550 and LSP_mass==423: thisSig = 1.0
-            if hino_mass==600 and LSP_mass==473: thisSig = 1.0
-            if hino_mass==625 and LSP_mass==498: thisSig = 1.0
-            if hino_mass==650 and LSP_mass==523: thisSig = 1.0
-            if hino_mass==700 and LSP_mass==573: thisSig = 1.0
+            if hino_mass==500 and LSP_mass==375: thisSig = 1.0
+            if hino_mass==550 and LSP_mass==425: thisSig = 1.0
+            if hino_mass==600 and LSP_mass==475: thisSig = 1.0
+            if hino_mass==625 and LSP_mass==500: thisSig = 1.0
+            if hino_mass==650 and LSP_mass==525: thisSig = 1.0
+            if hino_mass==700 and LSP_mass==575: thisSig = 1.0
             vsig.append(thisSig)
+            if thisSig>high_sig:
+                high_sig=thisSig; high_x=hino_mass; high_y=LSP_mass;
 
         hino=[];
         for h in range(0, 27):
@@ -74,8 +77,10 @@ def saveCanvas(model):
         for h in hino:
             vmx.append(h)
             vmy.append(1.0)
-            thisSig =  ExtractFile(in_dir+"higgsCombine2DTChiHH%i_LSP1_Data_Combo.Significance.mH120.root" %(h))
+            thisSig =  ExtractFile(datacardsDIR+"higgsCombine2DTChiHH%i_LSP1_Data_Combo.Significance.mH120.root" %(h))
             vsig.append(thisSig)
+            if thisSig>high_sig:
+                high_sig=thisSig; high_x=hino_mass; high_y=LSP_mass;
             for lsp in hino:
                 if (lsp+100) > h:
                     vmx.append(h)
@@ -86,12 +91,14 @@ def saveCanvas(model):
         for i in range(0, 16):
             g=1000+i*100
             vmx.append(g)
-            thisSig =  ExtractFile(in_dir+"higgsCombine1DT5HH%i_LSP1_Data_Combo.Significance.mH120.root" %(g))
+            thisSig =  ExtractFile(datacardsDIR+"higgsCombine1DT5HH%i_LSP1_Data_Combo.Significance.mH120.root" %(g))
             vsig.append(thisSig)
+            if thisSig>high_sig:
+                high_sig=thisSig; high_x=hino_mass; high_y=LSP_mass;
 
     canv = TCanvas()
-    if model == "N1N2": canv = TCanvas("","",1200,1100)
-    elif model == "T5HH": canv = TCanvas("","",800,800)
+    if model == "N1N2": canv = TCanvas(model,"",1200,1100)
+    elif model == "T5HH": canv = TCanvas(model,"",800,800)
     canv.cd()
     canv.SetLeftMargin(0.13)
     canv.SetBottomMargin(0.11)
@@ -136,15 +143,22 @@ def saveCanvas(model):
     ltitle.Draw("same")
     rtitle.Draw("same")
 
-    canv.SaveAs(out_dir+"significance_"+model+".pdf","PDF")
+    if model == "N1N2":
+        canv.SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_002-a.pdf","PDF")
+    elif model == "T5HH":
+        canv.SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_002-b.pdf","PDF")
+    if printSig: print("Highest significance is %.4f at (%i,%i)" %(high_sig,high_x,high_y))
+
+
+
 
 def saveRootFile():
     vmx=array('d',[]); vmy=array('d',[]); vsig=array('d',[]);
-    namesFile=open(in_dir+"higgsino2DFileNames.txt", 'r');
+    namesFile=open(datacardsDIR+"../src/higgsino2DFileNames.txt", 'r');
     for line in namesFile:
-        x = line.split('_')
-        hino_mass = int(x[5])
-        LSP_mass = int(x[6])
+        x = line.split('_'); hino_mass = int(x[5]); LSP_mass = int(x[6])
+        if (LSP_mass==1): LSP_mass=1;
+        elif (LSP_mass%5!=0): LSP_mass=LSP_mass+2;
         if hino_mass>810: break;
         if hino_mass==200 and LSP_mass==50: continue;
         if hino_mass==250 and LSP_mass==75: continue;
@@ -154,26 +168,26 @@ def saveRootFile():
 
         vmx.append(hino_mass)
         vmy.append(LSP_mass)
-        thisSig = ExtractFile(in_dir+"higgsCombine2DTChiHH%s_LSP%s_Data_Combo.Significance.mH120.root" %(x[5], x[6]))
+        thisSig = ExtractFile(datacardsDIR+"higgsCombine2DTChiHH%i_LSP%i_Data_Combo.Significance.mH120.root" %(hino_mass, LSP_mass))
 
         #Smoothing diagonal
-        if hino_mass==150 and LSP_mass==23: thisSig = 0.5
+        if hino_mass==150 and LSP_mass==25: thisSig = 0.5
         if hino_mass==175 and LSP_mass==25: thisSig = 0.5
-        if hino_mass==175 and LSP_mass==48: thisSig = 0.5
-        if hino_mass==225 and LSP_mass==98: thisSig = 1.0
-        if hino_mass==325 and LSP_mass==198: thisSig = 1.0
+        if hino_mass==175 and LSP_mass==50: thisSig = 0.5
+        if hino_mass==225 and LSP_mass==100: thisSig = 1.0
+        if hino_mass==325 and LSP_mass==200: thisSig = 1.0
         if hino_mass==350 and LSP_mass==200: thisSig = 1.0
-        if hino_mass==375 and LSP_mass==248: thisSig = 1.0
+        if hino_mass==375 and LSP_mass==250: thisSig = 1.0
         if hino_mass==400 and LSP_mass==250: thisSig = 1.0
-        if hino_mass==400 and LSP_mass==273: thisSig = 1.0
-        if hino_mass==425 and LSP_mass==298: thisSig = 1.0
+        if hino_mass==400 and LSP_mass==275: thisSig = 1.0
+        if hino_mass==425 and LSP_mass==300: thisSig = 1.0
         if hino_mass==500 and LSP_mass==350: thisSig = 1.0
-        if hino_mass==500 and LSP_mass==373: thisSig = 1.0
-        if hino_mass==550 and LSP_mass==423: thisSig = 1.0
+        if hino_mass==500 and LSP_mass==375: thisSig = 1.0
+        if hino_mass==550 and LSP_mass==425: thisSig = 1.0
         if hino_mass==600 and LSP_mass==473: thisSig = 1.0
-        if hino_mass==625 and LSP_mass==498: thisSig = 1.0
-        if hino_mass==650 and LSP_mass==523: thisSig = 1.0
-        if hino_mass==700 and LSP_mass==573: thisSig = 1.0
+        if hino_mass==625 and LSP_mass==500: thisSig = 1.0
+        if hino_mass==650 and LSP_mass==525: thisSig = 1.0
+        if hino_mass==700 and LSP_mass==575: thisSig = 1.0
         vsig.append(thisSig)
 
 
@@ -184,7 +198,7 @@ def saveRootFile():
     for h in hino:
         vmx.append(h)
         vmy.append(1.0)
-        thisSig =  ExtractFile(in_dir+"higgsCombine2DTChiHH%i_LSP1_Data_Combo.Significance.mH120.root" %(h))
+        thisSig =  ExtractFile(datacardsDIR+"higgsCombine2DTChiHH%i_LSP1_Data_Combo.Significance.mH120.root" %(h))
         vsig.append(thisSig)
         for lsp in hino:
             if (lsp+100) > h:
@@ -196,7 +210,7 @@ def saveRootFile():
     for i in range(0, 16):
         g=1000+i*100
         vmx_g.append(g)
-        thisSig =  ExtractFile(in_dir+"higgsCombine1DT5HH%i_LSP1_Data_Combo.Significance.mH120.root" %(g))
+        thisSig =  ExtractFile(datacardsDIR+"higgsCombine1DT5HH%i_LSP1_Data_Combo.Significance.mH120.root" %(g))
         vsig_g.append(thisSig)
 
 
@@ -225,12 +239,25 @@ def saveRootFile():
     SignifScan_g.GetXaxis().SetRangeUser(975.0,2525.0);
     SignifScan_g.SetMarkerStyle(20); SignifScan_g.SetMarkerSize(1.0); SignifScan_g.SetMarkerColor(kBlack); SignifScan_g.SetLineColor(kBlack);
 
-    fNEW = TFile(out_dir+"CMS-SUS-20-004_aux_significance.root", "recreate")
+    fNEW_TChiHH = TFile(outDIR+"CMS-SUS-20-004_Figure-aux_002-a.root", "recreate")
     SignifScan.Write("TChiHH")
+    fNEW_TChiHH.Close()
+
+    fNEW_T5HH = TFile(outDIR+"CMS-SUS-20-004_Figure-aux_002-b.root", "recreate")
     SignifScan_g.Write("T5HH")
-    fNEW.Close()
+    fNEW_T5HH.Close()
 
 if __name__ == '__main__':
-    # saveCanvas("N1N2")
-    saveCanvas("T5HH")
-    # saveRootFile()
+    '''
+    Save the canvases of the significance for the combination only
+    Can run for 2D TChiHH "N1N2" or the 1D T5HH "T5HH"
+    Second argument is to print the highest significance, and the (mNLSP,mLSP) point
+    '''
+    saveCanvas("N1N2",False)
+    saveCanvas("T5HH",False)
+
+
+    '''
+    Save the root file containing the significance plots for both TChiHH and T5HH for HEPData
+    '''
+    saveRootFile()

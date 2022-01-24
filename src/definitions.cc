@@ -154,7 +154,6 @@ template<typename ntupleType> double bothJetsGen(ntupleType* ntuple) {
 template<typename ntupleType> bool genHMatched(ntupleType* ntuple, double jet_eta, double jet_phi) {
   bool isMatched = false;
   for (unsigned int i=0 ; i < ntuple->GenParticles->size(); i++) {
-    int parentid = ntuple->GenParticles_ParentId->at(i);
     if (ntuple->GenParticles_PdgId->at(i) == 25 &&
     ntuple->GenParticles_Status->at(i) == 22) {
       double dr = CalcDeltaR(ntuple->GenParticles->at(i).Eta(),ntuple->GenParticles->at(i).Phi(),jet_eta,jet_phi);
@@ -162,6 +161,24 @@ template<typename ntupleType> bool genHMatched(ntupleType* ntuple, double jet_et
     }
   } //end loop over gen particles
   return isMatched;
+}
+
+template<typename ntupleType> bool genbbMatched(ntupleType* ntuple, double jet_eta, double jet_phi) {
+  int numBsMatched = 0;
+  for (unsigned int i=0 ; i < ntuple->GenParticles->size(); i++) {
+    if (abs(ntuple->GenParticles_PdgId->at(i)) == 5) {
+      double dr = CalcDeltaR(ntuple->GenParticles->at(i).Eta(),ntuple->GenParticles->at(i).Phi(),jet_eta,jet_phi);
+      if (dr<0.8) numBsMatched++;
+      // if (numBsMatched>1) break;
+    }
+  } //end loop over gen particles
+  return (numBsMatched>1);
+}
+
+template<typename ntupleType> bool genHbbMatched(ntupleType* ntuple, double jet_eta, double jet_phi) {
+  bool isH = genHMatched(ntuple, jet_eta, jet_phi);
+  bool isbb =  genbbMatched(ntuple, jet_eta, jet_phi);
+  return (isH && isbb);
 }
 
 template<typename ntupleType> bool gen4bs(ntupleType* ntuple) {
@@ -311,8 +328,8 @@ template<typename ntupleType> void setJetPT(ntupleType* ntuple) {
 
 template<typename ntupleType> void setJetMass(ntupleType* ntuple, bool smear=false) {
   TString filename = ntuple->fChain->GetFile()->GetName();
-  bool isSignal = (filename.Contains("TChiHH")||filename.Contains("T5qqqqZH"));
-  bool doTheB = (isSignal && !filename.Contains("2016") && filename.Contains("fast") && filename.Contains("MC") && do3PerCorr);
+  bool isSignal = (filename.Contains("TChiHH")||filename.Contains("T5qqqqZH")||filename.Contains("T5qqqqHH"));
+  bool doTheB = (isSignal && !filename.Contains("2016") && !filename.Contains("Summer16v3") && (filename.Contains("fast")||filename.Contains("Fast")) && (filename.Contains("MC")||filename.Contains("TChiHH")) && do3PerCorr);
   if (ntuple->JetsAK8->size()>0 && ntuple->JetsAK8_softDropMass->size()>0) {
     jetMass1 = ntuple->JetsAK8_softDropMass->at(0);
     if (doTheB) { //recalculate softdrop mass, reducing subjets by 3% only for 2017/2018 fast sim
@@ -393,7 +410,20 @@ template<typename ntupleType> void setSignalMasses(ntupleType* ntuple, int regio
       LSPmass.Append("0");
     }
   }
-  else if (region==1 && filename.Contains("T5qqqqZH") && !filename.Contains("fast")) {
+  else if (region==2 && filename.Contains("T5qqqqHH")) {
+    NLSPmass = ((TObjString *)(x->At(4)))->String();
+    LSPmass = ((TObjString *)(x->At(5)))->String();
+    if (LSPmass.EndsWith("3")) {
+      LSPmass.Remove(LSPmass.Length()-1,LSPmass.Length());
+      LSPmass.Append("5");
+    }
+    else if (LSPmass.EndsWith("8")) {
+      LSPmass.Remove(LSPmass.Length()-1,LSPmass.Length());
+      LSPmass.Append("0");
+    }
+    std::cout<<"Check masses: "<< NLSPmass<<", "<<LSPmass<<std::endl;
+  }
+  else if (region==1 && filename.Contains("T5qqqqZH") && !filename.Contains("fast") && !filename.Contains("Fast")) {
     NLSPmass = ((TObjString *)(x->At(2)))->String();
     LSPmass = ((TObjString *)(x->At(3)))->String();
     if (LSPmass.EndsWith("3")) {
@@ -416,8 +446,8 @@ template<typename ntupleType> void setMET(ntupleType* ntuple) {
     return;
   }
 
-  if (filename.Contains("MC")) {
-    bool doTheB = !filename.Contains("2016") && filename.Contains("fast");
+  if (filename.Contains("MC") || filename.Contains("TChiHH")) {
+    bool doTheB = !filename.Contains("2016") && !filename.Contains("Summer16v3") && (filename.Contains("fast")||filename.Contains("Fast"));
     vector<TLorentzVector> JetsJECFriend(ntuple->Jets->size());
     TLorentzVector v_old, v_new;
 
@@ -516,9 +546,9 @@ template<typename ntupleType> void setMET(ntupleType* ntuple) {
 
 template<typename ntupleType> vector<TLorentzVector> RemakeAK4Jets(ntupleType* ntuple) {
   TString filename = ntuple->fChain->GetFile()->GetName();
-  bool doTheB = !filename.Contains("2016") && filename.Contains("fast");
+  bool doTheB = !filename.Contains("2016") && !filename.Contains("Summer16v3") && (filename.Contains("fast")||filename.Contains("Fast"));
   vector<TLorentzVector> JetsJECFriend(ntuple->Jets->size());
-  if (!filename.Contains("MC")) {
+  if (!filename.Contains("MC") && !filename.Contains("TChiHH")) {
     for (unsigned j = 0; j < ntuple->Jets->size(); ++j) {
       JetsJECFriend[j] = ntuple->Jets->at(j);
     }
@@ -618,8 +648,8 @@ template<typename ntupleType> int numOverlapBs(ntupleType* ntuple, int whichAK8)
 
   TString filename = ntuple->fChain->GetFile()->GetName();
   double CSVBtagMed   = 0.6321; //2016
-  if (filename.Contains("2017")) CSVBtagMed = 0.4941;
-  else if (filename.Contains("2018")) CSVBtagMed = 0.4184;
+  if (filename.Contains("2017") || filename.Contains("Fall17")) CSVBtagMed = 0.4941;
+  else if (filename.Contains("2018") || filename.Contains("Autumn18")) CSVBtagMed = 0.4184;
 
   for (unsigned int j=0; j<ntuple->Jets->size();++j) {
     if (ntuple->Jets_bJetTagDeepCSVBvsAll->at(j)<CSVBtagMed) continue;
@@ -704,17 +734,17 @@ template<typename ntupleType> std::vector<int> numDeepBs(ntupleType* ntuple) {
   double CSVBtagMed   = 0.6321;
   double CSVBtagTight = 0.8953;
 
-  if (filename.Contains("2016")) {
+  if (filename.Contains("2016") || filename.Contains("Summer16v3")) {
     CSVBtagLoose = 0.2217;
     CSVBtagMed   = 0.6321;
     CSVBtagTight = 0.8953;
   }
-  else if (filename.Contains("2017")) {
+  else if (filename.Contains("2017") || filename.Contains("Fall17")) {
     CSVBtagLoose = 0.1522;
     CSVBtagMed   = 0.4941;
     CSVBtagTight = 0.8001;
   }
-  else if (filename.Contains("2018")) {
+  else if (filename.Contains("2018") || filename.Contains("Autumn18")) {
     CSVBtagLoose = 0.1241;
     CSVBtagMed   = 0.4184;
     CSVBtagTight = 0.7527;
@@ -823,14 +853,14 @@ template<typename ntupleType> bool METMHTFilterCut(ntupleType* ntuple) {
 template<typename ntupleType> bool HEMRegion(ntupleType* ntuple, bool isMC_) {
   if (!isMC_ && ntuple->RunNum < 319077) return false;
   TString sample = ntuple->fChain->GetFile()->GetName();
-  if (isMC_ && !sample.Contains("MC2018")) return false;
+  if (isMC_ && !sample.Contains("2018") && !sample.Contains("Autumn18")) return false;
   if (ntuple->EvtNum%1000 < 1000*21.0/59.6) return false;
   return true;
 }
 
 template<typename ntupleType> bool LowNeutralJetFilter(ntupleType* ntuple) {
   TString sample = ntuple->fChain->GetFile()->GetName();
-  if (sample.Contains("fast")) return true;
+  if (sample.Contains("fast") || sample.Contains("Fast")) return true;
 
   bool LowNeutralJetFilter = true;
   bool tight = false;
@@ -844,7 +874,7 @@ template<typename ntupleType> bool LowNeutralJetFilter(ntupleType* ntuple) {
 
 template<typename ntupleType> bool HEMDPhiVetoFilter(ntupleType* ntuple) {
   TString sample = ntuple->fChain->GetFile()->GetName();
-  if (sample.Contains("fast")) return true;
+  if (sample.Contains("fast") || sample.Contains("Fast")) return true;
   bool passHEM = true;
   if (sample.Contains("SingleMuon") || sample.Contains("SingleElectron") || sample.Contains("SinglePhoton") || sample.Contains("EGamma") || sample.Contains("tree_MET_201")) {
     if (HEMRegion(ntuple, false) && ntuple->HEMDPhiVetoFilter!=1) passHEM=false;
@@ -858,7 +888,7 @@ template<typename ntupleType> bool HEMDPhiVetoFilter(ntupleType* ntuple) {
 template<typename ntupleType> bool HEMDPhiVetoFilterCutflow(ntupleType* ntuple) {
   //if running from ntuples and not skims
   TString sample = ntuple->fChain->GetFile()->GetName();
-  if (sample.Contains("fast")) return true;
+  if (sample.Contains("fast") || sample.Contains("Fast")) return true;
   bool passHEM = true;
   bool isHEMRegion = true;
 
@@ -893,38 +923,38 @@ template<typename ntupleType> bool GoodVertexCutflow(ntupleType* ntuple) {
 
 template<typename ntupleType> bool globalSuperTightHalo2016FilterCutflow(ntupleType* ntuple) {
   TString sample = ntuple->fChain->GetFile()->GetName();
-  if (sample.Contains("fast")) return true;
+  if (sample.Contains("fast") || sample.Contains("Fast")) return true;
   return(ntuple->globalSuperTightHalo2016Filter==1);
 }
 
 template<typename ntupleType> bool HBHENoiseFilterCutflow(ntupleType* ntuple) {
   TString sample = ntuple->fChain->GetFile()->GetName();
-  if (sample.Contains("fast")) return true;
+  if (sample.Contains("fast") || sample.Contains("Fast")) return true;
   return(ntuple->HBHENoiseFilter==1);
 }
 
 template<typename ntupleType> bool HBHEIsoNoiseFilterCutflow(ntupleType* ntuple) {
   TString sample = ntuple->fChain->GetFile()->GetName();
-  if (sample.Contains("fast")) return true;
+  if (sample.Contains("fast") || sample.Contains("Fast")) return true;
   return(ntuple->HBHEIsoNoiseFilter==1);
 }
 
 template<typename ntupleType> bool EcalDeadCellTriggerPrimitiveFilterCutflow(ntupleType* ntuple) {
   TString sample = ntuple->fChain->GetFile()->GetName();
-  if (sample.Contains("fast")) return true;
+  if (sample.Contains("fast") || sample.Contains("Fast")) return true;
   return(ntuple->EcalDeadCellTriggerPrimitiveFilter==1);
 }
 
 template<typename ntupleType> bool BadPFMuonFilterCutflow(ntupleType* ntuple) {
   TString sample = ntuple->fChain->GetFile()->GetName();
-  if (sample.Contains("fast")) return true;
+  if (sample.Contains("fast") || sample.Contains("Fast")) return true;
   return(ntuple->BadPFMuonFilter==1);
 }
 
 template<typename ntupleType> bool FakeJetFilter(ntupleType* ntuple) {
   bool noFakeJet = true;
   TString sample = ntuple->fChain->GetFile()->GetName();
-  if (!sample.Contains("fast")) return(noFakeJet);
+  if (!sample.Contains("fast") && !sample.Contains("Fast")) return(noFakeJet);
   //reject events with any jet pt>20, |eta|<2.5 NOT matched to a GenJet (w/in DeltaR<0.3) and chfrac < 0.1
   for (unsigned j = 0; j < ntuple->Jets->size(); ++j) {
     if (ntuple->Jets->at(j).Pt()<=20 || abs(ntuple->Jets->at(j).Eta())>=2.5) continue;
@@ -943,7 +973,7 @@ template<typename ntupleType> bool FakeJetFilter(ntupleType* ntuple) {
 
 template<typename ntupleType> bool MuonJetFilter(ntupleType* ntuple) {
   TString sample = ntuple->fChain->GetFile()->GetName();
-  if (sample.Contains("fast")) return true;
+  if (sample.Contains("fast") || sample.Contains("Fast")) return true;
 
   bool noMuonJet = true;
   //check for inconsistent case
@@ -962,7 +992,7 @@ template<typename ntupleType> bool MuonJetFilter(ntupleType* ntuple) {
 
 template<typename ntupleType> bool HTRatioDPhiTightFilter(ntupleType* ntuple) {
   TString sample = ntuple->fChain->GetFile()->GetName();
-  if (sample.Contains("fast")) return true;
+  if (sample.Contains("fast") || sample.Contains("Fast")) return true;
   double htratio = ntuple->HT5/eventHT;
   bool tight = true;
   //keep any event with ht5/ht < 1.2
@@ -972,7 +1002,7 @@ template<typename ntupleType> bool HTRatioDPhiTightFilter(ntupleType* ntuple) {
 
 template<typename ntupleType> bool EcalNoiseJetFilter(ntupleType* ntuple) {
   TString sample = ntuple->fChain->GetFile()->GetName();
-  if (sample.Contains("fast")) return true;
+  if (sample.Contains("fast") || sample.Contains("Fast")) return true;
 
   int counter = 0;
   bool goodJet[2] = {true,true};
@@ -992,7 +1022,7 @@ template<typename ntupleType> bool EcalNoiseJetFilter(ntupleType* ntuple) {
 
 template<typename ntupleType> bool FiltersCut(ntupleType* ntuple) {
   TString sample = ntuple->fChain->GetFile()->GetName();
-  if (sample.Contains("fast")) {
+  if (sample.Contains("fast") || sample.Contains("Fast")) {
     return (
       ntuple->FakeJetFilter &&
       ntuple->NVtx>0 &&
@@ -1018,7 +1048,7 @@ template<typename ntupleType> bool FiltersCut(ntupleType* ntuple) {
 template<typename ntupleType> bool FiltersCutflow(ntupleType* ntuple) {
   //if running from ntuples and not skims
   TString sample = ntuple->fChain->GetFile()->GetName();
-  if (sample.Contains("fast")) {
+  if (sample.Contains("fast") || sample.Contains("Fast")) {
     return (
       FakeJetFilter(ntuple) && // ntuple->FakeJetFilter
       GoodVertexCutflow(ntuple) &&
@@ -1295,8 +1325,9 @@ void readResVeto_Data(string whichYear) {
     ifstream file(fileName);
     while (std::getline(file, line)) {
       std::vector<std::string> x = split(line, ',');
-      string thisOne = x[1].erase(0,1) + "," + x[2].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1)+ ",0";
+      string thisOne = x[1].erase(0,1) + "," + x[2].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1)+ ",1";
       vYearRunLumiEvt.insert(thisOne);
+      // std::cout<<"Check: "<<thisOne<<std::endl;
     }
   }
 }
@@ -1414,6 +1445,7 @@ template<typename ntupleType> bool resEventFound(ntupleType* ntuple,string yearS
     thisLSP = std::to_string(lspmass);
   }
   string check = yearStr+","+runNumber+","+lumiNumber+","+evtNumber+","+thisLSP;
+  // std::cout<<"My check: "<<check<<std::endl;
 
   bool foundEvent = false;
   set<string>::iterator it = vYearRunLumiEvt.find(check);
@@ -1426,8 +1458,8 @@ template<typename ntupleType> bool resEventFound(ntupleType* ntuple,string yearS
 template<typename ntupleType> bool resVetoCutflow(ntupleType* ntuple) {
   TString filename = ntuple->fChain->GetFile()->GetName();
   string thisyearinstring = "2016";
-  if (filename.Contains("2017")) thisyearinstring = "2017";
-  else if (filename.Contains("2018")) thisyearinstring = "2018";
+  if (filename.Contains("2017") || filename.Contains("Fall17")) thisyearinstring = "2017";
+  else if (filename.Contains("2018") || filename.Contains("Autumn18")) thisyearinstring = "2018";
   bool isFound = resEventFound(ntuple,thisyearinstring);
   return !isFound;
 }
@@ -1916,11 +1948,11 @@ template<typename ntupleType>float scalesSystematic(ntupleType* ntuple, TH1F* h_
 template<typename ntupleType>float ISRCorrections(ntupleType* ntuple, int region, TString year, TString whichSyst) {
   TString filename = ntuple->fChain->GetFile()->GetName();
   float isr = 1.0;
-  if (!filename.Contains("MC")) return isr;
+  if (!filename.Contains("MC") && !filename.Contains("TChiHH")) return isr;
   if (region==0 || region==1 || region==2) {
-    if (filename.Contains("T5qqqqZH") || filename.Contains("T5HH")) isr = SignalISRCorrection(ntuple,whichSyst);
+    if (filename.Contains("T5qqqqZH") || filename.Contains("T5HH") || filename.Contains("T5qqqqHH")) isr = SignalISRCorrection(ntuple,whichSyst);
     else if (filename.Contains("TTJets") && year=="MC2016") isr = SignalISRCorrection(ntuple,whichSyst);
-    else if (filename.Contains("TChiHH_HToBB") && filename.Contains("fast")) isr = SignalEWKISRCorrection(ntuple,whichSyst);
+    else if (filename.Contains("TChiHH_HToBB") && (filename.Contains("fast") || filename.Contains("Fast"))) isr = SignalEWKISRCorrection(ntuple,whichSyst);
   }
   return isr;
 }
@@ -2001,7 +2033,7 @@ template<typename ntupleType>float SignalEWKISRCorrection(ntupleType* ntuple, TS
 
 template<typename ntupleType> double bbFastSIMSFs(ntupleType* ntuple, TString whichSyst) { //returns an event weight
   TString filename = ntuple->fChain->GetFile()->GetName();
-  if (!filename.Contains("fast")) return 1.0;
+  if (!filename.Contains("fast") && !filename.Contains("Fast")) return 1.0;
   double evtWeight=1.0;
   float sf1 = 1.0; float sf1_unc = 0.0; float sf2 = 1.0; float sf2_unc = 0.0;
   float j1Mass = jetMass1; float j2Mass = jetMass2;
@@ -2015,7 +2047,7 @@ template<typename ntupleType> double bbFastSIMSFs(ntupleType* ntuple, TString wh
     float jetPt = jetPt1; float sdmass = jetMass1;
     if (ntuple->JetsAK8_pfMassIndependentDeepDoubleBvLJetTagsProbHbb->at(0)<0.7) {jetPt = jetPt2; sdmass=jetMass2;}
 
-    if (filename.Contains("2016")) {
+    if (filename.Contains("2016") || filename.Contains("Summer16v3")) {
       if (sdmass>HmassWindowLow && sdmass<HmassWindowHigh) { //jet is in SR
         if      (jetPt>=300 && jetPt<500) {sf1 = 0.998; sf1_unc = 0.004;}
         else if (jetPt>=500 && jetPt<700) {sf1 = 0.993; sf1_unc = 0.003;}
@@ -2030,7 +2062,7 @@ template<typename ntupleType> double bbFastSIMSFs(ntupleType* ntuple, TString wh
       }
 
     }
-    else if (filename.Contains("2017")) {
+    else if (filename.Contains("2017") || filename.Contains("Fall17")) {
       if (sdmass>HmassWindowLow && sdmass<HmassWindowHigh) { //jet is in SR
         if      (jetPt>=300 && jetPt<500) {sf1 = 0.972; sf1_unc = 0.015;}
         else if (jetPt>=500 && jetPt<700) {sf1 = 0.965; sf1_unc = 0.016;}
@@ -2044,7 +2076,7 @@ template<typename ntupleType> double bbFastSIMSFs(ntupleType* ntuple, TString wh
         else if (jetPt>=900)              {sf1 = 0.854; sf1_unc = 0.031;}
       }
     }
-    else if (filename.Contains("2018")) {
+    else if (filename.Contains("2018") || filename.Contains("Autumn18")) {
       if (sdmass>HmassWindowLow && sdmass<HmassWindowHigh) { //jet is in SR
         if      (jetPt>=300 && jetPt<500) {sf1 = 0.986; sf1_unc = 0.019;}
         else if (jetPt>=500 && jetPt<700) {sf1 = 0.982; sf1_unc = 0.014;}
@@ -2064,7 +2096,7 @@ template<typename ntupleType> double bbFastSIMSFs(ntupleType* ntuple, TString wh
     return evtWeight;
   } //end 1H
   else if (region=="2H") {
-    if (filename.Contains("2016")) {
+    if (filename.Contains("2016") || filename.Contains("Summer16v3")) {
       if (j1Mass>HmassWindowLow && j1Mass<HmassWindowHigh) { //j1 is in SR
         if      (jetPt1>=300 && jetPt1<500) {sf1 = 0.998; sf1_unc = 0.004;}
         else if (jetPt1>=500 && jetPt1<700) {sf1 = 0.993; sf1_unc = 0.003;}
@@ -2091,7 +2123,7 @@ template<typename ntupleType> double bbFastSIMSFs(ntupleType* ntuple, TString wh
         else if (jetPt2>=900)               {sf2 = 0.993; sf2_unc = 0.009;}
       }
     }
-    else if (filename.Contains("2017")) {
+    else if (filename.Contains("2017") || filename.Contains("Fall17")) {
       if (j1Mass>HmassWindowLow && j1Mass<HmassWindowHigh) { //j1 is in SR
         if      (jetPt1>=300 && jetPt1<500) {sf1 = 0.972; sf1_unc = 0.015;}
         else if (jetPt1>=500 && jetPt1<700) {sf1 = 0.965; sf1_unc = 0.016;}
@@ -2118,7 +2150,7 @@ template<typename ntupleType> double bbFastSIMSFs(ntupleType* ntuple, TString wh
         else if (jetPt2>=900)               {sf2 = 0.854; sf2_unc = 0.031;}
       }
     }
-    else if (filename.Contains("2018")) {
+    else if (filename.Contains("2018") || filename.Contains("Autumn18")) {
       if (j1Mass>HmassWindowLow && j1Mass<HmassWindowHigh) { //j1 is in SR
         if      (jetPt1>=300 && jetPt1<500) {sf1 = 0.986; sf1_unc = 0.019;}
         else if (jetPt1>=500 && jetPt1<700) {sf1 = 0.982; sf1_unc = 0.014;}
@@ -2156,14 +2188,14 @@ template<typename ntupleType> double bbFastSIMSFs(ntupleType* ntuple, TString wh
 
 template<typename ntupleType> double softdropmassFastSIMSFs(ntupleType* ntuple, TString whichSyst) { //returns an event weight
   TString filename = ntuple->fChain->GetFile()->GetName();
-  if (!filename.Contains("fast")) return 1.0;
+  if (!filename.Contains("fast") && !filename.Contains("Fast")) return 1.0;
   double evtWeight=1.0;
   float sf1 = 1.0; float sf1_unc = 0.0;
   float sf2 = 1.0; float sf2_unc = 0.0;
 
   //Check if jet is in SR or SB
   //using Noah's numbers, applying whicher is bigger between stat and syst as unc
-  if (filename.Contains("2016")) {
+  if (filename.Contains("2016") || filename.Contains("Summer16v3")) {
     if (jetMass1>HmassWindowLow && jetMass1<HmassWindowHigh) { //SR for J1
       if      (jetPt1>=300 && jetPt1<500) {sf1 = 0.988; sf1_unc = 1-sf1;} //systematic is the full correction, difference from 1
       else if (jetPt1>=500 && jetPt1<700) {sf1 = 0.986; sf1_unc = 1-sf1;}
@@ -2189,7 +2221,7 @@ template<typename ntupleType> double softdropmassFastSIMSFs(ntupleType* ntuple, 
       else if (jetPt2>=900)               {sf2 = 1-0.973+1; sf2_unc = sf2-1;}
     }
   }
-  else if (filename.Contains("2017")) {
+  else if (filename.Contains("2017") || filename.Contains("Fall17")) {
     if (jetMass1>HmassWindowLow && jetMass1<HmassWindowHigh) { //SR for J1
       if      (jetPt1>=300 && jetPt1<500) {sf1 = 1.002; sf1_unc = 0.006;} //stat unc is greater than syst
       else if (jetPt1>=500 && jetPt1<700) {sf1 = 1.007; sf1_unc = 0.007;}
@@ -2215,7 +2247,7 @@ template<typename ntupleType> double softdropmassFastSIMSFs(ntupleType* ntuple, 
       else if (jetPt2>=900)               {sf2 = 1-1.034+1; sf2_unc = 1-sf2;}
     }
   }
-  else if (filename.Contains("2018")) {
+  else if (filename.Contains("2018") || filename.Contains("Autumn18")) {
     if (jetMass1>HmassWindowLow && jetMass1<HmassWindowHigh) { //SR for J1
       if      (jetPt1>=300 && jetPt1<500) {sf1 = 1.015; sf1_unc = 0.015;}
       else if (jetPt1>=500 && jetPt1<700) {sf1 = 1.014; sf1_unc = 0.014;}
@@ -2256,13 +2288,12 @@ template<typename ntupleType> double bbSFs(ntupleType* ntuple, TString whichSyst
 
 template<typename ntupleType> double bbSFs_2H(ntupleType* ntuple, TString whichSyst) { //return an event weight
   TString filename = ntuple->fChain->GetFile()->GetName();
-  if (!filename.Contains("MC")) return 1.0;
+  if (!filename.Contains("MC") && !filename.Contains("TChiHH")) return 1.0;
   double evtWeight=1.0; float uncLowPt = 0.0; float uncHighPt = 0.0;
-  bool isSignal = (filename.Contains("TChiHH")||filename.Contains("T5qqqqZH")||filename.Contains("T5HH"));
+  bool isSignal = (filename.Contains("TChiHH")||filename.Contains("T5qqqqZH")||filename.Contains("T5HH")||filename.Contains("T5qqqqHH"));
 
   if (isSignal) {
-
-    if (filename.Contains("2016")) {
+    if (filename.Contains("2016") || filename.Contains("Summer16v3")) {
       if (whichSyst=="up") {uncLowPt = 0.10; uncHighPt = 0.10;} // up
       else if (whichSyst=="down") {uncLowPt = -0.04; uncHighPt = -0.04;} // down
       if (jetPt1>250. && jetPt1<=350) evtWeight=evtWeight*(0.95+uncLowPt); //this is currently missing, so using a general SF
@@ -2272,7 +2303,7 @@ template<typename ntupleType> double bbSFs_2H(ntupleType* ntuple, TString whichS
       else if (jetPt2>350.) evtWeight=evtWeight*(0.95+uncHighPt);
       return evtWeight;
     }
-    else if (filename.Contains("2017")) {
+    else if (filename.Contains("2017") || filename.Contains("Fall17")) {
       if (whichSyst=="up") {uncLowPt = 0.04; uncHighPt = 0.07;} // up
       else if (whichSyst=="down") {uncLowPt = -0.04; uncHighPt = -0.12;} // down
       if (jetPt1>250. && jetPt1<=350) evtWeight=evtWeight*(0.92+uncLowPt);
@@ -2280,9 +2311,10 @@ template<typename ntupleType> double bbSFs_2H(ntupleType* ntuple, TString whichS
 
       if (jetPt2>250. && jetPt2<=350) evtWeight=evtWeight*(0.92+uncLowPt);
       else if (jetPt2>350.) evtWeight=evtWeight*(1.01+uncHighPt);
+
       return evtWeight;
     }
-    else if (filename.Contains("2018")) {
+    else if (filename.Contains("2018") || filename.Contains("Autumn18")) {
       if (whichSyst=="up") {uncLowPt = 0.04; uncHighPt = 0.07;} // up
       else if (whichSyst=="down") {uncLowPt = -0.05; uncHighPt = -0.06;} // down
       if (jetPt1>250. && jetPt1<=350) evtWeight=evtWeight*(0.97+uncLowPt);
@@ -2341,30 +2373,30 @@ template<typename ntupleType> double bbSFs_2H(ntupleType* ntuple, TString whichS
 
 template<typename ntupleType> double bbSFs_1H(ntupleType* ntuple, TString whichSyst) { //return an event weight
   TString filename = ntuple->fChain->GetFile()->GetName();
-  if (!filename.Contains("MC")) return 1.0;
+  if (!filename.Contains("MC") && !filename.Contains("TChiHH")) return 1.0;
   double evtWeight=1.0; float uncLowPt = 0.0; float uncHighPt = 0.0;
-  bool isSignal = (filename.Contains("TChiHH")||filename.Contains("T5qqqqZH")||filename.Contains("T5HH"));
+  bool isSignal = (filename.Contains("TChiHH")||filename.Contains("T5qqqqZH")||filename.Contains("T5HH")||filename.Contains("T5qqqqHH"));
 
   //First, figure out which jet is tagged...
   float jetPt = jetPt1; int thisIsOurJet = 0;
   if (ntuple->JetsAK8_pfMassIndependentDeepDoubleBvLJetTagsProbHbb->at(0)<0.7) {jetPt = jetPt2; thisIsOurJet=1;}
 
   if (isSignal) {
-    if (filename.Contains("2016")) {
+    if (filename.Contains("2016") || filename.Contains("Summer16v3")) {
       if (whichSyst=="up") {uncLowPt = 0.10; uncHighPt = 0.10;} // up
       else if (whichSyst=="down") {uncLowPt = -0.04; uncHighPt = -0.04;} // down
       if (jetPt>250. && jetPt<=350) evtWeight=evtWeight*(0.95+uncLowPt); //this is currently missing, so using a general SF
       else if (jetPt>350.) evtWeight=evtWeight*(0.95+uncHighPt);
       return evtWeight;
     }
-    else if (filename.Contains("2017")) {
+    else if (filename.Contains("2017") || filename.Contains("Fall17")) {
       if (whichSyst=="up") {uncLowPt = 0.04; uncHighPt = 0.07;} // up
       else if (whichSyst=="down") {uncLowPt = -0.04; uncHighPt = -0.12;} // down
       if (jetPt>250. && jetPt<=350) evtWeight=evtWeight*(0.92+uncLowPt);
       else if (jetPt>350.) evtWeight=evtWeight*(1.01+uncHighPt);
       return evtWeight;
     }
-    else if (filename.Contains("2018")) {
+    else if (filename.Contains("2018") || filename.Contains("Autumn18")) {
       if (whichSyst=="up") {uncLowPt = 0.04; uncHighPt = 0.07;} // up
       else if (whichSyst=="down") {uncLowPt = -0.05; uncHighPt = -0.06;} // down
       if (jetPt>250. && jetPt<=350) evtWeight=evtWeight*(0.97+uncLowPt);
@@ -2379,20 +2411,20 @@ template<typename ntupleType> double bbSFs_1H(ntupleType* ntuple, TString whichS
     if (numBs==0) {
       if (jetPt>300. && jetPt<=400) evtWeight=evtWeight*0.989;
       else if (jetPt>400.) evtWeight=evtWeight*1.092;
-      // if (jetPt>300. && jetPt<=400) evtWeight=evtWeight*(0.989-0.097-0.179);
-      // else if (jetPt>400.) evtWeight=evtWeight*(1.092-0.285-0.146);
+      // if (jetPt>300. && jetPt<=400) evtWeight=evtWeight*(0.989-0.097-0.179); //-0.082
+      // else if (jetPt>400.) evtWeight=evtWeight*(1.092-0.285-0.146); //-0.431
     }
     else if (numBs==1) {
       if (jetPt>300. && jetPt<=400) evtWeight=evtWeight*0.941;
       else if (jetPt>400.) evtWeight=evtWeight*0.875;
-      // if (jetPt>300. && jetPt<=400) evtWeight=evtWeight*(0.941-0.017-0.108);
-      // else if (jetPt>400.) evtWeight=evtWeight*(0.875-0.053-0.060);
+      // if (jetPt>300. && jetPt<=400) evtWeight=evtWeight*(0.941-0.017-0.108); //-0.125
+      // else if (jetPt>400.) evtWeight=evtWeight*(0.875-0.053-0.060); //-0.113
     }
     else if (numBs>1) {
       if (jetPt>300. && jetPt<=400) evtWeight=evtWeight*0.976;
       else if (jetPt>400.) evtWeight=evtWeight*1.004;
-      // if (jetPt>300. && jetPt<=400) evtWeight=evtWeight*(0.976-0.022-0.060);
-      // else if (jetPt>400.) evtWeight=evtWeight*(1.004-0.072-0.074);
+      // if (jetPt>300. && jetPt<=400) evtWeight=evtWeight*(0.976-0.022-0.060); //-0.082
+      // else if (jetPt>400.) evtWeight=evtWeight*(1.004-0.072-0.074); //-0.146
     }
   }
   return evtWeight;
@@ -2402,10 +2434,10 @@ template<typename ntupleType> double RemakeAK8Jets(ntupleType* ntuple,int j) {
   //also used for 3% correction for signal jets
   TString filename = ntuple->fChain->GetFile()->GetName();
   double jetPt = ntuple->JetsAK8->at(j).Pt();
-  if (!filename.Contains("MC")) return jetPt;
+  if (!filename.Contains("MC") && !filename.Contains("TChiHH")) return jetPt;
 
-  bool doTheB = !filename.Contains("2016") && filename.Contains("fast") && do3PerCorr;
-  bool isSignal = filename.Contains("TChiHH")||filename.Contains("T5qqqqZH");
+  bool doTheB = !filename.Contains("2016") && !filename.Contains("Summer16v3") && (filename.Contains("fast") || filename.Contains("Fast")) && do3PerCorr;
+  bool isSignal = filename.Contains("TChiHH")||filename.Contains("T5qqqqZH")||filename.Contains("T5qqqqHH");
   double doubleBSF=1.0;
 
   vector<int> newIndex;
@@ -2427,7 +2459,7 @@ template<typename ntupleType> double RemakeAK8Jets(ntupleType* ntuple,int j) {
   }
   else if (whichJEC=="JECDown") {
     TLorentzVector newAK8Jet = ntuple->JetsAK8->at(i)*(1./ntuple->JetsAK8_jerFactor->at(i))*(1-ntuple->JetsAK8_jecUnc->at(i))*ntuple->JetsAK8JECdown_jerFactor->at(j); //JEC down
-    if ( isSignal && !filename.Contains("2016")) newAK8Jet=newAK8Jet*0.97;
+    if ( isSignal && !filename.Contains("2016") && !filename.Contains("Summer16v3")) newAK8Jet=newAK8Jet*0.97;
     jetPt = newAK8Jet.Pt();
   }
   else if (whichJEC=="JERUp") {
@@ -3153,4 +3185,11 @@ double higgsinoCrossSection2D(TString hig_mass) {
   else if (hig_mass =="1475") xsec = 1.16416e-05;
   else xsec = 0;
   return xsec*1000.0;
+}
+
+double reweightSignalXSEC(TString hig_mass) {
+  //reweights 2D xsec to 1D xsec
+  double xsec_1D = higgsinoCrossSection1D(hig_mass);
+  double xsec_2D = higgsinoCrossSection2D(hig_mass);
+  return (xsec_1D/xsec_2D);
 }

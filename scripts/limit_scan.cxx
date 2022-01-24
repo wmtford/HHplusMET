@@ -22,13 +22,38 @@
 
 using namespace std;
 
-// string in_dir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/boostedHiggsPlusMET/datacards/";
+
+/*
+Runs the actual 2D limits plot
+Requires the text file from scan_point.cxx to be run first (it will warn you if file is missing)
+Can run either TChiHH (N1N2) or T5HH (Gluino)
+Boosted only for TChiHH produces no limits
+Modified from UCSB
+
+ReadPointsCombo() reads the limits from the text file from scan_point.cxx and saves them in vectors
+MakeLimitPlotCombo() then plots the observed limits (with +/- 1 sigma lines) and the expected limits (+/- 1 and 2 sigma lines)
+
+ReadPointsAll() reads in all three text files (bosoted only, resolved only, combination) and plots the observed limits only (setup to instead do expected)
+MakeLimitPlotAll() then plots these three lines on the same plot
+
+SaveRootFile() saves all limits and all lines for a given model into a single root file used for HEPData
+CANNOT BE RUN WITH ANYTHING ELSE OR IT DOES WEIRD STUFF
+*/
+
+
+
 string src_dir = "../src/";
 string out_dir = "../output/";
 string tag = "";
 
+//Which model, N1N2 = TChiHH  and  Gluino = T5HH
 string model_ = "N1N2";
 // string model_ = "Gluino";
+
+//Which type: boosted only (boost), resolved only (res), combination (comb)
+string which = "comb";
+// string which = "boost";
+// string which = "res";
 
 void ReadPointsCombo(vector<double> &vmx,vector<double> &vmy,vector<double> &vxsec,vector<double> &vobs,vector<double> &vobsup,vector<double> &vobsdown, vector<double> &vobsup2,vector<double> &vobsdown2, vector<double> &vexp,vector<double> &vup,vector<double> &vdown, vector<double> &vup2,vector<double> &vdown2);
 void ReadPointsAll(vector<double> &vmxComb,vector<double> &vmyComb,vector<double> &vxsecComb,vector<double> &vobsBoost,vector<double> &vobsRes,vector<double> &vobsComb);
@@ -52,8 +77,9 @@ void limit_scan() {
   }
   MakeLimitPlotCombo(vmx, vmy, vlim, vobs, vobsup, vobsdown, vobsup2, vobsdown2, vexp, vup, vdown, vup2, vdown2);
 
-  SaveRootFile(); //For HEPdata
-  std::exit(1);
+  // SaveRootFile(); //For HEPdata; CAN'T RUN AT THE SAME TIME AS READPOINTSCOMBO+MAKELIMITPLOT
+
+  std::exit(1); //so it exits when run in the shell script
 }
 
 void ReadPointsCombo(vector<double> &vmx, vector<double> &vmy, vector<double> &vxsec,
@@ -64,6 +90,8 @@ void ReadPointsCombo(vector<double> &vmx, vector<double> &vmy, vector<double> &v
                     ) {
 
   string txtname = src_dir+"/limitsCombined_"+model_+"_data.txt";
+  if (which=="boost") txtname = src_dir+"/limitsBoostOnly_"+model_+"_data.txt";
+  else if (which=="res") txtname = src_dir+"/limitsResOnly_"+model_+"_data.txt";
   if (!doesFileExist(txtname)) {
     std::cout<<"You need to run scan_point.cxx first! Exiting..."<<std::endl;
     std::exit(1);
@@ -143,23 +171,23 @@ void ReadPointsAll(vector<double> &vmxComb,
     vmyComb.push_back(pmy);
     vxsecComb.push_back(pxsec);
 
-    // vobsComb.push_back(pobs);
-    vobsComb.push_back(pexp);
+    vobsComb.push_back(pobs);
+    // vobsComb.push_back(pexp);
   }
   //Get "obs" for boostOnly and resOnly
   while(getline(infile2, line2)) {
     istringstream iss2(line2);
     double pmx_2, pmy_2, pxsec_2, pxsecunc_2, pobs_2, pexp_2, pup_2, pdown_2, pup2_2, pdown2_2;
     iss2 >> pmx_2 >> pmy_2 >> pxsec_2 >> pxsecunc_2 >> pobs_2 >> pexp_2 >> pup_2 >> pdown_2 >> pup2_2 >> pdown2_2;
-    // vobsBoost.push_back(pobs_2);
-    vobsBoost.push_back(pexp_2);
+    vobsBoost.push_back(pobs_2);
+    // vobsBoost.push_back(pexp_2);
   }
   while(getline(infile3, line3)) {
     istringstream iss3(line3);
     double pmx_3, pmy_3, pxsec_3, pxsecunc_3, pobs_3, pexp_3, pup_3, pdown_3, pup2_3, pdown2_3;
     iss3 >> pmx_3 >> pmy_3 >> pxsec_3 >> pxsecunc_3 >> pobs_3 >> pexp_3 >> pup_3 >> pdown_3 >> pup2_3 >> pdown2_3;
-    // vobsRes.push_back(pobs_3);
-    vobsRes.push_back(pexp_3);
+    vobsRes.push_back(pobs_3);
+    // vobsRes.push_back(pexp_3);
   }
   infile.close(); infile2.close(); infile3.close();
 
@@ -181,7 +209,8 @@ void MakeLimitPlotCombo(vector<double> vmx, vector<double> vmy, vector<double> v
                         vector<double> vobsup2, vector<double> vobsdown2,
                         vector<double> vexp, vector<double> vup, vector<double> vdown,
                         vector<double> vup2, vector<double> vdown2
-                        ) {
+                      ) {
+  //2-sigma band for observed line passed but currently commented out since unnecessary
   SetupColors();
 
   string xparticle, yparticle;
@@ -190,7 +219,9 @@ void MakeLimitPlotCombo(vector<double> vmx, vector<double> vmy, vector<double> v
   string chi02_str = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0}}}#kern[-0.95]{#scale[0.85]{_{2}}}";
   TString chi02 = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0}}}#kern[-0.95]{#scale[0.85]{_{2}}}";
   TString chi01 = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0 }}}#kern[-1.2]{#scale[0.85]{_{1 }}}";
-  string title = ";m("+chi02_str+") [GeV];m("+yparticle+") [GeV];Cross section upper limit (95% CL) [fb]";
+
+
+  string title = ";m("+xparticle+") [GeV];m("+yparticle+") [GeV];Cross section upper limit (95% CL) [fb]";
 
   TGraph2D glim("", title.c_str(), vlim.size(), &vmx.at(0), &vmy.at(0), &vlim.at(0));
   TGraph2D gobs("", "Observed Limit", vobs.size(), &vmx.at(0), &vmy.at(0), &vobs.at(0));
@@ -207,6 +238,7 @@ void MakeLimitPlotCombo(vector<double> vmx, vector<double> vmy, vector<double> v
 
   if (model_=="N1N2"){
     gexp.SetMinimum(0.0001); gexp.SetMaximum(2); gexp.SetNpx(38.); gexp.SetNpy(35.);
+    glim.SetMinimum(0.5); glim.SetMaximum(9000); //fb
   }
   else {
     gobs.SetMinimum(0.000001); gobs.SetMaximum(2); gobs.SetNpx(38.); gobs.SetNpy(35.);
@@ -215,9 +247,9 @@ void MakeLimitPlotCombo(vector<double> vmx, vector<double> vmy, vector<double> v
     gexp.SetMinimum(0.000001); gexp.SetMaximum(2); gexp.SetNpx(38.); gexp.SetNpy(35.);
     gup.SetMinimum(0.000001); gup.SetMaximum(2); gup.SetNpx(38.); gup.SetNpy(35.);
     gdown.SetMinimum(0.000001); gdown.SetMaximum(2); gdown.SetNpx(38.); gdown.SetNpy(35.);
+    glim.SetMinimum(0.1); glim.SetMaximum(900); //fb
   }
 
-  glim.SetMinimum(0.5); glim.SetMaximum(9000); //fb
   glim.SetTitle(title.c_str());
   glim.GetXaxis()->SetTitleOffset(0.8); glim.GetYaxis()->SetTitleOffset(0.95); glim.GetZaxis()->SetTitleOffset(1.25);
   glim.GetXaxis()->SetTitleSize(0.051); glim.GetYaxis()->SetTitleSize(0.051); glim.GetZaxis()->SetTitleSize(0.042);
@@ -225,8 +257,7 @@ void MakeLimitPlotCombo(vector<double> vmx, vector<double> vmy, vector<double> v
 
   TCanvas c("","",1200, 1100);
   c.cd();
-  TLegend l(0.12, 0.6,0.84,0.9);
-  l.SetTextSize(0.045);
+  TLegend l(0.12, 0.68,0.84,0.9); l.SetTextSize(0.038);
   l.SetBorderSize(1); l.SetFillColor(kWhite);
 
   TLatex ltitle(0.12, 1.-0.5*c.GetTopMargin()-0.02, "#font[62]{CMS}");
@@ -235,8 +266,8 @@ void MakeLimitPlotCombo(vector<double> vmx, vector<double> vmy, vector<double> v
   ltitle.SetNDC(); rtitle.SetNDC(); ltitle_prelim.SetNDC();
   ltitle.SetTextAlign(12); rtitle.SetTextAlign(32); ltitle_prelim.SetTextAlign(12);
 
-  TLatex txtd(0.15,0.825,"pp#rightarrow "+chi03+" "+chi02+" #rightarrow HH "+chi01+" "+chi01);
-  txtd.SetNDC(); txtd.SetTextFont(42); txtd.SetTextSize(0.045);
+  TLatex txtd(0.15,0.85,"pp#rightarrow "+chi02+" "+chi03+" #rightarrow HH "+chi01+" "+chi01);
+  txtd.SetNDC(); txtd.SetTextFont(42); txtd.SetTextSize(0.038);
   c.SetRightMargin(0.16);
   c.SetLeftMargin(0.12); c.SetLogz();
   glim.Draw("colz");
@@ -247,40 +278,40 @@ void MakeLimitPlotCombo(vector<double> vmx, vector<double> vmy, vector<double> v
   TGraph cdown = DrawContours(gdown, 2, 2, 2, 1.0, true);
   TGraph cup2 = DrawContours(gup2, 2, 3, 2, 1.0, true);
   TGraph cdown2 = DrawContours(gdown2, 2, 3, 2, 1.0, true);
-  TGraph cobsup = DrawContours(gobsup, 1, 2, 3, 1., true);
+  TGraph cobsup = DrawContours(gobsup, 1, 2, 2, 1., true);
   TGraph cobsdown = DrawContours(gobsdown, 1, 2, 2, 1., true);
   TGraph cobs = DrawContours(gobs, 1, 1, 2, 1., true);
   // TGraph cobsup2 = DrawContours(gobsup2, 1, 3, 5, 1., true);
   // TGraph cobsdown2 = DrawContours(gobsdown2, 1, 3, 5, 1., true);
 
   cobs.SetLineColor(kBlack);  cobs.SetLineWidth(2);
-  cobsup.SetLineWidth(2);
+  cobsup.SetLineWidth(2); cobsdown.SetLineWidth(2);
   l.AddEntry((TObject*)0, "", "");
   l.AddEntry(&cexp, "Expected #pm1, #pm2 #sigma_{experiment}", "l");
   l.AddEntry(&cobs, "Observed #pm1 #sigma_{theory}", "l");
 
   //Add the stupid bands to the legend
-  TLegend leg2(0.12,0.617,0.84,0.717);
+  TLegend leg2(0.12,0.678,0.84,0.778);
   leg2.SetBorderSize(0); leg2.SetFillColor(0); leg2.SetFillStyle(0);
   leg2.AddEntry(&cobsup," ","l");
 
-  TLegend leg3(0.12,0.583,0.84,0.683);
+  TLegend leg3(0.12,0.656,0.84,0.756);
   leg3.SetBorderSize(0); leg3.SetFillColor(0); leg3.SetFillStyle(0);
   leg3.AddEntry(&cobsup," ","l");
 
-  TLegend leg4(0.12,0.6885,0.84,0.7885);
+  TLegend leg4(0.12,0.733,0.84,0.833);
   leg4.SetBorderSize(0); leg4.SetFillColor(0); leg4.SetFillStyle(0);
   leg4.AddEntry(&cdown," ","l");
 
-  TLegend leg5(0.12,0.71,0.84,0.81);
+  TLegend leg5(0.12,0.746,0.84,0.846);
   leg5.SetBorderSize(0); leg5.SetFillColor(0); leg5.SetFillStyle(0);
   leg5.AddEntry(&cdown," ","l");
 
-  TLegend leg6(0.12,0.678,0.84,0.778);
+  TLegend leg6(0.12,0.726,0.84,0.826);
   leg6.SetBorderSize(0); leg6.SetFillColor(0); leg6.SetFillStyle(0);
   leg6.AddEntry(&cdown2," ","l");
 
-  TLegend leg7(0.12,0.72,0.84,0.82);
+  TLegend leg7(0.12,0.754,0.84,0.854);
   leg7.SetBorderSize(0); leg7.SetFillColor(0); leg7.SetFillStyle(0);
   leg7.AddEntry(&cdown2," ","l");
 
@@ -292,16 +323,30 @@ void MakeLimitPlotCombo(vector<double> vmx, vector<double> vmy, vector<double> v
   leg6.Draw("same"); leg7.Draw("same");
 
   string filebase = out_dir+model_+"_limitScan";
-  string which = "_ComboData";
+  string which = "_ComboData_bFix";
+  if (model_=="Gluino") which = "_Boost";
   filebase+=which;
   gPad->Update();
-  glim.GetYaxis()->SetRangeUser(-0.01,630.0);
+
+  TAxis *axisX = glim.GetXaxis();
+  TAxis *axisY = glim.GetYaxis();
+
+  if (model_=="N1N2"){
+    axisX->SetLimits(150.0,750.0);
+    axisY->SetLimits(-0.01,530.0);
+  }
+  else {
+    axisY->SetLimits(-0.01,2200.0);
+  }
   gPad->Update();
 
-  c.Print((filebase+".pdf").c_str());
-  ltitle_prelim.Draw("same"); //Preliminary
-  gPad->Update();
-  c.Print((filebase+"_prelim.pdf").c_str());
+  // c.Print((filebase+".pdf").c_str());
+  c.Print((out_dir+"Figure_013.pdf").c_str());
+
+
+  // ltitle_prelim.Draw("same"); //Preliminary
+  // gPad->Update();
+  // c.Print((filebase+"_prelim.pdf").c_str());
 }
 
 void MakeLimitPlotAll(vector<double> vmx, vector<double> vmy, vector<double> vlim,
@@ -314,14 +359,20 @@ void MakeLimitPlotAll(vector<double> vmx, vector<double> vmy, vector<double> vli
   string title = ";m_{"+xparticle+"} [GeV];m_{"+yparticle+"} [GeV];95% CL upper limit on cross section [pb]";
 
   TGraph2D glim("", title.c_str(), vlim.size(), &vmx.at(0), &vmy.at(0), &vlim.at(0));
-  TGraph2D gobsComb("", "Expected Limit, Combo", vobsComb.size(), &vmx.at(0), &vmy.at(0), &vobsComb.at(0));
-  TGraph2D gobsBoost("", "Expected Limit, BoostOnly", vobsBoost.size(), &vmx.at(0), &vmy.at(0), &vobsBoost.at(0));
-  TGraph2D gobsRes("", "Expected Limit, ResOnly", vobsRes.size(), &vmx.at(0), &vmy.at(0), &vobsRes.at(0));
+  TGraph2D gobsComb("", "Observed Limit, Combo", vobsComb.size(), &vmx.at(0), &vmy.at(0), &vobsComb.at(0));
+  TGraph2D gobsBoost("", "Observed Limit, BoostOnly", vobsBoost.size(), &vmx.at(0), &vmy.at(0), &vobsBoost.at(0));
+  TGraph2D gobsRes("", "Observed Limit, ResOnly", vobsRes.size(), &vmx.at(0), &vmy.at(0), &vobsRes.at(0));
+
+  //or
+  // TGraph2D gobsComb("", "Expected Limit, Combo", vobsComb.size(), &vmx.at(0), &vmy.at(0), &vobsComb.at(0));
+  // TGraph2D gobsBoost("", "Expected Limit, BoostOnly", vobsBoost.size(), &vmx.at(0), &vmy.at(0), &vobsBoost.at(0));
+  // TGraph2D gobsRes("", "Expected Limit, ResOnly", vobsRes.size(), &vmx.at(0), &vmy.at(0), &vobsRes.at(0));
 
   if (model_=="N1N2"){
     gobsComb.SetMinimum(0.000001); gobsComb.SetMaximum(2); gobsComb.SetNpx(38.); gobsComb.SetNpy(35.);
   }
   else {
+    //Haven't checked these yet
     gobsComb.SetMinimum(0.000001); gobsComb.SetMaximum(2); gobsComb.SetNpx(38.); gobsComb.SetNpy(35.);
   }
 
@@ -366,7 +417,8 @@ void MakeLimitPlotAll(vector<double> vmx, vector<double> vmy, vector<double> vli
   ltitle.Draw("same");
   rtitle.Draw("same");
 
-  string filebase = out_dir+model_+"_limit_scanEXPECTED";
+  string filebase = out_dir+model_+"_limit_scanOBSERVED";
+  // string filebase = out_dir+model_+"_limit_scanEXPECTED";
   string which = "_ComboAll_Data";
   filebase+=which;
 
@@ -381,7 +433,7 @@ void MakeLimitPlotAll(vector<double> vmx, vector<double> vmy, vector<double> vli
 
 void GetParticleNames(string &xparticle, string &yparticle) {
   if (model_=="N1N2") {
-    xparticle = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0}}}#kern[-1.3]{#scale[0.85]{_{2}}}";
+    xparticle = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0}}}#kern[-0.95]{#scale[0.85]{_{2}}}";
     yparticle = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0}}}#kern[-1.3]{#scale[0.85]{_{1}}}";
   }
   else {
@@ -490,32 +542,31 @@ void SaveRootFile() {
   ifstream infile(txtname); string line;
   ifstream infile2(txtname2); string line2;
   ifstream infile3(txtname3); string line3;
-  vector<double> vmx, vmy, vxsec, vobs, vobsup, vobsdown, vexp, vup, vdown, vup2, vdown2, vlim;
+  vector<double> vmx_comb, vmy_comb, vxsec_comb, vobs_comb, vobsup_comb, vobsdown_comb, vexp_comb, vup_comb, vdown_comb, vup2_comb, vdown2_comb, vlim_comb;
   vector<double> vmx_boost, vmy_boost, vxsec_boost, vobs_boost, vobsup_boost, vobsdown_boost, vexp_boost, vup_boost, vdown_boost, vup2_boost, vdown2_boost, vlim_boost;
   vector<double> vmx_res, vmy_res, vxsec_res, vobs_res, vobsup_res, vobsdown_res, vexp_res, vup_res, vdown_res, vup2_res, vdown2_res, vlim_res;
-  vector<double> vlimexp_res, vlimexp_boost, vlimexp;
+  vector<double> vlimexp_res, vlimexp_boost, vlimexp_comb;
 
   while(getline(infile, line)) { //combo
     istringstream iss(line);
     double pmx, pmy, pxsec, pxsecunc, pobs, pexp, pup, pdown, pup2, pdown2;
     iss >> pmx >> pmy >> pxsec >> pxsecunc >> pobs >> pexp >> pup >> pdown >> pup2 >> pdown2;
 
-    //Regular N2N1-only xsec OR gluino
-    vmx.push_back(pmx);
-    vmy.push_back(pmy);
-    vxsec.push_back(pxsec);
-    vobs.push_back(pobs);
-    vobsup.push_back(pobs/(1+pxsecunc));
-    vobsdown.push_back(pobs/(1-pxsecunc));
+    vmx_comb.push_back(pmx);
+    vmy_comb.push_back(pmy);
+    vxsec_comb.push_back(pxsec); //Regular N2N1-only xsec OR gluino
+    vobs_comb.push_back(pobs);
+    vobsup_comb.push_back(pobs/(1+pxsecunc));
+    vobsdown_comb.push_back(pobs/(1-pxsecunc));
 
-    vexp.push_back(pexp);
-    vup.push_back(pup);
-    vdown.push_back(pdown);
-    vup2.push_back(pup2);
-    vdown2.push_back(pdown2);
+    vexp_comb.push_back(pexp);
+    vup_comb.push_back(pup);
+    vdown_comb.push_back(pdown);
+    vup2_comb.push_back(pup2);
+    vdown2_comb.push_back(pdown2);
 
-    vlim.push_back(pxsec*pobs);
-    vlimexp.push_back(pxsec*pexp);
+    vlim_comb.push_back(pxsec*pobs);
+    vlimexp_comb.push_back(pxsec*pexp);
   }
   infile.close();
 
@@ -524,7 +575,6 @@ void SaveRootFile() {
     double pmx, pmy, pxsec, pxsecunc, pobs, pexp, pup, pdown, pup2, pdown2;
     iss2 >> pmx >> pmy >> pxsec >> pxsecunc >> pobs >> pexp >> pup >> pdown >> pup2 >> pdown2;
 
-    //Regular N2N1-only xsec OR gluino
     vmx_boost.push_back(pmx);
     vmy_boost.push_back(pmy);
     vxsec_boost.push_back(pxsec);
@@ -540,7 +590,6 @@ void SaveRootFile() {
 
     vlim_boost.push_back(pxsec*pobs);
     vlimexp_boost.push_back(pxsec*pexp);
-
   }
   infile2.close();
 
@@ -549,7 +598,6 @@ void SaveRootFile() {
     double pmx, pmy, pxsec, pxsecunc, pobs, pexp, pup, pdown, pup2, pdown2;
     iss3 >> pmx >> pmy >> pxsec >> pxsecunc >> pobs >> pexp >> pup >> pdown >> pup2 >> pdown2;
 
-    //Regular N2N1-only xsec OR gluino
     vmx_res.push_back(pmx);
     vmy_res.push_back(pmy);
     vxsec_res.push_back(pxsec);
@@ -570,18 +618,18 @@ void SaveRootFile() {
 
   string xparticle, yparticle;
   GetParticleNames(xparticle, yparticle);
-  string title = ";m("+xparticle+") [GeV];m("+yparticle+") [GeV];Cross section upper limit (95% CL) [pb]";
+  string title = ";m("+xparticle+") [GeV];m("+yparticle+") [GeV];Cross section upper limit (95% CL) [fb]";
 
-  TGraph2D glim("XSecUpperLimit_Combo", title.c_str(), vlim.size(), &vmx.at(0), &vmy.at(0), &vlim.at(0));
-  TGraph2D glimexp("XSecUpperLimitExpected_Combo", title.c_str(), vlimexp.size(), &vmx.at(0), &vmy.at(0), &vlimexp.at(0));
-  TGraph2D gobs("ObservedLimit_Combo", "Observed Limit", vobs.size(), &vmx.at(0), &vmy.at(0), &vobs.at(0));
-  TGraph2D gobsup("ObservedLimit1SigmaUp_Combo", "Observed +1#sigma Limit", vobsup.size(), &vmx.at(0), &vmy.at(0), &vobsup.at(0));
-  TGraph2D gobsdown("ObservedLimit1SigmaDown_Combo", "Observed -1#sigma Limit", vobsdown.size(), &vmx.at(0), &vmy.at(0), &vobsdown.at(0));
-  TGraph2D gexp("ExpectedLimit_Combo", "Expected Limit", vexp.size(), &vmx.at(0), &vmy.at(0), &vexp.at(0));
-  TGraph2D gup("ExpectedLimit1SigmaUp_Combo", "Expected +1#sigma Limit", vup.size(), &vmx.at(0), &vmy.at(0), &vup.at(0));
-  TGraph2D gdown("ExpectedLimit1SigmaDown_Combo", "Expected -1#sigma Limit", vdown.size(), &vmx.at(0), &vmy.at(0), &vdown.at(0));
-  TGraph2D gup2("ExpectedLimit2SigmaUp_Combo", "Expected +2#sigma Limit", vup2.size(), &vmx.at(0), &vmy.at(0), &vup2.at(0));
-  TGraph2D gdown2("ExpectedLimit2SigmaDown_Combo", "Expected -2#sigma Limit", vdown2.size(), &vmx.at(0), &vmy.at(0), &vdown2.at(0));
+  TGraph2D glim("XSecUpperLimit_Combo", title.c_str(), vlim_comb.size(), &vmx_comb.at(0), &vmy_comb.at(0), &vlim_comb.at(0));
+  TGraph2D glimexp("XSecUpperLimitExpected_Combo", title.c_str(), vlimexp_comb.size(), &vmx_comb.at(0), &vmy_comb.at(0), &vlimexp_comb.at(0));
+  TGraph2D gobs("ObservedLimit_Combo", "Observed Limit", vobs_comb.size(), &vmx_comb.at(0), &vmy_comb.at(0), &vobs_comb.at(0));
+  TGraph2D gobsup("ObservedLimit1SigmaUp_Combo", "Observed +1#sigma Limit", vobsup_comb.size(), &vmx_comb.at(0), &vmy_comb.at(0), &vobsup_comb.at(0));
+  TGraph2D gobsdown("ObservedLimit1SigmaDown_Combo", "Observed -1#sigma Limit", vobsdown_comb.size(), &vmx_comb.at(0), &vmy_comb.at(0), &vobsdown_comb.at(0));
+  TGraph2D gexp("ExpectedLimit_Combo", "Expected Limit", vexp_comb.size(), &vmx_comb.at(0), &vmy_comb.at(0), &vexp_comb.at(0));
+  TGraph2D gup("ExpectedLimit1SigmaUp_Combo", "Expected +1#sigma Limit", vup_comb.size(), &vmx_comb.at(0), &vmy_comb.at(0), &vup_comb.at(0));
+  TGraph2D gdown("ExpectedLimit1SigmaDown_Combo", "Expected -1#sigma Limit", vdown_comb.size(), &vmx_comb.at(0), &vmy_comb.at(0), &vdown_comb.at(0));
+  TGraph2D gup2("ExpectedLimit2SigmaUp_Combo", "Expected +2#sigma Limit", vup2_comb.size(), &vmx_comb.at(0), &vmy_comb.at(0), &vup2_comb.at(0));
+  TGraph2D gdown2("ExpectedLimit2SigmaDown_Combo", "Expected -2#sigma Limit", vdown2_comb.size(), &vmx_comb.at(0), &vmy_comb.at(0), &vdown2_comb.at(0));
 
   TGraph2D glim_boost("XSecUpperLimit_Boosted", title.c_str(), vlim_boost.size(), &vmx_boost.at(0), &vmy_boost.at(0), &vlim_boost.at(0));
   TGraph2D glimexp_boost("XSecUpperLimitExpected_Boosted", title.c_str(), vlimexp_boost.size(), &vmx_boost.at(0), &vmy_boost.at(0), &vlimexp_boost.at(0));
@@ -605,18 +653,12 @@ void SaveRootFile() {
   TGraph2D gup2_res("ExpectedLimit2SigmaUp_Resolved", "Expected +2#sigma Limit", vup2_res.size(), &vmx_res.at(0), &vmy_res.at(0), &vup2_res.at(0));
   TGraph2D gdown2_res("ExpectedLimit2SigmaDown_Resolved", "Expected -2#sigma Limit", vdown2_res.size(), &vmx_res.at(0), &vmy_res.at(0), &vdown2_res.at(0));
 
-  // Save ROOT file with all limits
-  TFile * fNEW = new TFile("CMS-SUS-20-004_Figure_013.root", "recreate");
-  glim_res.GetHistogram()->Write();
-  glim_boost.GetHistogram()->Write();
-  glim.GetHistogram()->Write();
-  glimexp_res.GetHistogram()->Write();
-  glimexp_boost.GetHistogram()->Write();
-  glimexp.GetHistogram()->Write();
+  TGraph2D gxsec("TheoryXSec", title.c_str(), vxsec_comb.size(), &vmx_comb.at(0), &vmy_comb.at(0), &vxsec_comb.at(0));
+  gxsec.GetZaxis()->SetTitle("Theory cross section [fb]");
 
 
   TGraph cobs = DrawContours(gobs, 1, 1, 2, 1., false);
-  TGraph cobsup = DrawContours(gobsup, 1, 2, 3, 1., false);
+  TGraph cobsup = DrawContours(gobsup, 1, 2, 2, 1., false);
   TGraph cobsdown = DrawContours(gobsdown, 1, 2, 2, 1., false);
   TGraph cexp = DrawContours(gexp, 2, 1, 2, 1.0, false);
   TGraph cup = DrawContours(gup, 2, 2, 2, 1.0, false);
@@ -639,6 +681,18 @@ void SaveRootFile() {
   TGraph cdown_res = DrawContours(gdown_res, 2, 2, 2, 1.0, false);
   TGraph cup2_res = DrawContours(gup2_res, 2, 3, 2, 1.0, false);
   TGraph cdown2_res = DrawContours(gdown2_res, 2, 3, 2, 1.0, false);
+
+  // Save ROOT file with all limits
+  TString filename = out_dir+"CMS-SUS-20-004_Figure_013.root";
+  TFile * fNEW = new TFile(filename, "recreate");
+  gxsec.GetHistogram()->Write();
+  glim_res.GetHistogram()->Write();
+  glim_boost.GetHistogram()->Write();
+  glim.GetHistogram()->Write();
+  glimexp_res.GetHistogram()->Write();
+  glimexp_boost.GetHistogram()->Write();
+  glimexp.GetHistogram()->Write();
+
 
   cobs.Write("ObservedLimit_Combo"); cobsup.Write("ObservedLimit1SigmaUp_Combo"); cobsdown.Write("ObservedLimit1SigmaDown_Combo");
   cexp.Write("ExpectedLimit_Combo"); cup.Write("ExpectedLimit1SigmaUp_Combo"); cdown.Write("ExpectedLimit1SigmaDown_Combo");

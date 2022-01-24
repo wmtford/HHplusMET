@@ -15,15 +15,25 @@
 
 using namespace std;
 
+/*
+Creates a text file containing the observed and expected limits (and sigma band values) for each mass point of the 2D scan
+Requires the combine root files for the model and type (boosted only, resolved only, combined) to be in the datacards/ directory
+Only runs for the 2D models (N1N2 = TChiHH, Gluino = T5HH)
+Can run for boosted only, resolved only, or combination
+Make sure the mass points match the corresponding NAMES files (src/higgsino2DFileNames.txt or src/Gluino2DScanNamesNEW.txt) - just need the mass points from this
+Modified from UCSB
+*/
+
+
 std::vector<std::string> split(const std::string& s, char delimiter);
 void higgsino2DCrossSection(int hig_mass, double &xsec, double &xsec_unc);
 void gluino2DCrossSection(int hig_mass, double &xsec, double &xsec_unc);
 void saveLimits(string model, string which);
 
-string in_dir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/HHplusMET/datacards";
+string in_dir = "../datacards";
 string out_dir = "../src";
 
-//model = "N1N2" or "Gluino", but probably don't run gluino
+//model = "N1N2" or "Gluino", but not sure if Gluino works
 //which = "comb" "boost" or "res"
 void scan_point(string model, string which) {
   saveLimits(model,which);
@@ -32,7 +42,7 @@ void scan_point(string model, string which) {
 
 void saveLimits(string model, string which) {
   string inFile = out_dir+"/higgsino2DFileNames.txt";
-  if (model=="Gluino") inFile = out_dir+"/Gluino2DScanNames.txt";
+  if (model=="Gluino") inFile = out_dir+"/Gluino2DScanNamesNEW.txt";
   ifstream file(inFile);
   string line; TString filename;
   string txtname(out_dir+"/limitsCombined_"+model+"_data.txt");
@@ -43,17 +53,26 @@ void saveLimits(string model, string which) {
   while(std::getline(file, line)) {
     std::vector<std::string> x = split(line, '_');
     string hino_mass = ""; string LSP_mass = "";
-    if (model=="Gluino") {hino_mass = x[3]; LSP_mass = x[4];}
+    if (model=="Gluino") {hino_mass = x[4]; LSP_mass = x[5];}
     else {hino_mass = x[5]; LSP_mass = x[6];}
-    std::cout<<"hino: "<<hino_mass<<", LSP: "<<LSP_mass<<std::endl;
+
+
     int hino_mass_int = std::stoi(hino_mass);
     int LSP_mass_int = std::stoi(LSP_mass);
     if (model=="N1N2" && hino_mass_int>810) continue;
 
-    filename = in_dir+"/higgsCombine2DTChiHH"+hino_mass+"_LSP"+LSP_mass+"_Data_Combo.AsymptoticLimits.mH120.root";
-    if (which=="boost") filename = in_dir+"/higgsCombine2DTChiHH"+hino_mass+"_LSP"+LSP_mass+"_BothBoostedH_Data.AsymptoticLimits.mH120.root";
-    else if (which=="res") filename = in_dir+"/higgsCombine2DTChiHH"+hino_mass+"_LSP"+LSP_mass+"_Data_ResOnly.AsymptoticLimits.mH120.root";
-    if (model=="Gluino") filename = in_dir+"/higgsCombine2DT5HH"+hino_mass+"_LSP"+LSP_mass+"_BothBoostedH_Data.AsymptoticLimits.mH120.root"; //gluino
+    int resLSP_int = LSP_mass_int;
+    if (resLSP_int==1) resLSP_int=1;
+    else if (resLSP_int%5!=0) resLSP_int=resLSP_int+2;
+    string resLSP = std::to_string(resLSP_int);
+    std::cout<<"hino: "<<hino_mass<<", LSP: "<<resLSP<<std::endl;
+
+
+
+    filename = in_dir+"/higgsCombine2DTChiHH"+hino_mass+"_LSP"+resLSP+"_Data_Combo.AsymptoticLimits.mH120.root";
+    if (which=="boost") filename = in_dir+"/higgsCombine2DTChiHH"+hino_mass+"_LSP"+resLSP+"_BothBoostedH_Data.AsymptoticLimits.mH120.root";
+    else if (which=="res") filename = in_dir+"/higgsCombine2DTChiHH"+hino_mass+"_LSP"+resLSP+"_Data_ResOnly.AsymptoticLimits.mH120.root";
+    if (model=="Gluino") filename = in_dir+"/higgsCombine2DT5HH"+hino_mass+"_LSP"+resLSP+"_BothBoostedH_Data.AsymptoticLimits.mH120.root"; //gluino
 
     double xsec, xsec_unc;
     if (model=="N1N2") higgsino2DCrossSection(hino_mass_int, xsec, xsec_unc);
@@ -78,7 +97,7 @@ void saveLimits(string model, string which) {
 
     txtfile << setprecision(numeric_limits<double>::max_digits10)
       << ' ' << hino_mass
-      << ' ' << LSP_mass
+      << ' ' << resLSP
       << ' ' << xsec
       << ' ' << xsec_unc
       << ' ' << obs
@@ -97,7 +116,7 @@ void saveLimits(string model, string which) {
       string LSP_mass = "1";
       std::cout<<"hino: "<<hino_mass<<", LSP: "<<LSP_mass<<std::endl;
       int hino_mass_int = i;
-      int LSP_mass_int = 1;
+      int LSP_mass_int = 0;
 
       filename = in_dir+"/higgsCombine2DTChiHH"+hino_mass+"_LSP"+LSP_mass+"_Data_Combo.AsymptoticLimits.mH120.root";
       if (which=="boost") filename = in_dir+"/higgsCombine2DTChiHH"+hino_mass+"_LSP"+LSP_mass+"_BothBoostedH_Data.AsymptoticLimits.mH120.root";
@@ -212,21 +231,39 @@ void higgsino2DCrossSection(int hig_mass, double &xsec, double &xsec_unc) {
 }
 
 void gluino2DCrossSection(int hig_mass, double &xsec, double &xsec_unc) { //eventually update with 50 GeV points
-  if (hig_mass ==1000) { xsec = 0.325388; xsec_unc = 16.758*xsec/100; return;}
-  else if (hig_mass ==1100) { xsec = 0.163491; xsec_unc = 17.6402*xsec/100; return;}
-  else if (hig_mass ==1200) { xsec = 0.0856418; xsec_unc = 18.4814*xsec/100; return;}
-  else if (hig_mass ==1300) { xsec = 0.0460525; xsec_unc = 19.64*xsec/100; return;}
-  else if (hig_mass ==1400) { xsec = 0.0252977; xsec_unc = 20.9163*xsec/100; return;}
-  else if (hig_mass ==1500) { xsec = 0.0141903; xsec_unc = 22.7296*xsec/100; return;}
-  else if (hig_mass ==1600) { xsec = 0.00810078; xsec_unc = 24.2679*xsec/100; return;}
-  else if (hig_mass ==1700) { xsec = 0.00470323; xsec_unc = 26.1021*xsec/100; return;}
-  else if (hig_mass ==1800) { xsec = 0.00276133;  xsec_unc = 28.108*xsec/100;return;}
-  else if (hig_mass ==1900) { xsec = 0.00163547;  xsec_unc = 29.9045*xsec/100;return;}
-  else if (hig_mass ==2000) { xsec = 0.000981077; xsec_unc = 31.8422*xsec/100; return;}
-  else if (hig_mass ==2100) { xsec = 0.000591918; xsec_unc = 33.9326*xsec/100; return;}
-  else if (hig_mass ==2200) { xsec = 0.000359318; xsec_unc = 35.9623*xsec/100; return;}
-  else if (hig_mass ==2300) { xsec = 0.000219049; xsec_unc = 38.5249*xsec/100; return;}
-  else if (hig_mass ==2400) { xsec = 0.000133965; xsec_unc = 40.7945*xsec/100; return;}
-  else if (hig_mass ==2500) { xsec = 8.20068E-05; xsec_unc = 43.1071*xsec/100; return;}
-  else if (hig_mass ==2600) { xsec = 5.03066e-05; xsec_unc = 45.6584*xsec/100; return;}
+  float factor = 1000.0; //returns fb
+
+  if (hig_mass ==1000) { xsec = 0.325388*factor; xsec_unc = 16.758*xsec/100; return;}
+  else if (hig_mass ==1050) { xsec = 0.229367*factor; xsec_unc = 17.1975*xsec/100; return;}
+  else if (hig_mass ==1100) { xsec = 0.163491*factor; xsec_unc = 17.6402*xsec/100; return;}
+  else if (hig_mass ==1150) { xsec = 0.117687*factor; xsec_unc = 18.0655*xsec/100; return;}
+  else if (hig_mass ==1200) { xsec = 0.0856418*factor; xsec_unc = 18.4814*xsec/100; return;}
+  else if (hig_mass ==1250) { xsec = 0.0627027*factor; xsec_unc = 18.9328*xsec/100; return;}
+  else if (hig_mass ==1300) { xsec = 0.0460525*factor; xsec_unc = 19.64*xsec/100; return;}
+  else if (hig_mass ==1350) { xsec = 0.0340187*factor; xsec_unc = 20.3088*xsec/100; return;}
+  else if (hig_mass ==1400) { xsec = 0.0252977*factor; xsec_unc = 20.9163*xsec/100; return;}
+  else if (hig_mass ==1450) { xsec = 0.0188887*factor; xsec_unc = 21.9548*xsec/100; return;}
+  else if (hig_mass ==1500) { xsec = 0.0141903*factor; xsec_unc = 22.7296*xsec/100; return;}
+  else if (hig_mass ==1550) { xsec = 0.0107027*factor; xsec_unc = 23.4971*xsec/100; return;}
+  else if (hig_mass ==1600) { xsec = 0.00810078*factor; xsec_unc = 24.2679*xsec/100; return;}
+  else if (hig_mass ==1650) { xsec = 0.00616072*factor; xsec_unc = 25.138*xsec/100; return;}
+  else if (hig_mass ==1700) { xsec = 0.00470323*factor; xsec_unc = 26.1021*xsec/100; return;}
+  else if (hig_mass ==1750) { xsec = 0.00359842*factor; xsec_unc = 27.1502*xsec/100; return;}
+  else if (hig_mass ==1800) { xsec = 0.00276133*factor;  xsec_unc = 28.108*xsec/100;return;}
+  else if (hig_mass ==1850) { xsec = 0.00212345*factor;  xsec_unc = 28.9167*xsec/100;return;}
+  else if (hig_mass ==1900) { xsec = 0.00163547*factor;  xsec_unc = 29.9045*xsec/100;return;}
+  else if (hig_mass ==1950) { xsec = 	0.0012642*factor;  xsec_unc = 30.4581*xsec/100;return;}
+  else if (hig_mass ==2000) { xsec = 0.000981077*factor; xsec_unc = 31.8422*xsec/100; return;}
+  else if (hig_mass ==2050) { xsec = 0.000761286*factor; xsec_unc = 32.9341*xsec/100; return;}
+  else if (hig_mass ==2100) { xsec = 0.000591918*factor; xsec_unc = 33.9326*xsec/100; return;}
+  else if (hig_mass ==2150) { xsec = 0.000460941*factor; xsec_unc = 34.9082*xsec/100; return;}
+  else if (hig_mass ==2200) { xsec = 0.000359318*factor; xsec_unc = 35.9623*xsec/100; return;}
+  else if (hig_mass ==2250) { xsec = 0.00028065*factor; xsec_unc = 37.1485*xsec/100; return;}
+  else if (hig_mass ==2300) { xsec = 0.000219049*factor; xsec_unc = 38.5249*xsec/100; return;}
+  else if (hig_mass ==2350) { xsec = 0.000171031*factor; xsec_unc = 39.6435*xsec/100; return;}
+  else if (hig_mass ==2400) { xsec = 0.000133965*factor; xsec_unc = 40.7945*xsec/100; return;}
+  else if (hig_mass ==2450) { xsec = 0.000104886*factor; xsec_unc = 41.9997*xsec/100; return;}
+  else if (hig_mass ==2500) { xsec = 8.20068E-05*factor; xsec_unc = 43.1071*xsec/100; return;}
+  else if (hig_mass ==2550) { xsec = 6.42534e-05*factor; xsec_unc = 44.3683*xsec/100; return;}
+  else if (hig_mass ==2600) { xsec = 5.03066e-05*factor; xsec_unc = 45.6584*xsec/100; return;}
 }

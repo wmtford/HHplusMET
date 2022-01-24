@@ -30,6 +30,7 @@ std::vector<std::string> mySplit(const std::string& s, char delimiter) {
 
 static const TString BASE_DIR="root://cmseos.fnal.gov//store/user/emacdona/Skims/Run2ProductionV18/";
 static const TString keithsDir="root://cmseos.fnal.gov//eos/uscms/store/user/kaulmer/Skims/Run2ProductionV18/scan/tree_signal_METVars/"; //this is for TChiHH
+static const TString emilysDir="root://cmseos.fnal.gov//eos/uscms/store/user/emacdona/Skims/Run2ProductionV18/scan/tree_signal_METVars/"; //for all H decays TChiHH and 2D T5HH (2016 only)
 static const TString BASE_DIRUnblind="root://cmseos.fnal.gov//store/user/emacdona/Skims/Run2ProductionV18/tree_signalUnblind_METVars/";
 static const TString V18Signal_DIR="root://cmseos.fnal.gov//store/user/emacdona/Skims/Run2ProductionV18/scan/tree_signal_METVars_FullSIM/";
 
@@ -55,11 +56,11 @@ class skimSamples {
     if (r == kPhoton) skimType=BASE_DIR+"tree_GJet_CleanMETVars";
 
     //bools that determine which processes are run, as a subset of signal
-    bool runData = true;
+    bool runData = false;
     bool run_singleT = false;
     bool run_TT = false;
     bool run_QCD = false;
-    bool run_GJets = true;
+    bool run_GJets = false;
     bool run_WJets = false;
     bool run_ZJets = false;
     bool run_TChiHH1D = false;
@@ -70,84 +71,40 @@ class skimSamples {
     bool run_TChiHH2DAll = false;
     bool run_T5HH1DAll = false;
 
-    if (r == k1DSignal) {
-      run_singleT = false;
-      run_TT = false;
-      run_QCD = false;
-      run_WJets = false;
-      run_ZJets = false;
-      run_TChiHH2D = false;
-      run_T5HH2D = false;
-      run_T5HH1D = false; //for fullsim
-      run_TChiHH1D = true;
 
-      run_TChiHH1DAll = false;
-      run_TChiHH2DAll = false;
-      run_T5HH1DAll = false;
+    if ( (r==kSignal || r==kSLm || r==kSLe || kPhoton) && mass2D==1) runData=true;
+
+    if (r==kSignal && mass2D==0) { //run MC bkg
+      run_singleT = true;
+      run_TT = true;
+      run_QCD = true;
+      run_WJets = true;
+      run_ZJets = true;
     }
-    else if (r == k2DSignal) {
-      run_TChiHH1DAll = false;
-      run_TChiHH2DAll = false;
-      run_T5HH1DAll = false;
-
+    if (r == kSLm || r == kSLe) {
+      run_singleT = true;
+      run_TT = true;
+      run_WJets = true;
+    }
+    if (kPhoton) {
+      run_QCD = true;
+      run_GJets = true;
+    }
+    if (r == k1DSignal) {
+      run_T5HH1D = true;
       run_TChiHH1D = false;
-      run_T5HH1D = false;
-      // run_TChiHH2D = false;
-      // run_T5HH2D = true;
+    }
+    if (r == k2DSignal) {
+      run_TChiHH2D = true;
+      run_T5HH2D = false;
       if (mass2D>810){
         run_TChiHH2D = false;
         run_T5HH2D = true;
       }
-      else {
-        run_TChiHH2D = true;
-        run_T5HH2D = false;
-      }
     }
-
-    else if (r == k1DTChiHHAll) {
-      run_singleT = false;
-      run_TT = false;
-      run_QCD = false;
-      run_WJets = false;
-      run_ZJets = false;
-      run_TChiHH1D = false;
-      run_TChiHH2D = false;
-      run_T5HH1D = false;
-      run_T5HH2D = false;
-      run_TChiHH1DAll = true;
-      run_TChiHH2DAll = false;
-      run_T5HH1DAll = false;
-    }
-
-    else if (r == k1DT5HHAll) {
-      run_singleT = false;
-      run_TT = false;
-      run_QCD = false;
-      run_WJets = false;
-      run_ZJets = false;
-      run_TChiHH1D = false;
-      run_TChiHH2D = false;
-      run_T5HH1D = false;
-      run_T5HH2D = false;
-      run_TChiHH1DAll = false;
-      run_TChiHH2DAll = false;
-      run_T5HH1DAll = true;
-    }
-
-    else if (r == k2DTChiHHAll) {
-      run_singleT = false;
-      run_TT = false;
-      run_QCD = false;
-      run_WJets = false;
-      run_ZJets = false;
-      run_TChiHH1D = false;
-      run_TChiHH2D = false;
-      run_T5HH1D = false;
-      run_T5HH2D = false;
-      run_TChiHH1DAll = false;
-      run_TChiHH2DAll = true;
-      run_T5HH1DAll = false;
-    }
+    if (r == k1DTChiHHAll) run_TChiHH1DAll = true;
+    if (r == k1DT5HHAll) run_T5HH1DAll = true;
+    if (r == k2DTChiHHAll) run_TChiHH2DAll = true;
 
     ///////////////////////////////////////////////////////////////////////
     // - - - - - - - - - - BACKGROUND INPUTS - - - - - - - - - - - - - - //
@@ -435,18 +392,37 @@ class skimSamples {
     }
 
     if (run_T5HH2D) {
-      ifstream file("Gluino2DScanNames.txt");
-      string line; TString fileName;
-      while(std::getline(file, line)) {
-       std::vector<std::string> x = mySplit(line, '_');
-       int gluino_mass = std::stoi(x[3]); int LSP_mass = std::stoi(x[4]);
-       if (mass2D!=815 && gluino_mass!=mass2D) continue;
-       T5HH = new TChain("tree");
-       fileName = V18Signal_DIR+"tree_T5qqqqZH_HToBB_"+TString::Format("%d_%d_",gluino_mass,LSP_mass)+Year+"_fast.root";
-       T5HH->Add(fileName);
-       ntuples.push_back(new RA2bTree(T5HH));
-       sampleName.push_back(TString::Format("T5HH%d_LSP%d", gluino_mass, LSP_mass));
+      // ifstream file("Gluino2DScanNames.txt");
+      // ifstream file("root://cmseos.fnal.gov//uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/HHplusMET/src/Gluino2DScanNamesNEW.txt");
+      std::ifstream file;
+      file.open("Gluino2DScanNamesNEW.txt", std::ifstream::in);
+      // ifstream file("Gluino2DScanNamesNEW.txt");
+      if (!file.good()) {
+        file.close();
+        file.open("../src/Gluino2DScanNamesNEW.txt", std::ifstream::in);
       }
+
+
+      string line; TString fileName;
+      if (file.good()) {
+        while(std::getline(file, line)) {
+         std::vector<std::string> x = mySplit(line, '_');
+         // int gluino_mass = std::stoi(x[3]); int LSP_mass = std::stoi(x[4]);
+         int gluino_mass = std::stoi(x[4]); int LSP_mass = std::stoi(x[5]);
+         if (mass2D!=815 && gluino_mass!=mass2D) {continue;}
+         T5HH = new TChain("tree");
+         // if (LSP_mass!=1) {continue;}
+         // fileName = V18Signal_DIR+"tree_T5qqqqZH_HToBB_"+TString::Format("%d_%d_",gluino_mass,LSP_mass)+Year+"_fast.root";
+         fileName = emilysDir+"tree_T5qqqqHH_HToBB_2D_"+TString::Format("%d_%d_",gluino_mass,LSP_mass)+Year+"_fast.root";
+         T5HH->Add(fileName);
+         ntuples.push_back(new RA2bTree(T5HH));
+         sampleName.push_back(TString::Format("T5HH%d_LSP%d", gluino_mass, LSP_mass));
+        }
+      }
+      else {
+        std::cout<<"Not good?"<<std::endl;
+      }
+
     }
 
     if (run_TChiHH2D) {

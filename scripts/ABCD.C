@@ -38,23 +38,33 @@ void makeMCvDataComp(TH1F* h_MC, TH1F* h_data, TString region, TString type);
 void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F * h_MC_sum, TH1F* h_data,TH1F* h_sig1,TH1F* h_sig2, TString region, TString type, bool save);
 void justBB(TH1F* h_bkgOrig, TH1F* h_sigOrig, TString bkgType, TString sigType, TString sigMass);
 void tableOfFullPred(vector<TH1F*> h_histos, TString bkgType);
+void compareSignals(TString type, TString reg);
+void runSigComp();
+void quickTable();
+void makePretty();
+vector<float> getHistoForTable(TString model, TFile * openFile);
 
 //for running
 ofstream myfile;
 bool runDataVMCStack = true;
-bool runSIGSBRatio = true;
+bool runSIGSBRatio = false;
 bool runABCDPlots = false;
 bool runFullBkg = false; //Make full background closure plots (MC and data)
 bool runStacks = false;
-bool runMETNorm = true;
+bool runMETNorm = false;
 bool runTableOfYields = false; //Creates txt file of yields
 bool runPies = false;
 bool savePDFs = false; //For AN, requires subdirectories
 TString outDIR = "../output/";
+TString testDIR = "../test/";
 
 string whichRegion = "signal";
 // string whichRegion = "singleLept";
 // string whichRegion = "photon";
+
+bool runPaperPlots = false;
+
+
 
 //for style
 double W = 800; double H = 600;
@@ -90,6 +100,7 @@ Int_t col_snglt = TColor::GetColorTransparent(kGray+2, 0.95);
 
 //ALPHABET files to open
 TFile * f = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/boosted_veto_Final/ALPHABET_0l.root");
+TFile * f2 = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/moreMETbins/ALPHABET_all_forMoreMET_resVeto.root"); //needed for more MET bins
 TFile * fData = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/boosted_veto_Final/ALPHABET_0lData.root");
 TFile * fSignal = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/boosted_veto_FastSIMSFs/ALPHABET_1DSignal.root");
 TFile * fSignal2 = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/T5HH1D_FullSIM_veto/ALPHABET_1DSignal.root");
@@ -117,32 +128,45 @@ TDirectory *cdOther  = fout->mkdir("OtherPlots");
 
 
 void runABCD() {
+  if (runPaperPlots==true) {
+    runDataVMCStack = true;
+    runSIGSBRatio = true;
+    runABCDPlots = false;
+    runFullBkg = false; //Make full background closure plots (MC and data)
+    runStacks = false;
+    runMETNorm = true;
+    runTableOfYields = false; //Creates txt file of yields
+    runPies = false;
+    savePDFs = false; //For AN, requires subdirectories
+  }
+
   gStyle->SetTextFont(52);
-  TH1F * h_A_data; TH1F * h_B_data; TH1F * h_A1_data; TH1F * h_B1_data; TH1F *h_C_data; TH1F *h_D_data; TH1F *h_Opt1_data; TH1F * h_baseline_MET_data; TH1F * h_0H_MET_data; TH1F * h_1H_MET_data; TH1F * h_2H_MET_data; TH1F * h_H_MET_data;
+  TH1F * h_A_data; TH1F * h_B_data; TH1F * h_A1_data; TH1F * h_B1_data; TH1F *h_C_data; TH1F *h_D_data; TH1F *h_Opt1_data; TH1F * h_baseline_MET_data; TH1F * h_baseline_METall_data; TH1F * h_baseline_METother_data; TH1F * h_0H_MET_data; TH1F * h_1H_MET_data; TH1F * h_2H_MET_data; TH1F * h_H_MET_data;
 
   TH1F * h_nH_sum = new TH1F("nH_sum","nH_sum", 3,0,4);
   TH1F * h_nH_data = new TH1F("nH_data","nH_data", 3,0,4);
   h_nH_sum->GetXaxis()->SetBinLabel(1,"0H");h_nH_sum->GetXaxis()->SetBinLabel(2,"1H");h_nH_sum->GetXaxis()->SetBinLabel(3,"2H");
   h_nH_data->GetXaxis()->SetBinLabel(1,"0H");h_nH_data->GetXaxis()->SetBinLabel(2,"1H");h_nH_data->GetXaxis()->SetBinLabel(3,"2H");
 
-  TH1F * h_A_sum; TH1F * h_B_sum; TH1F * h_A1_sum; TH1F * h_B1_sum; TH1F *h_C_sum; TH1F *h_D_sum; TH1F * h_baseline_MET_sum; TH1F * h_0H_MET_sum; TH1F * h_1H_MET_sum; TH1F * h_2H_MET_sum; TH1F * h_H_MET_sum;
+  TH1F * h_A_sum; TH1F * h_B_sum; TH1F * h_A1_sum; TH1F * h_B1_sum; TH1F *h_C_sum; TH1F *h_D_sum;
+  TH1F * h_baseline_MET_sum; TH1F * h_baseline_METall_sum; TH1F * h_baseline_METother_sum; TH1F * h_0H_MET_sum; TH1F * h_1H_MET_sum; TH1F * h_2H_MET_sum; TH1F * h_H_MET_sum;
   TH1F * hP_A_sum; TH1F * hP_B_sum; TH1F * hP_A1_sum; TH1F * hP_B1_sum; TH1F *hP_C_sum; TH1F *hP_D_sum;
   TH1F * h_A5_sum; TH1F * h_B5_sum; TH1F * h_A15_sum; TH1F * h_B15_sum; TH1F *h_C5_sum; TH1F *h_D5_sum;
-  TH1F * h_A_QCD; TH1F * h_B_QCD; TH1F * h_A1_QCD; TH1F * h_B1_QCD; TH1F * h_C_QCD; TH1F * h_D_QCD; TH1F * h_baseline_MET_QCD;  TH1F * h_0H_MET_QCD; TH1F * h_1H_MET_QCD; TH1F * h_2H_MET_QCD; TH1F * h_H_MET_QCD;
+  TH1F * h_A_QCD; TH1F * h_B_QCD; TH1F * h_A1_QCD; TH1F * h_B1_QCD; TH1F * h_C_QCD; TH1F * h_D_QCD; TH1F * h_baseline_MET_QCD; TH1F * h_baseline_METall_QCD; TH1F * h_baseline_METother_QCD; TH1F * h_0H_MET_QCD; TH1F * h_1H_MET_QCD; TH1F * h_2H_MET_QCD; TH1F * h_H_MET_QCD;
   TH1F * hP_A_QCD; TH1F * hP_B_QCD; TH1F * hP_A1_QCD; TH1F * hP_B1_QCD; TH1F *hP_C_QCD; TH1F *hP_D_QCD;
-  TH1F * h_A_SnglT; TH1F * h_B_SnglT; TH1F * h_A1_SnglT; TH1F * h_B1_SnglT; TH1F * h_C_SnglT; TH1F * h_D_SnglT; TH1F * h_baseline_MET_SnglT;  TH1F * h_0H_MET_SnglT; TH1F * h_1H_MET_SnglT; TH1F * h_2H_MET_SnglT; TH1F * h_H_MET_SnglT;
+  TH1F * h_A_SnglT; TH1F * h_B_SnglT; TH1F * h_A1_SnglT; TH1F * h_B1_SnglT; TH1F * h_C_SnglT; TH1F * h_D_SnglT; TH1F * h_baseline_MET_SnglT; TH1F * h_baseline_METall_SnglT; TH1F * h_baseline_METother_SnglT; TH1F * h_0H_MET_SnglT; TH1F * h_1H_MET_SnglT; TH1F * h_2H_MET_SnglT; TH1F * h_H_MET_SnglT;
   TH1F * h_A_GJets; TH1F * h_B_GJets; TH1F * h_A1_GJets; TH1F * h_B1_GJets; TH1F * h_C_GJets; TH1F * h_D_GJets; TH1F * h_baseline_MET_GJets; TH1F * h_H_MET_GJets;
   TH1F * hP_A_GJets; TH1F * hP_B_GJets; TH1F * hP_A1_GJets; TH1F * hP_B1_GJets; TH1F *hP_C_GJets; TH1F *hP_D_GJets;
-  TH1F * h_A_TT; TH1F * h_B_TT; TH1F * h_A1_TT; TH1F * h_B1_TT; TH1F * h_C_TT; TH1F * h_D_TT; TH1F * h_baseline_MET_TT; TH1F * h_0H_MET_TT; TH1F * h_1H_MET_TT; TH1F * h_2H_MET_TT; TH1F * h_H_MET_TT;
-  TH1F * h_A_WJets; TH1F * h_B_WJets; TH1F * h_A1_WJets; TH1F * h_B1_WJets; TH1F * h_C_WJets; TH1F * h_D_WJets; TH1F * h_baseline_MET_WJets; TH1F * h_0H_MET_WJets; TH1F * h_1H_MET_WJets; TH1F * h_2H_MET_WJets; TH1F * h_H_MET_WJets;
-  TH1F * h_A_ZJets; TH1F * h_B_ZJets; TH1F * h_A1_ZJets; TH1F * h_B1_ZJets; TH1F * h_C_ZJets; TH1F * h_D_ZJets; TH1F * h_baseline_MET_ZJets; TH1F * h_0H_MET_ZJets; TH1F * h_1H_MET_ZJets; TH1F * h_2H_MET_ZJets; TH1F * h_H_MET_ZJets;
+  TH1F * h_A_TT; TH1F * h_B_TT; TH1F * h_A1_TT; TH1F * h_B1_TT; TH1F * h_C_TT; TH1F * h_D_TT; TH1F * h_baseline_MET_TT; TH1F * h_baseline_METall_TT; TH1F * h_baseline_METother_TT; TH1F * h_0H_MET_TT; TH1F * h_1H_MET_TT; TH1F * h_2H_MET_TT; TH1F * h_H_MET_TT;
+  TH1F * h_A_WJets; TH1F * h_B_WJets; TH1F * h_A1_WJets; TH1F * h_B1_WJets; TH1F * h_C_WJets; TH1F * h_D_WJets; TH1F * h_baseline_MET_WJets; TH1F * h_baseline_METall_WJets; TH1F * h_baseline_METother_WJets; TH1F * h_0H_MET_WJets; TH1F * h_1H_MET_WJets; TH1F * h_2H_MET_WJets; TH1F * h_H_MET_WJets;
+  TH1F * h_A_ZJets; TH1F * h_B_ZJets; TH1F * h_A1_ZJets; TH1F * h_B1_ZJets; TH1F * h_C_ZJets; TH1F * h_D_ZJets; TH1F * h_baseline_MET_ZJets; TH1F * h_baseline_METall_ZJets; TH1F * h_baseline_METother_ZJets; TH1F * h_0H_MET_ZJets; TH1F * h_1H_MET_ZJets; TH1F * h_2H_MET_ZJets; TH1F * h_H_MET_ZJets;
 
-  TH1F * h_A_T5HH1600; TH1F * h_B_T5HH1600; TH1F * h_A1_T5HH1600; TH1F * h_B1_T5HH1600; TH1F * h_C_T5HH1600; TH1F * h_D_T5HH1600; TH1F * h_baseline_MET_T5HH1600; TH1F * h_0H_MET_T5HH1600; TH1F * h_1H_MET_T5HH1600; TH1F * h_2H_MET_T5HH1600; TH1F * h_H_MET_T5HH1600;
-  TH1F * h_A_T5HH2000; TH1F * h_B_T5HH2000; TH1F * h_A1_T5HH2000; TH1F * h_B1_T5HH2000; TH1F * h_C_T5HH2000; TH1F * h_D_T5HH2000; TH1F * h_baseline_MET_T5HH2000; TH1F * h_H_MET_T5HH2000;
-  TH1F * h_A_T5HH2200; TH1F * h_B_T5HH2200; TH1F * h_A1_T5HH2200; TH1F * h_B1_T5HH2200; TH1F * h_C_T5HH2200; TH1F * h_D_T5HH2200; TH1F * h_baseline_MET_T5HH2200; TH1F * h_H_MET_T5HH2200;
-  TH1F * h_A_TChiHH500; TH1F * h_B_TChiHH500; TH1F * h_A1_TChiHH500; TH1F * h_B1_TChiHH500; TH1F * h_C_TChiHH500; TH1F * h_D_TChiHH500; TH1F * h_baseline_MET_TChiHH500; TH1F * h_0H_MET_TChiHH500; TH1F * h_1H_MET_TChiHH500; TH1F * h_2H_MET_TChiHH500; TH1F * h_H_MET_TChiHH500;
-  TH1F * h_A_TChiHH800; TH1F * h_B_TChiHH800; TH1F * h_A1_TChiHH800; TH1F * h_B1_TChiHH800; TH1F * h_C_TChiHH800; TH1F * h_D_TChiHH800; TH1F * h_baseline_MET_TChiHH800; TH1F * h_H_MET_TChiHH800;
-  TH1F * h_A_TChiHH1000; TH1F * h_B_TChiHH1000; TH1F * h_A1_TChiHH1000; TH1F * h_B1_TChiHH1000; TH1F * h_C_TChiHH1000; TH1F * h_D_TChiHH1000; TH1F * h_baseline_MET_TChiHH1000; TH1F * h_H_MET_TChiHH1000;
+  TH1F * h_A_T5HH1600; TH1F * h_B_T5HH1600; TH1F * h_A1_T5HH1600; TH1F * h_B1_T5HH1600; TH1F * h_C_T5HH1600; TH1F * h_D_T5HH1600; TH1F * h_baseline_MET_T5HH1600; TH1F * h_baseline_METall_T5HH1600; TH1F * h_baseline_METother_T5HH1600; TH1F * h_0H_MET_T5HH1600; TH1F * h_1H_MET_T5HH1600; TH1F * h_2H_MET_T5HH1600; TH1F * h_H_MET_T5HH1600;
+  TH1F * h_A_T5HH2000; TH1F * h_B_T5HH2000; TH1F * h_A1_T5HH2000; TH1F * h_B1_T5HH2000; TH1F * h_C_T5HH2000; TH1F * h_D_T5HH2000; TH1F * h_baseline_MET_T5HH2000; TH1F * h_baseline_METall_T5HH2000; TH1F * h_baseline_METother_T5HH2000; TH1F * h_H_MET_T5HH2000;
+  TH1F * h_A_T5HH2200; TH1F * h_B_T5HH2200; TH1F * h_A1_T5HH2200; TH1F * h_B1_T5HH2200; TH1F * h_C_T5HH2200; TH1F * h_D_T5HH2200; TH1F * h_baseline_MET_T5HH2200; TH1F * h_baseline_METall_T5HH2200; TH1F * h_baseline_METother_T5HH2200; TH1F * h_H_MET_T5HH2200;
+  TH1F * h_A_TChiHH500; TH1F * h_B_TChiHH500; TH1F * h_A1_TChiHH500; TH1F * h_B1_TChiHH500; TH1F * h_C_TChiHH500; TH1F * h_D_TChiHH500; TH1F * h_baseline_MET_TChiHH500; TH1F * h_baseline_METall_TChiHH500; TH1F * h_baseline_METother_TChiHH500; TH1F * h_0H_MET_TChiHH500; TH1F * h_1H_MET_TChiHH500; TH1F * h_2H_MET_TChiHH500; TH1F * h_H_MET_TChiHH500;
+  TH1F * h_A_TChiHH800; TH1F * h_B_TChiHH800; TH1F * h_A1_TChiHH800; TH1F * h_B1_TChiHH800; TH1F * h_C_TChiHH800; TH1F * h_D_TChiHH800; TH1F * h_baseline_MET_TChiHH800; TH1F * h_baseline_METall_TChiHH800; TH1F * h_baseline_METother_TChiHH800; TH1F * h_H_MET_TChiHH800;
+  TH1F * h_A_TChiHH1000; TH1F * h_B_TChiHH1000; TH1F * h_A1_TChiHH1000; TH1F * h_B1_TChiHH1000; TH1F * h_C_TChiHH1000; TH1F * h_D_TChiHH1000; TH1F * h_baseline_MET_TChiHH1000; TH1F * h_baseline_METall_TChiHH1000; TH1F * h_baseline_METother_TChiHH1000; TH1F * h_H_MET_TChiHH1000;
 
 
   TH1F * h_J1M_doubletagSR_sum; TH1F * h_J1M_doubletagSB_sum; TH1F * h_J1M_tagSR_sum; TH1F * h_J1M_tagSB_sum; TH1F * h_J1M_antitagSR_sum; TH1F * h_J1M_antitagSB_sum;
@@ -446,6 +470,22 @@ void runABCD() {
     h_baseline_MET_data = (TH1F*)fData->Get("MET_baseline_data");
     h_baseline_MET_sum = (TH1F*)f->Get("MET_baseline_sum");
 
+    h_baseline_METall_SnglT = (TH1F*)f2->Get("METall_baseline_SnglT");
+    h_baseline_METall_QCD = (TH1F*)f2->Get("METall_baseline_QCD");
+    h_baseline_METall_ZJets = (TH1F*)f2->Get("METall_baseline_ZJets");
+    h_baseline_METall_WJets = (TH1F*)f2->Get("METall_baseline_WJets");
+    h_baseline_METall_TT = (TH1F*)f2->Get("METall_baseline_TT");
+    h_baseline_METall_data = (TH1F*)f2->Get("METall_baseline_data");
+    h_baseline_METall_sum = (TH1F*)f2->Get("METall_baseline_sum");
+
+    h_baseline_METother_SnglT = (TH1F*)f2->Get("METother_baseline_SnglT");
+    h_baseline_METother_QCD = (TH1F*)f2->Get("METother_baseline_QCD");
+    h_baseline_METother_ZJets = (TH1F*)f2->Get("METother_baseline_ZJets");
+    h_baseline_METother_WJets = (TH1F*)f2->Get("METother_baseline_WJets");
+    h_baseline_METother_TT = (TH1F*)f2->Get("METother_baseline_TT");
+    h_baseline_METother_data = (TH1F*)f2->Get("METother_baseline_data");
+    h_baseline_METother_sum = (TH1F*)f2->Get("METother_baseline_sum");
+
     h_0H_MET_sum = (TH1F*)h_C_sum->Clone("h_0H_MET_sum");  h_0H_MET_sum->Add(h_D_sum);
     h_0H_MET_SnglT = (TH1F*)h_C_SnglT->Clone("h_0H_MET_SnglT");  h_0H_MET_SnglT->Add(h_D_SnglT);
     h_0H_MET_QCD = (TH1F*)h_C_QCD->Clone("h_0H_MET_QCD");  h_0H_MET_QCD->Add(h_D_QCD);
@@ -509,6 +549,8 @@ void runABCD() {
     h_A1_T5HH1600 = (TH1F*)fSignal2->Get("MET_tagSR_T5HH1600_LSP1"); h_B1_T5HH1600 = (TH1F*)fSignal2->Get("MET_tagSB_T5HH1600_LSP1");
     h_C_T5HH1600 = (TH1F*)fSignal2->Get("MET_antitagSR_T5HH1600_LSP1"); h_D_T5HH1600 = (TH1F*)fSignal2->Get("MET_antitagSB_T5HH1600_LSP1");
     h_baseline_MET_T5HH1600 = (TH1F*)fSignal2->Get("MET_baseline_T5HH1600_LSP1");
+    h_baseline_METall_T5HH1600 = (TH1F*)f2->Get("METall_baseline_T5HH1600_LSP1");
+    h_baseline_METother_T5HH1600 = (TH1F*)f2->Get("METother_baseline_T5HH1600_LSP1");
     h_H_MET_T5HH1600 = (TH1F*)h_baseline_MET_T5HH1600->Clone("h_H_MET_T5HH1600"); h_H_MET_T5HH1600->Add(h_C_T5HH1600,-1); h_H_MET_T5HH1600->Add(h_D_T5HH1600,-1);
     h_0H_MET_T5HH1600 = (TH1F*)h_C_T5HH1600->Clone("h_0H_MET_T5HH1600"); h_0H_MET_T5HH1600->Add(h_D_T5HH1600);
     h_1H_MET_T5HH1600 = (TH1F*)h_A1_T5HH1600->Clone("h_1H_MET_T5HH1600"); h_1H_MET_T5HH1600->Add(h_B1_T5HH1600);
@@ -518,18 +560,24 @@ void runABCD() {
     h_A1_T5HH2000 = (TH1F*)fSignal2->Get("MET_tagSR_T5HH2000_LSP1"); h_B1_T5HH2000 = (TH1F*)fSignal2->Get("MET_tagSB_T5HH2000_LSP1");
     h_C_T5HH2000 = (TH1F*)fSignal2->Get("MET_antitagSR_T5HH2000_LSP1"); h_D_T5HH2000 = (TH1F*)fSignal2->Get("MET_antitagSB_T5HH2000_LSP1");
     h_baseline_MET_T5HH2000 = (TH1F*)fSignal2->Get("MET_baseline_T5HH2000_LSP1");
+    h_baseline_METall_T5HH2000 = (TH1F*)f2->Get("METall_baseline_T5HH2000_LSP1");
+    h_baseline_METother_T5HH2000 = (TH1F*)f2->Get("METother_baseline_T5HH2000_LSP1");
     h_H_MET_T5HH2000 = (TH1F*)h_baseline_MET_T5HH2000->Clone("h_H_MET_T5HH2000"); h_H_MET_T5HH2000->Add(h_C_T5HH2000,-1); h_H_MET_T5HH2000->Add(h_D_T5HH2000,-1);
 
     h_A_T5HH2200 = (TH1F*)fSignal2->Get("MET_doubletagSR_T5HH2200_LSP1"); h_B_T5HH2200 = (TH1F*)fSignal2->Get("MET_doubletagSB_T5HH2200_LSP1");
     h_A1_T5HH2200 = (TH1F*)fSignal2->Get("MET_tagSR_T5HH2200_LSP1"); h_B1_T5HH2200 = (TH1F*)fSignal2->Get("MET_tagSB_T5HH2200_LSP1");
     h_C_T5HH2200 = (TH1F*)fSignal2->Get("MET_antitagSR_T5HH2200_LSP1"); h_D_T5HH2200 = (TH1F*)fSignal2->Get("MET_antitagSB_T5HH2200_LSP1");
     h_baseline_MET_T5HH2200 = (TH1F*)fSignal2->Get("MET_baseline_T5HH2200_LSP1");
+    h_baseline_METall_T5HH2200 = (TH1F*)f2->Get("METall_baseline_T5HH2200_LSP1");
+    h_baseline_METother_T5HH2200 = (TH1F*)f2->Get("METother_baseline_T5HH2200_LSP1");
     h_H_MET_T5HH2200 = (TH1F*)h_baseline_MET_T5HH2200->Clone("h_H_MET_T5HH2200"); h_H_MET_T5HH2200->Add(h_C_T5HH2200,-1); h_H_MET_T5HH2200->Add(h_D_T5HH2200,-1);
 
     h_A_TChiHH500 = (TH1F*)fSignal->Get("MET_doubletagSR_TChiHH500_LSP1"); h_B_TChiHH500 = (TH1F*)fSignal->Get("MET_doubletagSB_TChiHH500_LSP1");
     h_A1_TChiHH500 = (TH1F*)fSignal->Get("MET_tagSR_TChiHH500_LSP1"); h_B1_TChiHH500 = (TH1F*)fSignal->Get("MET_tagSB_TChiHH500_LSP1");
     h_C_TChiHH500 = (TH1F*)fSignal->Get("MET_antitagSR_TChiHH500_LSP1"); h_D_TChiHH500 = (TH1F*)fSignal->Get("MET_antitagSB_TChiHH500_LSP1");
     h_baseline_MET_TChiHH500 = (TH1F*)fSignal->Get("MET_baseline_TChiHH500_LSP1");
+    h_baseline_METall_TChiHH500 = (TH1F*)f2->Get("METall_baseline_TChiHH500_LSP1");
+    h_baseline_METother_TChiHH500 = (TH1F*)f2->Get("METother_baseline_TChiHH500_LSP1");
     h_H_MET_TChiHH500 = (TH1F*)h_baseline_MET_TChiHH500->Clone("h_H_MET_TChiHH500"); h_H_MET_TChiHH500->Add(h_C_TChiHH500,-1); h_H_MET_TChiHH500->Add(h_D_TChiHH500,-1);
     h_0H_MET_TChiHH500 = (TH1F*)h_C_TChiHH500->Clone("h_0H_MET_TChiHH500"); h_0H_MET_TChiHH500->Add(h_D_TChiHH500);
     h_1H_MET_TChiHH500 = (TH1F*)h_A1_TChiHH500->Clone("h_1H_MET_TChiHH500"); h_1H_MET_TChiHH500->Add(h_B1_TChiHH500);
@@ -539,12 +587,16 @@ void runABCD() {
     h_A1_TChiHH800 = (TH1F*)fSignal->Get("MET_tagSR_TChiHH800_LSP1"); h_B1_TChiHH800 = (TH1F*)fSignal->Get("MET_tagSB_TChiHH800_LSP1");
     h_C_TChiHH800 = (TH1F*)fSignal->Get("MET_antitagSR_TChiHH800_LSP1"); h_D_TChiHH800 = (TH1F*)fSignal->Get("MET_antitagSB_TChiHH800_LSP1");
     h_baseline_MET_TChiHH800 = (TH1F*)fSignal->Get("MET_baseline_TChiHH800_LSP1");
+    h_baseline_METall_TChiHH800 = (TH1F*)f2->Get("METall_baseline_TChiHH800_LSP1");
+    h_baseline_METother_TChiHH800 = (TH1F*)f2->Get("METother_baseline_TChiHH800_LSP1");
     h_H_MET_TChiHH800 = (TH1F*)h_baseline_MET_TChiHH800->Clone("h_H_MET_TChiHH800"); h_H_MET_TChiHH800->Add(h_C_TChiHH800,-1); h_H_MET_TChiHH800->Add(h_D_TChiHH800,-1);
 
     h_A_TChiHH1000 = (TH1F*)fSignal->Get("MET_doubletagSR_TChiHH1000_LSP1"); h_B_TChiHH1000 = (TH1F*)fSignal->Get("MET_doubletagSB_TChiHH1000_LSP1");
     h_A1_TChiHH1000 = (TH1F*)fSignal->Get("MET_tagSR_TChiHH1000_LSP1"); h_B1_TChiHH1000 = (TH1F*)fSignal->Get("MET_tagSB_TChiHH1000_LSP1");
     h_C_TChiHH1000 = (TH1F*)fSignal->Get("MET_antitagSR_TChiHH1000_LSP1"); h_D_TChiHH1000 = (TH1F*)fSignal->Get("MET_antitagSB_TChiHH1000_LSP1");
     h_baseline_MET_TChiHH1000 = (TH1F*)fSignal->Get("MET_baseline_TChiHH1000_LSP1");
+    h_baseline_METall_TChiHH1000 = (TH1F*)f2->Get("METall_baseline_TChiHH1000_LSP1");
+    h_baseline_METother_TChiHH1000 = (TH1F*)f2->Get("METother_baseline_TChiHH1000_LSP1");
     h_H_MET_TChiHH1000 = (TH1F*)h_baseline_MET_TChiHH1000->Clone("h_H_MET_TChiHH1000"); h_H_MET_TChiHH1000->Add(h_C_TChiHH1000,-1); h_H_MET_TChiHH1000->Add(h_D_TChiHH1000,-1);
 
     h_J1M_doubletagSR_sum = (TH1F*)f->Get("J1pt_M_doubletagSR_sum"); h_J2M_doubletagSR_sum = (TH1F*)f->Get("J2pt_M_doubletagSR_sum");
@@ -1626,6 +1678,8 @@ void runABCD() {
   vector<TH1F*> vec_baseline_MET_0l = {h_baseline_MET_ZJets,h_baseline_MET_WJets,h_baseline_MET_QCD,h_baseline_MET_TT,h_baseline_MET_SnglT};
   vector<TH1F*> vec_baseline_MET_1l = {h_baseline_MET_WJets,h_baseline_MET_TT,h_baseline_MET_SnglT};
   vector<TH1F*> vec_baseline_MET_1p = {h_baseline_MET_QCD,h_baseline_MET_GJets};
+  vector<TH1F*> vec_baseline_METall_0l = {h_baseline_METall_ZJets,h_baseline_METall_WJets,h_baseline_METall_QCD,h_baseline_METall_TT,h_baseline_METall_SnglT};
+  vector<TH1F*> vec_baseline_METother_0l = {h_baseline_METother_ZJets,h_baseline_METother_WJets,h_baseline_METother_QCD,h_baseline_METother_TT,h_baseline_METother_SnglT};
   vector<TH1F*> vec_2HSR_MET_0l = {h_A_ZJets,h_A_WJets,h_A_QCD,h_A_TT,h_A_SnglT};
   vector<TH1F*> vec_1HSR_MET_0l = {h_A1_ZJets,h_A1_WJets,h_A1_QCD,h_A1_TT,h_A1_SnglT};
 
@@ -1949,8 +2003,12 @@ void runABCD() {
   if (runDataVMCStack) {
     std::cout<<"Running Data v MC stack plots..."<<std::endl;
     if (whichRegion=="signal"){
+      makeMCStackvDataComp(vec_baseline_METall_0l, h_baseline_METall_sum, h_baseline_METall_data, h_baseline_METall_TChiHH500,h_baseline_METall_T5HH1600,"baseline", "METall", true);
+      // makeMCStackvDataComp(vec_baseline_METother_0l, h_baseline_METother_sum, h_baseline_METother_data, h_baseline_METother_TChiHH500,h_baseline_METother_T5HH1600,"baseline", "METother", true);
+
+
       //For paper
-      makeMCStackvDataComp(vec_baseline_MET_0l, h_baseline_MET_sum, h_baseline_MET_data, h_baseline_MET_TChiHH500,h_baseline_MET_T5HH1600,"baseline", "MET", true);
+      // makeMCStackvDataComp(vec_baseline_MET_0l, h_baseline_MET_sum, h_baseline_MET_data, h_baseline_MET_TChiHH500,h_baseline_MET_T5HH1600,"baseline", "MET", true);
       makeMCStackvDataComp(vec_baseline_jmass_0l, h_baseline_jmass_sum, h_baseline_jmass_data, h_baseline_jmass_TChiHH500,h_baseline_jmass_T5HH1600,"baseline", "jm", true);
       makeMCStackvDataComp(vec_baseline_jpt_0l, h_baseline_jpt_sum, h_baseline_jpt_data, h_baseline_jpt_TChiHH500,h_baseline_jpt_T5HH1600,"baseline", "jpt", true);
       makeMCStackvDataComp(vec_baseline_jbb_0l, h_baseline_jbb_sum, h_baseline_jbb_data, h_baseline_jbb_TChiHH500,h_baseline_jbb_T5HH1600,"baseline", "jbb", true);
@@ -2198,12 +2256,11 @@ void makeABCDPlot(vector<TH1F*> dem_histos, TString bkgType, TString tagType) {
 
   graph->Draw("APE");
   graph->GetXaxis()->SetTitleSize(0.16);
-  graph->GetXaxis()->SetRangeUser(300,1400);
-  graph->GetYaxis()->SetRangeUser(-1.0,5.0);
-  if (tagType=="Single") graph->GetYaxis()->SetRangeUser(0.0,2.0);
+  TAxis *axis = graph->GetXaxis();  TAxis *axis2 = graph->GetYaxis();
+  axis->SetLimits(300.0,1400.0);
+  if (tagType=="Single") axis2->SetLimits(0.0,2.0);
+  else axis2->SetLimits(-1.0,5.0);
   graph->Draw("APE");
-  can_h->Modified(); can_h->Update();
-  graph->GetXaxis()->SetRangeUser(300,1400);
   can_h->Modified(); can_h->Update();
 
   TLine *line = new TLine(300,1.0,1400,1.0);
@@ -2357,16 +2414,15 @@ void makeFullBkgClosure(vector<TH1F*> dem_histos, TString bkgType, TString tagTy
   legend->Draw("same");
   pad2->cd();
   graph->Draw("APE");
-
-  graph->GetXaxis()->SetRangeUser(300,1400);
-  graph->GetYaxis()->SetRangeUser(-0.95,4.95);
+  TAxis *axis = graph->GetXaxis(); TAxis *axis2 = graph->GetYaxis();
+  axis->SetLimits(300.,1400.); axis2->SetLimits(-0.95,4.95);
   graph->GetYaxis()->SetTitleSize(0.045);
   graph->GetXaxis()->SetTitleSize(0.05);
   graph->GetXaxis()->SetTitleOffset(0.9);
   graph->GetYaxis()->SetLabelSize(0.038);
   graph->GetXaxis()->SetLabelSize(0.038);
-  if (tagType=="Single" && bkgType=="BkgSum") graph->GetYaxis()->SetRangeUser(0.71,1.29);
-  else if (tagType=="Single" && bkgType=="Data") graph->GetYaxis()->SetRangeUser(0.0,2.99);
+  if (tagType=="Single" && bkgType=="BkgSum") axis2->SetLimits(0.71,1.29);
+  else if (tagType=="Single" && bkgType=="Data") axis2->SetLimits(0.0,2.99);
 
   TLine *line = new TLine(300,1.0,1400,1.0);
   line->SetLineColor(kRed); line->SetLineStyle(2);
@@ -2375,7 +2431,7 @@ void makeFullBkgClosure(vector<TH1F*> dem_histos, TString bkgType, TString tagTy
   line->Draw("same");
 
   can_h->Modified(); can_h->Update();
-  graph->GetXaxis()->SetRangeUser(300,1400);
+  axis->SetLimits(300.,1400.);
   can_h->Modified(); can_h->Update();
 
   pad1->cd();
@@ -2704,7 +2760,8 @@ void makeMETNormCompare(vector<TH1F*> dem_histos, TString bkgType, bool drawData
   TGraphAsymmErrors * graph2H = new TGraphAsymmErrors(h_2HSR, h_0HbSR, "pois");
   TGraphAsymmErrors * graph1H = new TGraphAsymmErrors(h_1HSR, h_0HbSR, "pois");
   graph2H->SetMinimum(-0.1); graph1H->SetMinimum(-0.1);
-  graph2H->GetXaxis()->SetRangeUser(300,1400); graph1H->GetXaxis()->SetRangeUser(300,1400);
+  TAxis *axis2H = graph2H->GetXaxis(); axis2H->SetLimits(300.,1400.);
+  TAxis *axis1H = graph1H->GetXaxis(); axis1H->SetLimits(300.,1400.);
   graph2H->SetTitle(";p_{T}^{miss} [GeV];N_{SR} / N_{0H+b}");
   graph2H->GetYaxis()->SetTitleOffset(0.9);
 
@@ -2747,7 +2804,7 @@ void makeMETNormCompare(vector<TH1F*> dem_histos, TString bkgType, bool drawData
   graph2H->SetMinimum(0.0);
   graph2H->SetMaximum(0.29);
   if (bkgType=="Data") graph2H->SetMaximum(0.39);
-  graph2H->GetXaxis()->SetRangeUser(301.,1399.0);
+  TAxis *axis = graph2H->GetXaxis(); axis->SetLimits(300.,1400.);
   graph2H->SetLineColor(kRed); graph2H->SetLineWidth(2); graph2H->SetMarkerColor(kRed); graph2H->SetMarkerSize(1.2);
   graph1H->GetYaxis()->SetNdivisions(505);
   graph1H->SetMinimum(0.0);
@@ -3549,11 +3606,11 @@ void makeMCvDataComp(TH1F* h_MC_orig, TH1F* h_data_orig, TString region, TString
   legend->Draw("same");
   pad2->cd();
   graph->Draw("APE");
-
+  TAxis *axis = graph->GetXaxis(); TAxis *axis2 = graph->GetYaxis();
   //Now change everything about this graph
   if (type=="MET") {
     graph->GetXaxis()->SetTitle("p_{T}^{miss} [GeV]");
-    graph->GetXaxis()->SetRangeUser(300.0,1400.0);
+    axis->SetLimits(300.0,1400.0);
   }
   else if (type=="nH") {
     graph_histo->GetXaxis()->SetTitle("Number Higgs tags");
@@ -3561,27 +3618,27 @@ void makeMCvDataComp(TH1F* h_MC_orig, TH1F* h_data_orig, TString region, TString
   }
   else if (type=="j1m") {
     graph->GetXaxis()->SetTitle("Leading jet softdrop mass [GeV]");
-    graph->GetXaxis()->SetRangeUser(60.0,260.0);
+    axis->SetLimits(60.0,260.0);
   }
   else if (type=="j2m") {
     graph->GetXaxis()->SetTitle("Subleading jet softdrop mass [GeV]");
-    graph->GetXaxis()->SetRangeUser(60.0,260.0);
+    axis->SetLimits(60.0,260.0);
   }
   else if (type=="j1pt") {
     graph->GetXaxis()->SetTitle("Leading jet p_{T} [GeV]");
-    graph->GetXaxis()->SetRangeUser(300.0,1300.0);
+    axis->SetLimits(300.0,1300.0);
   }
   else if (type=="j2pt") {
     graph->GetXaxis()->SetTitle("Subleading jet p_{T} [GeV]");
-    graph->GetXaxis()->SetRangeUser(300.0,1300.0);
+    axis->SetLimits(300.0,1300.0);
   }
   else if (type=="j1bb") {
     graph->GetXaxis()->SetTitle("Leading jet deep bb-tag");
-    graph->GetXaxis()->SetRangeUser(0.0,1.0);
+    axis->SetLimits(0.0,1.0);
   }
   else if (type=="j2bb") {
     graph->GetXaxis()->SetTitle("Subleading jet deep bb-tag");
-    graph->GetXaxis()->SetRangeUser(0.0,1.0);
+    axis->SetLimits(0.0,1.0);
   }
   else graph->GetXaxis()->SetTitle(type);
 
@@ -3613,14 +3670,20 @@ void makeMCvDataComp(TH1F* h_MC_orig, TH1F* h_data_orig, TString region, TString
   if (savePDFs)  can_h->SaveAs("boostedFigures/"+whichRegion+"/dataVsMC/"+savename+".pdf","PDF");
 }
 
-void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_orig,TH1F* h_sig1,TH1F* h_sig2, TString region, TString type, bool save){
+void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_orig,TH1F* h_sig1_orig,TH1F* h_sig2_orig, TString region, TString type, bool save){
   //Vector length: 5(0l), 3(1l), 2(photon)
-  TH1F * h_MC_sum =(TH1F*)h_MC_sum_orig->Clone("h_MC_sum"); TH1F * h_data =(TH1F*)h_data_orig->Clone("h_data");
   THStack * MCstack = new THStack("hs","");
   TString graphName = region+"_"+type;
   TCanvas * can_h = new TCanvas(graphName,graphName, 50, 50, 800, 800);
   styleCanvas(can_h);
   TLegend* legend = new TLegend(0.36,0.7,0.9,0.9);
+
+  // float bins[]={300.0,350.0,400.0,450.0,500.0,600.0,700.0,900.0,1400.0};
+  // int binnum=8;
+
+  TH1F * h_sig1; TH1F * h_sig2; TH1F * h_data; TH1F * h_MC_sum;
+  h_sig1 =(TH1F*)h_sig1_orig->Clone("h_sig1"); h_sig2 =(TH1F*)h_sig2_orig->Clone("h_sig2");
+  h_MC_sum =(TH1F*)h_MC_sum_orig->Clone("h_MC_sum"); h_data =(TH1F*)h_data_orig->Clone("h_data");
 
   DrawOverflow(h_MC_sum); DrawOverflow(h_data); DrawOverflow(h_sig1); DrawOverflow(h_sig2);
   h_sig1->SetLineColor(kRed); h_sig1->SetLineStyle(1); h_sig1->SetLineWidth(5);
@@ -3629,6 +3692,20 @@ void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_
   if (type.Contains("j") || type.Contains("j")) {
     h_MC_sum->Rebin(2); h_data->Rebin(2); h_sig1->Rebin(2);h_sig2->Rebin(2);
     if (region=="2H" && type.Contains("jm") ) {h_MC_sum->Rebin(2); h_data->Rebin(2);h_sig1->Rebin(2);h_sig2->Rebin(2);}
+  }
+  if (type=="METall") {
+    h_MC_sum->Rebin(4); h_data->Rebin(4); h_sig1->Rebin(4);h_sig2->Rebin(4);
+  }
+  if (type=="METother") {
+    int startBin = h_MC_sum->FindBin(550.0);
+    h_MC_sum->SetBinContent(startBin, h_MC_sum->GetBinContent(startBin)/2.0); h_MC_sum->SetBinContent(startBin+1, h_MC_sum->GetBinContent(startBin+1)/2.0);
+    h_MC_sum->SetBinContent(startBin+2, h_MC_sum->GetBinContent(startBin+2)/4.0); h_MC_sum->SetBinContent(startBin+3, h_MC_sum->GetBinContent(startBin+3)/10.0);
+    h_data->SetBinContent(startBin, h_data->GetBinContent(startBin)/2.0); h_data->SetBinContent(startBin+1, h_data->GetBinContent(startBin+1)/2.0);
+    h_data->SetBinContent(startBin+2, h_data->GetBinContent(startBin+2)/4.0); h_data->SetBinContent(startBin+3, h_data->GetBinContent(startBin+3)/10.0);
+    h_sig1->SetBinContent(startBin, h_sig1->GetBinContent(startBin)/2.0); h_sig1->SetBinContent(startBin+1, h_sig1->GetBinContent(startBin+1)/2.0);
+    h_sig1->SetBinContent(startBin+2, h_sig1->GetBinContent(startBin+2)/4.0); h_sig1->SetBinContent(startBin+3, h_sig1->GetBinContent(startBin+3)/10.0);
+    h_sig2->SetBinContent(startBin, h_sig2->GetBinContent(startBin)/2.0); h_sig2->SetBinContent(startBin+1, h_sig2->GetBinContent(startBin+1)/2.0);
+    h_sig2->SetBinContent(startBin+2, h_sig2->GetBinContent(startBin+2)/4.0); h_sig2->SetBinContent(startBin+3, h_sig2->GetBinContent(startBin+3)/10.0);
   }
   h_MC_sum->SetStats(0); h_MC_sum->SetFillColor(c_error);
   h_data->SetStats(0); h_data->SetLineColor(kBlack); h_data->SetMarkerColor(kBlack); h_data->SetMarkerStyle(20); h_data->SetLineWidth(3); h_data->SetMarkerSize(1.7);
@@ -3661,6 +3738,7 @@ void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_
   TGraphAsymmErrors * graph = new TGraphAsymmErrors(h_data, h_MC_sum, "pois");
   graph->SetLineColor(kBlack); graph->SetMarkerColor(kBlack);
   graph->SetTitle(";p_{T}^{miss} [GeV]; #frac{Data}{MC}");
+  TAxis *axisX = graph->GetXaxis(); //TAxis *axisY = graph->GetYaxis();
 
   TH1F * graph_histo = (TH1F*)h_data->Clone("graph_histo");graph_histo->Divide(h_MC_sum);
   graph_histo->SetLineColor(kBlack); graph_histo->SetMarkerColor(kBlack); graph_histo->SetMarkerStyle(20);
@@ -3670,17 +3748,44 @@ void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_
   TH1F *h_ZJets; TH1F *h_WJets; TH1F *h_QCD; TH1F *h_TT; TH1F *h_SnglT; TH1F *h_GJets;
 
   if (h_MC.size()==5){ //0l, ZJets, WJets, QCD, TT, SnglT
-    h_ZJets = (TH1F*)h_MC[0]->Clone("h_ZJets");h_ZJets->SetFillColor(col_zjets); h_ZJets->SetLineColor(kBlack); h_ZJets->SetMarkerStyle(21); h_ZJets->SetMarkerColor(kOrange+1);
-    h_WJets = (TH1F*)h_MC[1]->Clone("h_WJets");h_WJets->SetFillColor(col_wjets);h_WJets->SetLineColor(kBlack);h_WJets->SetMarkerStyle(21); h_WJets->SetMarkerColor(kGreen+3);
-    h_QCD = (TH1F*)h_MC[2]->Clone("h_QCD"); h_QCD->SetFillColor(col_qcd);h_QCD->SetLineColor(kBlack); h_QCD->SetMarkerStyle(21); h_QCD->SetMarkerColor(ci2);
-    h_TT = (TH1F*)h_MC[3]->Clone("h_TT"); h_TT->SetFillColor(col_tt);h_TT->SetLineColor(kBlack);h_TT->SetMarkerStyle(21); h_TT->SetMarkerColor(ci);
-    h_SnglT = (TH1F*)h_MC[4]->Clone("h_SnglT");h_SnglT->SetFillColor(col_snglt);h_SnglT->SetLineColor(kBlack); h_SnglT->SetMarkerStyle(21); h_SnglT->SetMarkerColor(kGray+2); //now "Other" category
+    h_ZJets = (TH1F*)h_MC[0]->Clone("h_ZJets");
+    h_WJets = (TH1F*)h_MC[1]->Clone("h_WJets");
+    h_QCD = (TH1F*)h_MC[2]->Clone("h_QCD");
+    h_TT = (TH1F*)h_MC[3]->Clone("h_TT");
+    h_SnglT = (TH1F*)h_MC[4]->Clone("h_SnglT");
+
+    h_ZJets->SetFillColor(col_zjets); h_ZJets->SetLineColor(kBlack); h_ZJets->SetMarkerStyle(21); h_ZJets->SetMarkerColor(kOrange+1);
+    h_WJets->SetFillColor(col_wjets);h_WJets->SetLineColor(kBlack);h_WJets->SetMarkerStyle(21); h_WJets->SetMarkerColor(kGreen+3);
+    h_QCD->SetFillColor(col_qcd);h_QCD->SetLineColor(kBlack); h_QCD->SetMarkerStyle(21); h_QCD->SetMarkerColor(ci2);
+    h_TT->SetFillColor(col_tt);h_TT->SetLineColor(kBlack);h_TT->SetMarkerStyle(21); h_TT->SetMarkerColor(ci);
+    h_SnglT->SetFillColor(col_snglt);h_SnglT->SetLineColor(kBlack); h_SnglT->SetMarkerStyle(21); h_SnglT->SetMarkerColor(kGray+2); //now "Other" category
     if (type.Contains("j") || type.Contains("j")) {
       h_ZJets->Rebin(2); h_WJets->Rebin(2); h_QCD->Rebin(2);
       h_TT->Rebin(2); h_SnglT->Rebin(2);
       if (region=="2H" && type.Contains("jm") ) {h_ZJets->Rebin(2); h_WJets->Rebin(2); h_QCD->Rebin(2); h_TT->Rebin(2); h_SnglT->Rebin(2);}
     }
+    if (type=="METall") {
+      h_ZJets->Rebin(4); h_WJets->Rebin(4); h_QCD->Rebin(4); h_TT->Rebin(4); h_SnglT->Rebin(4);
+    }
+
     DrawOverflow(h_ZJets); DrawOverflow(h_WJets); DrawOverflow(h_QCD); DrawOverflow(h_TT); DrawOverflow(h_SnglT);
+    if (type=="METother") {
+      int startBin = h_MC_sum->FindBin(550.0);
+      h_ZJets->SetBinContent(startBin, h_ZJets->GetBinContent(startBin)/2.0); h_ZJets->SetBinContent(startBin+1, h_ZJets->GetBinContent(startBin+1)/2.0);
+      h_ZJets->SetBinContent(startBin+2, h_ZJets->GetBinContent(startBin+2)/4.0); h_ZJets->SetBinContent(startBin+3, h_ZJets->GetBinContent(startBin+3)/10.0);
+
+      h_WJets->SetBinContent(startBin, h_WJets->GetBinContent(startBin)/2.0); h_WJets->SetBinContent(startBin+1, h_WJets->GetBinContent(startBin+1)/2.0);
+      h_WJets->SetBinContent(startBin+2, h_WJets->GetBinContent(startBin+2)/4.0); h_WJets->SetBinContent(startBin+3, h_WJets->GetBinContent(startBin+3)/10.0);
+
+      h_QCD->SetBinContent(startBin, h_QCD->GetBinContent(startBin)/2.0); h_QCD->SetBinContent(startBin+1, h_QCD->GetBinContent(startBin+1)/2.0);
+      h_QCD->SetBinContent(startBin+2, h_QCD->GetBinContent(startBin+2)/4.0); h_QCD->SetBinContent(startBin+3, h_QCD->GetBinContent(startBin+3)/10.0);
+
+      h_TT->SetBinContent(startBin, h_TT->GetBinContent(startBin)/2.0); h_TT->SetBinContent(startBin+1, h_TT->GetBinContent(startBin+1)/2.0);
+      h_TT->SetBinContent(startBin+2, h_TT->GetBinContent(startBin+2)/4.0); h_TT->SetBinContent(startBin+3, h_TT->GetBinContent(startBin+3)/10.0);
+
+      h_SnglT->SetBinContent(startBin, h_SnglT->GetBinContent(startBin)/2.0); h_SnglT->SetBinContent(startBin+1, h_SnglT->GetBinContent(startBin+1)/2.0);
+      h_SnglT->SetBinContent(startBin+2, h_SnglT->GetBinContent(startBin+2)/4.0); h_SnglT->SetBinContent(startBin+3, h_SnglT->GetBinContent(startBin+3)/10.0);
+    }
     h_QCD->Scale(scaleMCtoData); h_SnglT->Scale(scaleMCtoData); h_WJets->Scale(scaleMCtoData);
     h_TT->Scale(scaleMCtoData); h_ZJets->Scale(scaleMCtoData);
 
@@ -3732,6 +3837,8 @@ void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_
   legend->SetBorderSize(0);
   legend->SetTextSize(0.042);
   MCstack->Draw("hist");
+  MCstack->GetXaxis()->SetRangeUser(300.0,1400.0);
+  MCstack->Draw("hist");
 
   if (!doRatioPanel){
     h_data->GetXaxis()->SetLabelSize(0.04); h_data->GetXaxis()->SetTitleSize(0.06); h_data->GetXaxis()->SetTitleOffset(0.9);
@@ -3766,6 +3873,11 @@ void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_
       h_MC_sum->GetXaxis()->SetRangeUser(300.0,1400.0);
       h_MC_sum->SetTitle(";;Events");
     }
+    else if (type=="METall" || type=="METother") {
+      h_MC_sum->GetXaxis()->SetRangeUser(300.0,1400.0);
+      // h_MC_sum->SetTitle(";;Events / 50 GeV");
+      h_MC_sum->SetTitle(";;Events / 100 GeV");
+    }
     else if (type=="jm" || type=="j1m" || type=="j2m") {
       h_MC_sum->SetTitle(";;Entries / 5 GeV");
       if (region=="2H") h_MC_sum->SetTitle(";;Entries / 10 GeV");
@@ -3788,6 +3900,14 @@ void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_
     if (region=="baseline") h_MC_sum->GetYaxis()->SetRangeUser(4E0,4E4);
     else h_MC_sum->SetMaximum(thisMax*2.5);
   }
+  else if (type=="METother") {
+    // h_MC_sum->SetMaximum(thisMax*2.5);
+    h_MC_sum->GetYaxis()->SetRangeUser(1E-1,1E4);
+
+  }
+  else if (type=="METall") {
+    h_MC_sum->GetYaxis()->SetRangeUser(1E-1,6E4);
+  }
   else if (type=="jbb" || type=="j1bb" || type=="j2bb") h_MC_sum->SetMaximum(thisMax*10.5);
   else if (type=="j1m" || type=="j2m") h_MC_sum->SetMaximum(thisMax*1.6);
   else if (type=="jm" && region=="baseline") h_MC_sum->SetMaximum(thisMax*1.6);
@@ -3803,7 +3923,7 @@ void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_
   h_sig1->Draw("hist same"); h_sig2->Draw("hist same");
   gPad->RedrawAxis();
 
-  if (type=="MET" || type=="jbb" || type=="j1bb" || type=="j2bb") gPad->SetLogy();
+  if (type=="MET" || type=="METall" || type=="METother" || type=="jbb" || type=="j1bb" || type=="j2bb") gPad->SetLogy();
   can_h->Update();can_h->Modified();
 
   if (doRatioPanel){
@@ -3812,9 +3932,17 @@ void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_
     //Now change everything about this graph
     double minOfLine = 300.0; double maxOfLine = 1400.0;
     graph->GetYaxis()->SetNdivisions(505);
-    if (type=="MET") {
+    graph->GetYaxis()->SetTickLength(graph->GetYaxis()->GetTickLength()*3.0);
+    if (region=="2H" && type=="jm") graph->GetYaxis()->SetRangeUser(0.0,2.95);
+    else graph->GetYaxis()->SetRangeUser(0.0,1.95);
+
+    // if (region=="2H" && type=="jm") axisY->SetLimits(0.0,2.95);
+    // else axisY->SetLimits(0.0,1.95);
+
+
+    if (type=="MET" || type=="METall" || type=="METother") {
       graph->GetXaxis()->SetTitle("p_{T}^{miss} [GeV]");
-      graph->GetXaxis()->SetRangeUser(300.0,1400.0);
+      axisX->SetLimits(300.0,1400.0);
       minOfLine=300.0; maxOfLine=1400.0;
     }
     else if (type=="nH") {
@@ -3823,47 +3951,47 @@ void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_
     }
     else if (type=="jm") {
       graph->GetXaxis()->SetTitle("m_{J} [GeV]");
-      graph->GetXaxis()->SetRangeUser(60.0,260.0);
+      axisX->SetLimits(60.0,260.0);
       minOfLine=60.0; maxOfLine=260.0;
     }
     else if (type=="j1m") {
       graph->GetXaxis()->SetTitle("Leading m_{J} [GeV]");
-      graph->GetXaxis()->SetRangeUser(60.0,260.0);
+      axisX->SetLimits(60.0,260.0);
       minOfLine=60.0; maxOfLine=260.0;
     }
     else if (type=="j2m") {
       graph->GetXaxis()->SetTitle("Subleading m_{J} [GeV]");
-      graph->GetXaxis()->SetRangeUser(60.0,260.0);
+      axisX->SetLimits(60.0,260.0);
       minOfLine=60.0; maxOfLine=260.0;
     }
     else if (type=="jpt") {
       graph->GetXaxis()->SetTitle("Jet p_{T} [GeV]");
-      graph->GetXaxis()->SetRangeUser(300.0,1300.0);
+      axisX->SetLimits(300.0,1300.0);
       minOfLine=300.0; maxOfLine=1300.0;
     }
     else if (type=="j1pt") {
       graph->GetXaxis()->SetTitle("Leading jet p_{T} [GeV]");
-      graph->GetXaxis()->SetRangeUser(300.0,1300.0);
+      axisX->SetLimits(300.0,1300.0);
       minOfLine=300.0; maxOfLine=1300.0;
     }
     else if (type=="j2pt") {
       graph->GetXaxis()->SetTitle("Subleading jet p_{T} [GeV]");
-      graph->GetXaxis()->SetRangeUser(300.0,1300.0);
+      axisX->SetLimits(300.0,1300.0);
       minOfLine=300.0; maxOfLine=1300.0;
     }
     else if (type=="jbb") {
       graph->GetXaxis()->SetTitle("D_{bb}");
-      graph->GetXaxis()->SetRangeUser(0.0,1.0);
+      axisX->SetLimits(0.0,1.0);
       minOfLine=0.0; maxOfLine=1.0;
     }
     else if (type=="j1bb") {
       graph->GetXaxis()->SetTitle("Leading jet D_{bb}");
-      graph->GetXaxis()->SetRangeUser(0.0,1.0);
+      axisX->SetLimits(0.0,1.0);
       minOfLine=0.0; maxOfLine=1.0;
     }
     else if (type=="j2bb") {
       graph->GetXaxis()->SetTitle("Subleading jet D_{bb}");
-      graph->GetXaxis()->SetRangeUser(0.0,1.0);
+      axisX->SetLimits(0.0,1.0);
       minOfLine=0.0; maxOfLine=1.0;
     }
 
@@ -3885,8 +4013,6 @@ void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_
       graph->GetXaxis()->SetLabelSize(0.038); graph->GetXaxis()->SetTitleSize(0.045); graph->GetXaxis()->SetTitleOffset(1.1);
       graph->GetYaxis()->SetLabelSize(0.04); graph->GetYaxis()->SetTitleSize(0.036); graph->GetYaxis()->SetTitleOffset(1.7);
       graph->GetYaxis()->CenterTitle();
-      graph->GetYaxis()->SetRangeUser(0.0,1.95);
-      if (region=="2H" && type=="jm") graph->GetYaxis()->SetRangeUser(0.0,2.95);
       graph->Draw("APE");
       line_at1->Draw("same");
     }
@@ -3932,11 +4058,20 @@ void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_
     line1->SetLineColor(kBlack); line1->SetLineStyle(9); line1->SetLineWidth(3); line1->Draw("same");
     can_h->SetLogy();
   }
+  else   if (type=="METall" || type=="METother") {
+      float max = MCstack->GetMaximum();
+      if (h_data->GetMaximum()>max) max = h_data->GetMaximum();
+      TLine *line1 = new TLine(500.0,0,500.0,max);
+      TLine *line2 = new TLine(700.0,0,700.0,max);
+      line1->SetLineColor(kBlack); line1->SetLineStyle(2); line1->SetLineWidth(3); line1->Draw("same");
+      line2->SetLineColor(kBlack); line2->SetLineStyle(2); line2->SetLineWidth(3); line2->Draw("same");
+    }
 
   legend->Draw("same");
 
   cdDatavMC->cd();
   TString savename = "DatavMC_"+type+"_"+region;
+  if (type=="METall" || type=="METother") savename = "DatavMC_MET_"+region;
   can_h->Write(savename);
   can_h->SaveAs(outDIR+savename+".pdf","PDF");
   latex.DrawLatex(0.30, 0.82, extraText);
@@ -3995,12 +4130,22 @@ void mass2D_plane(TString region) {
   gStyle->SetTextFont(52);
   TLegend l(0.18,0.72,0.48,0.85);
 
-  Double_t red[9]   = { 0.6, 0.5333, 0.5176, 0.5529, 0.6627, 0.8039, 0.9216, 0.9922, 0.9843};
-  Double_t green[9] = { 0.5804, 0.7333, 0.7922, 0.8353, 0.8588, 0.8667, 0.8667, 0.8980, 0.9843};
-  Double_t blue[9]  = { 0.7569, 0.9176, 0.8980, 0.8471, 0.7765, 0.7098, 0.6549, 0.588, 0.5255};
-  Double_t stops[9] = { 0.00000, 0.1250, 0.2500, 0.3750, 0.5000, 0.6250, 0.7500, 0.8750, 1.0000};
+  // Double_t red[9]   = { 0.6, 0.5333, 0.5176, 0.5529, 0.6627, 0.8039, 0.9216, 0.9922, 0.9843};
+  // Double_t green[9] = { 0.5804, 0.7333, 0.7922, 0.8353, 0.8588, 0.8667, 0.8667, 0.8980, 0.9843};
+  // Double_t blue[9]  = { 0.7569, 0.9176, 0.8980, 0.8471, 0.7765, 0.7098, 0.6549, 0.588, 0.5255};
+  Double_t stops[9] = { 0.00000, 0.1250, 0.2500, 0.3750, 0.5000, 0.6250, 0.7500, 0.8750, 1.0000}; //original and even
+
+
+  //Try to make green brighter
+  Double_t red[9]   = { 0.6000, 0.5333, 0.5020, 0.5451, 0.5608, 0.7137,   0.8275, 0.9843,  0.9294};
+  Double_t green[9] = { 0.5804, 0.7333, 0.8275, 0.8941, 0.9216, 0.9294,   0.9294, 0.9843,  0.8667};
+  Double_t blue[9]  = { 0.7569, 0.9176, 0.9490, 0.9098, 0.7098, 0.5490,   0.5490, 0.5255,  0.5490};
+
+
+  // Double_t stops[9] = { 0.00000, 0.025, 0.035, 0.04, 0.06, 0.10, 0.15, 0.25, 1.0000};
   Int_t nb=255;
   TColor::CreateGradientColorTable(9, stops, red, green, blue, nb, 1.0);
+  int numCont = 50;
 
   TFile * f0 = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/boosted_veto_Final/ALPHABET_0lData.root"); //Data
   TH2F* j1vj2M_data;
@@ -4008,7 +4153,9 @@ void mass2D_plane(TString region) {
   else if (region=="0H")  j1vj2M_data = (TH2F*)f0->Get("j1vj2M_0H_data");
   else if (region=="1H")  j1vj2M_data = (TH2F*)f0->Get("j1vj2M_1H_data");
   else if (region=="2H")  j1vj2M_data = (TH2F*)f0->Get("j1vj2M_2H_data");
-  j1vj2M_data->SetMarkerStyle(21); j1vj2M_data->SetMarkerSize(0.5); j1vj2M_data->SetMarkerColor(kBlack);
+  j1vj2M_data->SetMarkerStyle(21); j1vj2M_data->SetMarkerSize(0.6); j1vj2M_data->SetMarkerColor(kBlack);
+  if (region=="2H") j1vj2M_data->SetMarkerSize(0.7);
+  else if (region=="1H") j1vj2M_data->SetMarkerSize(0.65);
 
   TH2F* j1vj2M_ZJets; TH2F* j1vj2M_WJets; TH2F* j1vj2M_SnglT; TH2F* j1vj2M_TT; TH2F* j1vj2M_QCD;
   TFile * f1 = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/boosted_veto_Final/ALPHABET_0l.root"); //MC
@@ -4044,11 +4191,20 @@ void mass2D_plane(TString region) {
   TH2F *h_MC_sum = (TH2F*)j1vj2M_ZJets->Clone("h_MC_sum");
   h_MC_sum->Add(j1vj2M_WJets); h_MC_sum->Add(j1vj2M_SnglT);
   h_MC_sum->Add(j1vj2M_TT); h_MC_sum->Add(j1vj2M_QCD);
-  h_MC_sum->RebinX(8); h_MC_sum->RebinY(8); h_MC_sum->SetStats(0);
+  h_MC_sum->RebinX(10); h_MC_sum->RebinY(10); h_MC_sum->SetStats(0);
   h_MC_sum->SetTitle(";m_{J} (leading jet) [GeV]; m_{J} (subleading jet) [GeV]; SM background [Events]");
   h_MC_sum->GetZaxis()->SetTitleOffset(1.0);
   h_MC_sum->GetXaxis()->SetTitleSize(0.04); h_MC_sum->GetYaxis()->SetTitleSize(0.04); h_MC_sum->GetZaxis()->SetTitleSize(0.04);
   h_MC_sum->GetXaxis()->SetLabelSize(0.03); h_MC_sum->GetYaxis()->SetLabelSize(0.03); h_MC_sum->GetZaxis()->SetLabelSize(0.03);
+
+
+  int xbins = h_MC_sum->GetNbinsX(); int ybins = h_MC_sum->GetNbinsY();
+  for (int x=1; x<xbins+1; x++) {
+    for (int y=1; y<ybins+1; y++) {
+      if (h_MC_sum->GetBinContent(x,y)<0.01)  h_MC_sum->SetBinContent(x,y,0.01);
+    }
+  }
+
 
   TFile * f2 = TFile::Open("../src/ALPHABET_1DT5HH1600_for2DMassPlots.root"); //T5HH1600, specially made!
   TH2F* j1vj2M_TChiHH500_LSP1;
@@ -4056,26 +4212,36 @@ void mass2D_plane(TString region) {
   else if (region=="0H")  j1vj2M_TChiHH500_LSP1 = (TH2F*)f2->Get("j1vj2M_0H_T5HH1600_LSP1");
   else if (region=="1H")  j1vj2M_TChiHH500_LSP1 = (TH2F*)f2->Get("j1vj2M_1H_T5HH1600_LSP1");
   else if (region=="2H")  j1vj2M_TChiHH500_LSP1 = (TH2F*)f2->Get("j1vj2M_2H_T5HH1600_LSP1");
-  j1vj2M_TChiHH500_LSP1->SetMarkerColor(kRed); j1vj2M_TChiHH500_LSP1->SetMarkerStyle(20); j1vj2M_TChiHH500_LSP1->SetMarkerSize(0.3);
+  j1vj2M_TChiHH500_LSP1->SetMarkerStyle(20); j1vj2M_TChiHH500_LSP1->SetMarkerSize(0.4); j1vj2M_TChiHH500_LSP1->SetMarkerColor(kRed);
+
+  TCanvas *c = new TCanvas("can","can", 800, 800);
+  c->SetMargin(0.13, 0.15, 0.11, 0.08);
+  h_MC_sum->SetContour(numCont);
+
+  if (region=="2H") {h_MC_sum->SetMaximum(0.65); h_MC_sum->SetMinimum(0.0);}
+  else if (region=="1H") {h_MC_sum->SetMaximum(2.0); h_MC_sum->SetMinimum(0.0);}
+  else if (region=="0H") {h_MC_sum->SetMaximum(5.9); h_MC_sum->SetMinimum(0.0);}
+  h_MC_sum->Draw("colz");
+  if (region=="2H") {
+    j1vj2M_TChiHH500_LSP1->Draw(" same");
+    j1vj2M_data->Draw(" same");
+  }
+  else {
+    j1vj2M_data->Draw(" same");
+    j1vj2M_TChiHH500_LSP1->Draw(" same");
+  }
 
   TH2F* h_red = (TH2F*)j1vj2M_TChiHH500_LSP1->Clone("h_red");
-  h_red->SetMarkerStyle(20); h_red->SetMarkerSize(0.8);
+  h_red->SetMarkerSize(0.8);
   TH2F* h_black = (TH2F*)j1vj2M_data->Clone("h_black");
   h_black->SetMarkerSize(0.8);
   l.AddEntry(h_red,"T5HH(1600,1)","p");
   l.AddEntry(h_black,"Data","p");
-
-  TCanvas *c = new TCanvas("can","can", 800, 800);
-  c->SetMargin(0.13, 0.15, 0.11, 0.08);
-
-  h_MC_sum->SetContour(50);
-  h_MC_sum->Draw("colz");
-  j1vj2M_TChiHH500_LSP1->Draw("same");
-  j1vj2M_data->Draw("same");
   l.Draw("same");
 
   TLatex ltitle_prelim(0.26, 0.943, "#scale[0.76]{#font[52]{ Preliminary}}");
-  TLatex ltitle(0.16, 0.948, "#font[62]{CMS}");
+  // TLatex ltitle(0.16, 0.948, "#font[62]{CMS}");
+  TLatex ltitle(0.18, 0.888, "#font[62]{CMS}");
   TLatex rtitle(0.85, 0.948, "#scale[0.8]{137 fb^{-1} (13 TeV)}");
   rtitle.SetTextFont(42);
   ltitle.SetNDC(); ltitle_prelim.SetNDC(); rtitle.SetNDC();
@@ -4097,7 +4263,9 @@ void mass2D_plane(TString region) {
   line1->Draw("same"); line2->Draw("same");
   line3->Draw("same"); line4->Draw("same");
 
+
   TString saveName = outDIR+"j1vj2M_"+region;
+  // c->SaveAs(saveName+".png");
   c->SaveAs(saveName+".pdf","PDF");
   ltitle_prelim.Draw("same");
   c->SaveAs(saveName+"_prelim.pdf","PDF");
@@ -4112,11 +4280,216 @@ void runMass2D() {
   mass2D_plane("2H");
 }
 
+void compareSignals(TString type, TString reg) {
+  TFile * f1 = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/boosted_noVeto_FastSIMSFs/ALPHABET_1DSignal.root");
+  TFile * f1_MET = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/moreMETbins/ALPHABET_all_forMoreMET_resVeto.root");
+  TFile * f2 = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/TChiHH_onlyHbb/ALPHABET_1DSignal_Hbb.root");
+
+  // TFile * f1 = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/boosted_noVeto_FastSIMSFs/ALPHABET_1DSignal_2016only.root");
+  // TFile * f1_MET = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/moreMETbins/ALPHABET_1DSignal_2016only.root");
+  // TFile * f2 = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/TChiHH_onlyHbb/ALPHABET_1DSignal_2016only.root");
+
+  // TFile * f1 = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/boosted_noVeto_FastSIMSFs/ALPHABET_1DSignal_1718.root");
+  // TFile * f1_MET = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/moreMETbins/ALPHABET_1DSignal_1718.root");
+  // TFile * f2 = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/TChiHH_onlyHbb/ALPHABET_1DSignal_1718.root");
+
+  TH1F * h_sigOrig; TH1F * h_sigNew;
+
+  TString region = "baseline";
+  if (reg=="2HSR") region = "doubletagSR";
+  else if (reg=="1HSR") region = "tagSR";
+  TString histoType = "MET";
+
+  if (type=="HT") histoType = "HT";
+  else if (type=="METall") histoType = "METall";
+  else if (type=="j1pt") histoType = "J1pt_Pt";
+  else if (type=="j2pt") histoType = "J2pt_Pt";
+  else if (type=="j1m") histoType = "J1pt_M";
+  else if (type=="j2m") histoType = "J2pt_M";
+  else if (type=="j1bb") histoType = "LeadDeepBBTag";
+  else if (type=="j2bb") histoType = "SubLeadDeepBBTag";
+
+  TString histoName = histoType+"_"+region+"_TChiHH500_LSP1";
+  if (type!="METall") h_sigOrig = (TH1F*)f1->Get(histoName);
+  else h_sigOrig = (TH1F*)f1_MET->Get(histoName);
+  h_sigNew = (TH1F*)f2->Get(histoName);
+
+
+  //Now make pretty
+  h_sigOrig->SetLineColor(kBlack); h_sigOrig->SetMarkerStyle(20); h_sigOrig->SetMarkerSize(1.0); h_sigOrig->SetMarkerColor(kBlack);
+  h_sigNew->SetLineColor(kRed); h_sigNew->SetMarkerStyle(20); h_sigNew->SetMarkerSize(1.0); h_sigNew->SetMarkerColor(kRed);
+  h_sigOrig->SetStats(0); h_sigNew->SetStats(0);
+  if (type=="METall") h_sigOrig->GetXaxis()->SetRangeUser(300.0,1400.0);
+  else if (type=="HT") h_sigOrig->GetXaxis()->SetRangeUser(600.0,3000.0);
+  if (type=="j1pt" || type=="j2pt") {h_sigOrig->Rebin(2);h_sigNew->Rebin(2);}
+
+  TString xAxisName = "MET [GeV]";
+  if (type=="HT") xAxisName = "HT [GeV]";
+  else if (type=="j1pt") xAxisName = "Leading jet p_{T} [GeV]";
+  else if (type=="j2pt") xAxisName = "Subleading jet p_{T} [GeV]";
+  else if (type=="j1m") xAxisName = "Leading jet mass [GeV]";
+  else if (type=="j2m") xAxisName = "Subleading jet mass [GeV]";
+  else if (type=="j1bb") xAxisName = "Leading jet D_{bb}";
+  else if (type=="j2bb") xAxisName = "Subleading jet D_{bb}";
+  h_sigOrig->SetTitle("");
+  h_sigOrig->GetXaxis()->SetTitle(xAxisName);
+  h_sigOrig->GetYaxis()->SetTitle("Events");
+  h_sigOrig->GetXaxis()->SetLabelSize(0.03); h_sigOrig->GetXaxis()->SetTitleSize(0.045); h_sigOrig->GetXaxis()->SetTitleOffset(0.85);
+  h_sigOrig->GetYaxis()->SetLabelSize(0.03); h_sigOrig->GetYaxis()->SetTitleSize(0.045); h_sigOrig->GetYaxis()->SetTitleOffset(1.1);
+  TLegend* legend; TLegend* legend2;
+  if (type=="j1bb" || type=="j2bb") {legend = new TLegend(0.20,0.65,0.6,0.85); legend2 = new TLegend(0.25,0.65,0.65,0.85);}
+  else {legend = new TLegend(0.45,0.65,0.85,0.85); legend2 = new TLegend(0.5,0.65,0.9,0.85);}
+  legend->SetBorderSize(0);
+  legend->SetTextSize(0.04);
+  legend->AddEntry(h_sigOrig,"Original","lp");
+  legend->AddEntry(h_sigNew,"New, H #rightarrow bb only","lp");
+
+  legend2->SetBorderSize(0);
+  legend2->SetTextSize(0.04);
+  legend2->AddEntry(h_sigOrig,"Original","lp");
+  legend2->AddEntry(h_sigNew,"New, H #rightarrow bb only","lp");
+
+  TCanvas *c = new TCanvas("can","can", 1600, 800);
+  c->SetMargin(0.1, 0.06, 0.11, 0.07);
+  c->Divide(2,1,0,0); c->cd(1);
+  gPad->SetRightMargin(0.12);
+  gPad->SetTopMargin(0.005);
+  h_sigOrig->Draw("lp");
+  h_sigNew->Draw("lp same");
+  legend->Draw("same");
+
+  c->cd(2);
+  gPad->SetLeftMargin(0.12);
+  gPad->SetRightMargin(0.03);
+  gPad->SetTopMargin(0.005);
+  TH1F* h_sigOrigClone = (TH1F*)h_sigOrig->Clone("h_sigOrigClone");
+  h_sigOrigClone->GetYaxis()->SetTitle("Events (normalized)");
+  h_sigOrigClone->GetYaxis()->SetTitleOffset(1.2);
+  h_sigOrigClone->DrawNormalized("lp");
+  h_sigNew->DrawNormalized("lp same");
+  legend2->Draw("same");
+
+  TString saveName = testDIR+"compSignal_"+reg+"_"+type;
+  c->SaveAs(saveName+"_allYears.pdf","PDF");
+  delete c;
+}
+
+void runSigComp() {
+  compareSignals("METall", "baseline");
+  compareSignals("MET", "baseline");
+  compareSignals("HT", "baseline");
+  compareSignals("j1pt", "baseline");
+  compareSignals("j2pt", "baseline");
+  compareSignals("j1m", "baseline");
+  compareSignals("j2m", "baseline");
+  compareSignals("j1bb", "baseline");
+  compareSignals("j2bb", "baseline");
+}
+
+vector<float> getHistoForTable(TString model, TFile * openFile) {
+  TH1F *h_sigN;
+  TString histoName = "genHbb_"+model+"_LSP1";
+  h_sigN = (TH1F*)openFile->Get(histoName);
+  vector<float> binContents;
+  for (int i=1; i<h_sigN->GetNbinsX()+1;i++) {
+    float taco = h_sigN->GetBinContent(i);
+    if (i>3) taco = taco/3.0*100.0;
+    binContents.push_back(taco);
+  }
+  return binContents;
+}
+
+void quickTable() {
+  TFile * f1 = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/testingNumGenH/ALPHABET1DSignal.root");
+  vector<TString> theseModels = {"TChiHH300", "TChiHH600", "TChiHH900", "TChiHH1200", "T5HH1000", "T5HH1400", "T5HH1800", "T5HH2200"};
+  vector<TString> binLabels = {"2H", "1H", "0H", "2 Hbb", "1+ Hbb", "2 Hbb", "1 Hbb (wrong)", "1+ Hbb", "2 Hbb"};
+
+  TString outFileName = outDIR+"NumGenHbb_Table.txt";
+  ofstream outfile; outfile.open(outFileName);
+  outfile <<"\\documentclass{standalone}\n";
+  outfile<<"\\begin{document}\n";
+  outfile<<"\\begin{tabular}{ |c|ccc|cccccc| }\n";
+
+  outfile<<" & \\multicolumn{3}{c|}{Unweighted} && \\multicolumn{6}{c}{Events [\\%]} \\\\ \n";
+  outfile<<" & \\multicolumn{3}{c|}{Events} && 2H && 1H && 1H && 1H && 0H && 0H \\\\ \n";
+  outfile<<"Sample ";
+  for (int i=0; i<binLabels.size();i++) outfile<<" & "<<binLabels[i];
+  outfile<<" \\\\ \\hline \n";
+
+
+  for (int modelNum = 0; modelNum<theseModels.size(); modelNum++) {
+    std::vector<float> binContents = getHistoForTable(theseModels[modelNum], f1);
+    outfile<<theseModels[modelNum];
+    // std::streamsize ss = std::cout.precision();
+    for (int whichBin = 0; whichBin<binContents.size(); whichBin++) {
+      if (whichBin<3) outfile<<std::fixed<<std::setprecision(0);
+      else outfile<<std::fixed<<std::setprecision(2);
+      outfile<<" & "<<binContents[whichBin];
+    }
+    // for (int whichBin = 3; whichBin<binContents.size(); whichBin++) {
+    //   outfile<<std::fixed<<std::setprecision(2);
+    //   outfile<<" & "<<binContents[whichBin];
+    // }
+    outfile<<" \\\\ \n";
+  }
+
+  outfile<<"\\end{tabular}\n";
+  outfile<<"\\end{document}\n";
+
+  outfile.close();
+}
+
+void makePretty() {
+
+  TFile * f1 = TFile::Open("CMS-SUS-20-004_Figure-aux_006-a.root");
+  TFile * f2 = TFile::Open("CMS-SUS-20-004_Figure-aux_006-b.root");
+
+  TH1F *h_cov = (TH1F*)f1->Get("hCovSig");
+  TH1F *h_corr = (TH1F*)f2->Get("hCorrSig");
+
+  gStyle->SetTextFont(52);
+  h_cov->GetXaxis()->SetTitleOffset(0.85); h_cov->GetXaxis()->SetTitleSize(0.043); h_cov->GetXaxis()->SetLabelSize(0.04);
+  h_cov->GetYaxis()->SetTitleOffset(1.0); h_cov->GetYaxis()->SetTitleSize(0.043); h_cov->GetYaxis()->SetLabelSize(0.04);
+  h_cov->GetZaxis()->SetTitleOffset(1.1); h_cov->GetZaxis()->SetTitleSize(0.043); h_cov->GetZaxis()->SetLabelSize(0.027);
+
+  h_corr->GetXaxis()->SetTitleOffset(0.85); h_corr->GetXaxis()->SetTitleSize(0.043); h_corr->GetXaxis()->SetLabelSize(0.04);
+  h_corr->GetYaxis()->SetTitleOffset(1.0); h_corr->GetYaxis()->SetTitleSize(0.043); h_corr->GetYaxis()->SetLabelSize(0.04);
+  h_corr->GetZaxis()->SetTitleOffset(0.9); h_corr->GetZaxis()->SetTitleSize(0.043); h_corr->GetZaxis()->SetLabelSize(0.027);
+
+  TCanvas *c = new TCanvas("can","can", 900, 800);
+  c->SetMargin(0.11, 0.17, 0.11, 0.08);
+  h_cov->Draw("colz");
+
+  TLatex ltitle_prelim(0.215, 0.943, "#scale[0.76]{#font[52]{ Supplementary}}");
+  TLatex ltitle(0.115, 0.948, "#font[62]{CMS}");
+  TLatex rtitle(0.83, 0.948, "#scale[0.8]{137 fb^{-1} (13 TeV)}");
+  TLatex rtitle2(0.85, 0.948, "#scale[0.8]{137 fb^{-1} (13 TeV)}");
+  rtitle.SetTextFont(42); rtitle2.SetTextFont(42);
+  ltitle.SetNDC(); ltitle_prelim.SetNDC(); rtitle.SetNDC(); rtitle2.SetNDC();
+  ltitle.SetTextAlign(12); ltitle_prelim.SetTextAlign(12); rtitle.SetTextAlign(32); rtitle2.SetTextAlign(32);
+  ltitle.Draw("same"); rtitle.Draw("same"); ltitle_prelim.Draw("same");
+
+
+  c->SaveAs("CMS-SUS-20-004_Figure-aux_006-a.pdf", "PDF");
+
+  TCanvas *c2 = new TCanvas("can2","can2", 900, 800);
+  c2->SetMargin(0.11, 0.15, 0.11, 0.08);
+  h_corr->Draw("colz");
+  ltitle.Draw("same"); rtitle2.Draw("same"); ltitle_prelim.Draw("same");
+  c2->SaveAs("CMS-SUS-20-004_Figure-aux_006-b.pdf", "PDF");
+
+
+}
+
 //Currently setup to only run and save the plots in the paper
 //Saves the prelim version too
 void ABCD() {
   gROOT->SetBatch(1);
-  runABCD();
-  runMass2D();
+  // runABCD();
+  // runMass2D();
+
+  // runSigComp();
+  // quickTable();
+  makePretty();
   std::exit(1);
 }

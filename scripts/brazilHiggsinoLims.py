@@ -14,8 +14,17 @@ gROOT.SetBatch(True)
 import tdrstyle
 tdrstyle.setTDRStyle()
 
-idir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/HHplusMET/datacards/";
-odir = "../output/";
+
+'''
+Makes final limits plot for TChiHH-G (1D) model
+inDIR = location of combine root files (from running combineAndRunDatacards.py)
+outDIR = location of output PDF file (or root file for HEPData)
+Arguments and commands at the bottom of the script
+'''
+
+inDIR = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/HHplusMET/datacards/";
+outDIR = "../output/";
+
 
 def columnToList(fn,col):
 	f = open(fn,'r');
@@ -24,6 +33,7 @@ def columnToList(fn,col):
 		linelist = line.strip().split()
 		olist.append( linelist[col] );
 	return olist
+
 
 def ExtractFile(iname, m1, m2):
 	f = ROOT.TFile(iname);
@@ -36,7 +46,8 @@ def ExtractFile(iname, m1, m2):
 		lims.append( t.limit )
 	return lims;
 
-BR = 1.0 # BR = 0.5824
+
+BR = 1.0 # BR = 0.5824 #if H->bb decay limits only
 def higgsinoCrossSection(hig_mass):
 	if (hig_mass=="127"): xsec = BR*BR*7.6022
 	elif (hig_mass =="150"): xsec = BR*BR*3.83231
@@ -98,147 +109,153 @@ def higgsinoCrossSection(hig_mass):
 		print("Cross section not found for mass of %s" %(hig_mass))
 	return xsec*1000.0
 
-def makeBrazilFlag(compareLimits,saveRootFile):
-	results = []; results2 = []; results3 = []; results_hino = [];
 
-	#BoostedOnly
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH150_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','150', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH175_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','175', '1') );
-	# results.append( ExtractFile(idir+'higgsCombine1DTChiHH200_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','200', '1') );
-	# results.append( ExtractFile(idir+'higgsCombine1DTChiHH225_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','225', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH250_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','250', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH275_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','275', '1') );
-	# results.append( ExtractFile(idir+'higgsCombine1DTChiHH300_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','300', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH325_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','325', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH350_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','350', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH375_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','375', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH400_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','400', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH425_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','425', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH450_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','450', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH475_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','475', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH500_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','500', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH525_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','525', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH550_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','550', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH575_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','575', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH600_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','600', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH625_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','625', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH650_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','650', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH675_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','675', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH700_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','700', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH725_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','725', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH750_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','750', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH775_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','775', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH800_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','800', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH825_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','825', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH850_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','850', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH875_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','875', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH900_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','900', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH925_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','925', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH950_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','950', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH975_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','975', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH1000_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','1000', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH1100_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','1100', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH1200_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','1200', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH1300_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','1300', '1') );
-	results.append( ExtractFile(idir+'higgsCombine1DTChiHH1400_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','1400', '1') );
+def makeBrazilFlag(compareLimits,saveRootFile):
+	# Reads in the limits from the combine root files, stores them in arrays, and plots them
+	results = []; results2 = []; results3 = []; results4 = []; results_hino = [];
+
+	# Read in limits
+	# BoostedOnly
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH150_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','150', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH175_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','175', '1') );
+	# results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH200_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','200', '1') );
+	# results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH225_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','225', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH250_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','250', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH275_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','275', '1') );
+	# results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH300_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','300', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH325_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','325', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH350_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','350', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH375_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','375', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH400_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','400', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH425_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','425', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH450_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','450', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH475_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','475', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH500_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','500', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH525_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','525', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH550_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','550', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH575_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','575', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH600_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','600', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH625_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','625', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH650_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','650', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH675_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','675', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH700_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','700', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH725_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','725', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH750_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','750', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH775_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','775', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH800_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','800', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH825_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','825', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH850_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','850', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH875_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','875', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH900_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','900', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH925_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','925', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH950_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','950', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH975_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','975', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH1000_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','1000', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH1100_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','1100', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH1200_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','1200', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH1300_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','1300', '1') );
+	results.append( ExtractFile(inDIR+'higgsCombine1DTChiHH1400_LSP1_BothBoostedH_Data.AsymptoticLimits.mH120.root','1400', '1') );
 
 	# ResolvedOnly
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH150_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','150', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH175_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','175', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH200_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','200', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH225_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','225', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH250_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','250', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH275_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','275', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH300_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','300', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH325_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','325', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH350_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','350', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH375_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','375', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH400_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','400', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH425_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','425', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH450_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','450', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH475_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','475', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH500_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','500', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH525_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','525', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH550_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','550', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH575_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','575', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH600_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','600', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH625_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','625', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH650_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','650', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH675_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','675', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH700_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','700', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH725_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','725', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH750_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','750', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH775_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','775', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH800_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','800', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH825_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','825', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH850_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','850', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH875_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','875', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH900_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','900', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH925_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','925', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH950_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','950', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH975_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','975', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH1000_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','1000', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH1100_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','1100', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH1200_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','1200', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH1300_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','1300', '1') );
-	results2.append( ExtractFile(idir+'higgsCombine1DTChiHH1400_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','1400', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH150_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','150', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH175_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','175', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH200_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','200', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH225_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','225', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH250_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','250', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH275_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','275', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH300_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','300', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH325_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','325', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH350_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','350', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH375_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','375', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH400_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','400', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH425_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','425', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH450_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','450', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH475_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','475', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH500_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','500', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH525_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','525', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH550_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','550', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH575_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','575', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH600_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','600', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH625_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','625', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH650_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','650', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH675_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','675', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH700_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','700', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH725_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','725', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH750_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','750', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH775_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','775', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH800_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','800', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH825_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','825', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH850_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','850', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH875_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','875', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH900_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','900', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH925_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','925', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH950_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','950', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH975_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','975', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH1000_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','1000', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH1100_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','1100', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH1200_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','1200', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH1300_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','1300', '1') );
+	results2.append( ExtractFile(inDIR+'higgsCombine1DTChiHH1400_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','1400', '1') );
 
 
 	# Combo (ResolvedOnly+BoostedVeto)
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH150_LSP1_Data_Combo.AsymptoticLimits.mH120.root','150', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH175_LSP1_Data_Combo.AsymptoticLimits.mH120.root','175', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH200_LSP1_Data_Combo.AsymptoticLimits.mH120.root','200', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH225_LSP1_Data_Combo.AsymptoticLimits.mH120.root','225', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH250_LSP1_Data_Combo.AsymptoticLimits.mH120.root','250', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH275_LSP1_Data_Combo.AsymptoticLimits.mH120.root','275', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH300_LSP1_Data_Combo.AsymptoticLimits.mH120.root','300', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH325_LSP1_Data_Combo.AsymptoticLimits.mH120.root','325', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH350_LSP1_Data_Combo.AsymptoticLimits.mH120.root','350', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH375_LSP1_Data_Combo.AsymptoticLimits.mH120.root','375', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH400_LSP1_Data_Combo.AsymptoticLimits.mH120.root','400', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH425_LSP1_Data_Combo.AsymptoticLimits.mH120.root','425', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH450_LSP1_Data_Combo.AsymptoticLimits.mH120.root','450', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH475_LSP1_Data_Combo.AsymptoticLimits.mH120.root','475', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH500_LSP1_Data_Combo.AsymptoticLimits.mH120.root','500', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH525_LSP1_Data_Combo.AsymptoticLimits.mH120.root','525', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH550_LSP1_Data_Combo.AsymptoticLimits.mH120.root','550', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH575_LSP1_Data_Combo.AsymptoticLimits.mH120.root','575', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH600_LSP1_Data_Combo.AsymptoticLimits.mH120.root','600', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH625_LSP1_Data_Combo.AsymptoticLimits.mH120.root','625', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH650_LSP1_Data_Combo.AsymptoticLimits.mH120.root','650', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH675_LSP1_Data_Combo.AsymptoticLimits.mH120.root','675', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH700_LSP1_Data_Combo.AsymptoticLimits.mH120.root','700', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH725_LSP1_Data_Combo.AsymptoticLimits.mH120.root','725', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH750_LSP1_Data_Combo.AsymptoticLimits.mH120.root','750', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH775_LSP1_Data_Combo.AsymptoticLimits.mH120.root','775', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH800_LSP1_Data_Combo.AsymptoticLimits.mH120.root','800', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH825_LSP1_Data_Combo.AsymptoticLimits.mH120.root','825', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH850_LSP1_Data_Combo.AsymptoticLimits.mH120.root','850', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH875_LSP1_Data_Combo.AsymptoticLimits.mH120.root','875', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH900_LSP1_Data_Combo.AsymptoticLimits.mH120.root','900', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH925_LSP1_Data_Combo.AsymptoticLimits.mH120.root','925', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH950_LSP1_Data_Combo.AsymptoticLimits.mH120.root','950', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH975_LSP1_Data_Combo.AsymptoticLimits.mH120.root','975', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH1000_LSP1_Data_Combo.AsymptoticLimits.mH120.root','1000', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH1100_LSP1_Data_Combo.AsymptoticLimits.mH120.root','1100', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH1200_LSP1_Data_Combo.AsymptoticLimits.mH120.root','1200', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH1300_LSP1_Data_Combo.AsymptoticLimits.mH120.root','1300', '1') );
-	results3.append( ExtractFile(idir+'higgsCombine1DTChiHH1400_LSP1_Data_Combo.AsymptoticLimits.mH120.root','1400', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH150_LSP1_Data_Combo.AsymptoticLimits.mH120.root','150', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH175_LSP1_Data_Combo.AsymptoticLimits.mH120.root','175', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH200_LSP1_Data_Combo.AsymptoticLimits.mH120.root','200', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH225_LSP1_Data_Combo.AsymptoticLimits.mH120.root','225', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH250_LSP1_Data_Combo.AsymptoticLimits.mH120.root','250', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH275_LSP1_Data_Combo.AsymptoticLimits.mH120.root','275', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH300_LSP1_Data_Combo.AsymptoticLimits.mH120.root','300', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH325_LSP1_Data_Combo.AsymptoticLimits.mH120.root','325', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH350_LSP1_Data_Combo.AsymptoticLimits.mH120.root','350', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH375_LSP1_Data_Combo.AsymptoticLimits.mH120.root','375', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH400_LSP1_Data_Combo.AsymptoticLimits.mH120.root','400', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH425_LSP1_Data_Combo.AsymptoticLimits.mH120.root','425', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH450_LSP1_Data_Combo.AsymptoticLimits.mH120.root','450', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH475_LSP1_Data_Combo.AsymptoticLimits.mH120.root','475', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH500_LSP1_Data_Combo.AsymptoticLimits.mH120.root','500', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH525_LSP1_Data_Combo.AsymptoticLimits.mH120.root','525', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH550_LSP1_Data_Combo.AsymptoticLimits.mH120.root','550', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH575_LSP1_Data_Combo.AsymptoticLimits.mH120.root','575', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH600_LSP1_Data_Combo.AsymptoticLimits.mH120.root','600', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH625_LSP1_Data_Combo.AsymptoticLimits.mH120.root','625', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH650_LSP1_Data_Combo.AsymptoticLimits.mH120.root','650', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH675_LSP1_Data_Combo.AsymptoticLimits.mH120.root','675', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH700_LSP1_Data_Combo.AsymptoticLimits.mH120.root','700', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH725_LSP1_Data_Combo.AsymptoticLimits.mH120.root','725', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH750_LSP1_Data_Combo.AsymptoticLimits.mH120.root','750', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH775_LSP1_Data_Combo.AsymptoticLimits.mH120.root','775', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH800_LSP1_Data_Combo.AsymptoticLimits.mH120.root','800', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH825_LSP1_Data_Combo.AsymptoticLimits.mH120.root','825', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH850_LSP1_Data_Combo.AsymptoticLimits.mH120.root','850', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH875_LSP1_Data_Combo.AsymptoticLimits.mH120.root','875', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH900_LSP1_Data_Combo.AsymptoticLimits.mH120.root','900', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH925_LSP1_Data_Combo.AsymptoticLimits.mH120.root','925', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH950_LSP1_Data_Combo.AsymptoticLimits.mH120.root','950', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH975_LSP1_Data_Combo.AsymptoticLimits.mH120.root','975', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH1000_LSP1_Data_Combo.AsymptoticLimits.mH120.root','1000', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH1100_LSP1_Data_Combo.AsymptoticLimits.mH120.root','1100', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH1200_LSP1_Data_Combo.AsymptoticLimits.mH120.root','1200', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH1300_LSP1_Data_Combo.AsymptoticLimits.mH120.root','1300', '1') );
+	results3.append( ExtractFile(inDIR+'higgsCombine1DTChiHH1400_LSP1_Data_Combo.AsymptoticLimits.mH120.root','1400', '1') );
 
-	#N2N1, 150-1200 (every 50 until 1000, then 1100,1200,1300,1400)
-	names_hino=[150,200,250,300,350,400,450,500,550,600,650,700,750,800,850,900,950,1000,1100,1200,1300,1400]
+	# Store signal cross sections for N1-N2-only theory line
+	# N2N1, 150-1200 (every 50 until 1000, then 1100,1200,1300,1400)
+	mass_hino=[150,200,250,300,350,400,450,500,550,600,650,700,750,800,850,900,950,1000,1100,1200,1300,1400]
 	xsec_hino=[715.14,244.213,104.252, 50.9994, 27.3286, 15.6691, 9.44017, 5.90757, 3.8167, 2.53015, 1.71418, 1.18113, 0.826366, 0.586211, 0.420556, 0.305935, 0.22285, 0.16428,0.0912469,0.0516263,0.0299353,0.0175031] #this doesn't include the 25 GeV and 75 GeV mass points
 
+	# Store observed and expected limits (and sigma bands)
+	# Option for fourth result for comparisons sake
 	names=[]; l_obs=[]; l_m2sig=[]; l_m1sig=[]; l_exp=[]; l_p1sig=[]; l_p2sig=[]; count=0;
-	names2=[]; l_obs2=[]; l_m2sig2=[]; l_m1sig2=[]; l_exp2=[]; l_p1sig2=[]; l_p2sig2=[]; count2=0;
-	names3=[]; l_obs3=[]; l_m2sig3=[]; l_m1sig3=[]; l_exp3=[]; l_p1sig3=[]; l_p2sig3=[]; count3=0;
-	names4=[]; l_obs4=[]; l_m2sig4=[]; l_m1sig4=[]; l_exp4=[]; l_p1sig4=[]; l_p2sig4=[]; count4=0;
+	names2=[]; l_obs2=[]; l_m2sig2=[]; l_m1sig2=[]; l_exp2=[]; l_p1sig2=[]; l_p2sig2=[];
+	names3=[]; l_obs3=[]; l_m2sig3=[]; l_m1sig3=[]; l_exp3=[]; l_p1sig3=[]; l_p2sig3=[];
+	# names4=[]; l_obs4=[]; l_m2sig4=[]; l_m1sig4=[]; l_exp4=[]; l_p1sig4=[]; l_p2sig4=[];
 	LSP_m=[]; xsecs = []
 
-	# BR=1.0 #BR set in ALPHABET
+	# BR=1.0 #BR set in ALPHABET, not needed here
 	for r in results:
-		names.append(r[0]);#chi20 mass
-		LSP_m.append(r[1]);#LSP mass
+		names.append(r[0]); # NLSP mass
+		LSP_m.append(r[1]); # LSP mass
 		this_xsec = higgsinoCrossSection(r[0]);
 		xsecs.append(this_xsec);
 		l_m2sig.append(r[2]*this_xsec);
@@ -250,7 +267,7 @@ def makeBrazilFlag(compareLimits,saveRootFile):
 		count=count+1
 
 	for r in results2:
-		names2.append(r[0]);#chi20 mass
+		names2.append(r[0]); # NLSP mass
 		this_xsec = higgsinoCrossSection(r[0]);
 		l_m2sig2.append(r[2]*this_xsec);
 		l_m1sig2.append(r[3]*this_xsec);
@@ -258,10 +275,9 @@ def makeBrazilFlag(compareLimits,saveRootFile):
 		l_p1sig2.append(r[5]*this_xsec);
 		l_p2sig2.append(r[6]*this_xsec);
 		l_obs2.append(r[7]*this_xsec);
-		count2=count2+1
 
 	for r in results3:
-		names3.append(r[0]);#chi20 mass
+		names3.append(r[0]); # NLSP mass
 		this_xsec = higgsinoCrossSection(r[0]);
 		l_m2sig3.append(r[2]*this_xsec);
 		l_m1sig3.append(r[3]*this_xsec);
@@ -269,7 +285,16 @@ def makeBrazilFlag(compareLimits,saveRootFile):
 		l_p1sig3.append(r[5]*this_xsec);
 		l_p2sig3.append(r[6]*this_xsec);
 		l_obs3.append(r[7]*this_xsec);
-		count3=count3+1
+
+	# for r in results4:
+	# 	names4.append(r[0]); # NLSP mass
+	# 	this_xsec = higgsinoCrossSection(r[0]);
+	# 	l_m2sig4.append(r[2]*this_xsec);
+	# 	l_m1sig4.append(r[3]*this_xsec);
+	# 	l_exp4.append(r[4]*this_xsec);
+	# 	l_p1sig4.append(r[5]*this_xsec);
+	# 	l_p2sig4.append(r[6]*this_xsec);
+	# 	l_obs4.append(r[7]*this_xsec);
 
 	a_xax = array('d', []); a2_xax = array('d', []);
 	a_exp = array('d', []); a_obs = array('d', []);
@@ -277,6 +302,7 @@ def makeBrazilFlag(compareLimits,saveRootFile):
 
 	a_xax2 = array('d', []); a_exp2 = array('d', []); a_obs2 = array('d', []); a_1sig2 = array('d', []); a_2sig2 = array('d', []);
 	a_xax3 = array('d', []); a_exp3 = array('d', []); a_obs3 = array('d', []); a_1sig3 = array('d', []); a_2sig3 = array('d', []);
+	# a_xax4 = array('d', []); a_exp4 = array('d', []); a_obs4 = array('d', []); a_1sig4 = array('d', []); a_2sig4 = array('d', []);
 	aComb_1sig = array('d', []); aComb_2sig = array('d', []); a2Comb_xax = array('d', []);
 
 	a_1sigup = array('d', []); a_1sigdown = array('d', []); a_2sigup = array('d', []); a_2sigdown = array('d', []);
@@ -329,9 +355,14 @@ def makeBrazilFlag(compareLimits,saveRootFile):
 	for i in range(len(l_m1sig3)): aComb_1sigdown.append( float(l_m1sig3[i]) );
 	for i in range(len(l_p1sig3)): aComb_1sigup.append( float(l_p1sig3[i]) );
 
+	# for i in range(len(names4)): a_xax4.append( float(names4[i]) );
+	# for i in range(len(l_exp4)): a_exp4.append( float(l_exp4[i]) );
+	# for i in range(len(l_obs4)): a_obs4.append( float(l_obs4[i]) );
+
 	a_2sig.append(results[0][6])
 	a2_xax.append(0.5)
 
+	# Make graphs
 	g_exp = ROOT.TGraph(len(a_xax), a_xax, a_exp)
 	g_obs = ROOT.TGraph(len(a_xax), a_xax, a_obs)
 	g_1sig = ROOT.TGraph(len(2*a_xax), a2_xax, a_1sig)
@@ -359,7 +390,10 @@ def makeBrazilFlag(compareLimits,saveRootFile):
 	gComb_2sigup = ROOT.TGraph(len(a_xax3), a_xax3, aComb_2sigup)
 	gComb_2sigdown = ROOT.TGraph(len(a_xax3), a_xax3, aComb_2sigdown)
 
+	# g_exp4 = ROOT.TGraph(len(a_xax4), a_xax4, a_exp4);
+	# g_obs4 = ROOT.TGraph(len(a_xax4), a_xax4, a_obs4)
 
+	# Begin plotting
 	can = ROOT.TCanvas("can","can",1600,1200);
 	hrl = ROOT.TH1F("hrl","hrl",25,100,1200);
 	chi02 = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0 }}}#kern[-1.0]{#scale[0.85]{_{2 }}}";
@@ -372,6 +406,7 @@ def makeBrazilFlag(compareLimits,saveRootFile):
 	chi0pmi = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0,#pm  }}}#kern[-1.1]{#scale[0.85]{_{ i    }}}";
 	chi0mpj = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0,#mp }}}#kern[-1.1]{#scale[0.85]{_{j   }}}";
 
+	# Create blank histogram to make axes and titles easier
 	hrl.GetXaxis().SetTitle("m("+chi01nospace+") [GeV]");
 	hrl.GetXaxis().SetRangeUser(150,1400);
 	hrl.GetXaxis().SetLabelSize(0.04)
@@ -412,40 +447,41 @@ def makeBrazilFlag(compareLimits,saveRootFile):
 	a_stop_hino = array('d', []); a_xsec_hino = array('d', []);
 	count_hino=0;
 	for x in xsec_hino:
-		a_stop_hino.append(float(names_hino[count_hino]));
+		a_stop_hino.append(float(mass_hino[count_hino]));
 		a_xsec_hino.append(x*BR*BR)
 		count_hino=count_hino+1
 	g_xsec_hino=ROOT.TGraph(len(a_stop_hino), a_stop_hino, a_xsec_hino)
 
-	if compareLimits: leg = ROOT.TLegend(0.55,0.47,0.8,0.73);
+	if compareLimits: leg = ROOT.TLegend(0.5,0.47,0.8,0.73);
 	else: leg = ROOT.TLegend(0.6,0.47,0.85,0.73);
 	leg.SetFillStyle(4050); leg.SetFillColor(0);
 	leg.SetTextFont(42); leg.SetBorderSize(0);
-	leg.SetTextSize(0.045);
+	leg.SetTextSize(0.035);
 
 
-	#Compare limits
+	# Compare limits between boosted and resolved
 	if compareLimits:
-		leg.SetHeader("95% CL Upper Limit")
+		leg.SetHeader("95% CL upper limit")
 		leg.AddEntry(g_obs, "Observed (boosted)","l")
 		leg.AddEntry(g_obs2,"Observed (resolved)","l")
 		leg.AddEntry(g_exp,"Expected (boosted)","l")
 		leg.AddEntry(g_exp2,"Expected (resolved)","l")
 
-	#Combo
+
+	# Plot final combo
 	else:
-		leg.SetHeader("95% CL Upper Limit")
+		leg.SetHeader("95% CL upper limit")
 		leg.AddEntry(g_obs3,"Observed","l")
 		leg.AddEntry(g_exp3, "Expected","l")
 		leg.AddEntry(gComb_2sig,"#pm2 #sigma_{experiment}","f")
 		leg.AddEntry(gComb_1sig,"#pm1 #sigma_{experiment}","f")
 
 
+	#N1N2-only theory
 	leg2 = ROOT.TLegend(0.15,0.16,0.4,0.3);
 	leg2.SetFillStyle(4050); leg2.SetFillColor(0);
 	leg2.SetTextFont(42); leg2.SetBorderSize(0);
-	leg2.SetTextSize(0.045);
-
+	leg2.SetTextSize(0.035);
 	plusString = "#scale[0.1]{ }+#scale[0.5]{ }"
   	leg2.AddEntry(g_xsec, "Theory ("+chi01+chi02+plusString+chi01+chipm1+plusString+chi02+chipm1+plusString+chipm1+chimp1+")", "l")
 	if not compareLimits: leg2.AddEntry(g_xsec_hino, "Theory ("+chi01+chi02nospace+")", "l")
@@ -463,14 +499,17 @@ def makeBrazilFlag(compareLimits,saveRootFile):
 	if compareLimits:
 		g_obs.SetLineColor(ROOT.kRed); g_obs.SetLineWidth(2);
 		g_obs2.SetLineColor(ROOT.kBlue); g_obs2.SetLineWidth(2);
-		g_obs3.SetLineColor(ROOT.kBlack); g_obs3.SetLineWidth(3);
+		g_obs3.SetLineColor(ROOT.kBlack); g_obs3.SetLineWidth(2);
 		g_obs.Draw('l');
 		g_obs2.Draw('lsames');
-		g_exp.SetLineColor(ROOT.kRed); g_exp.SetLineWidth(2); #g_exp.SetLineStyle(1);
+		# g_obs3.Draw('lsames');
+
+		g_exp.SetLineColor(ROOT.kRed); g_exp.SetLineWidth(2); g_exp.SetLineStyle(2);
 		g_exp2.SetLineColor(ROOT.kBlue); g_exp2.SetLineWidth(2); g_exp2.SetLineStyle(2);
 		g_exp3.SetLineColor(ROOT.kBlack); g_exp3.SetLineWidth(2); g_exp3.SetLineStyle(2);
 		g_exp.Draw('lsames');
 		g_exp2.Draw('lsames');
+		# g_exp3.Draw('lsames');
 
 	# For one line with 1- and 2-sigma bands, combo
 	else:
@@ -482,30 +521,43 @@ def makeBrazilFlag(compareLimits,saveRootFile):
 	txta.Draw(); txtc.Draw();
 	txtd.Draw(); txte.Draw();
 	leg.Draw(); leg2.Draw();
+
 	g_xsec.SetLineStyle(2); g_xsec.SetLineWidth(3);
 	g_xsec.SetLineColor(ROOT.kRed);
 	if compareLimits: g_xsec.SetLineColor(ROOT.kBlack);
 	g_xsec.Draw("lsame")
 
-	#Second xsec (https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SUSYCrossSections13TeVn1n2hino)
+	# Second xsec (https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SUSYCrossSections13TeVn1n2hino)
 	g_xsec_hino.SetLineStyle(3);
 	g_xsec_hino.SetLineWidth(3);
 	g_xsec_hino.SetLineColor(ROOT.kMagenta);
 	if not compareLimits: g_xsec_hino.Draw("lsame")
 
+	# Print out mass and xsec exclusion
+	# for i in range(0,500):
+	# 	# if (g_xsec.Eval(700+i)-g_exp3.Eval(700+i)>0):
+	# 	# 	print "Expected: Mass %d  Exp Excl %g " %(700+i,g_exp3.Eval(700+i))
+	# 	if (g_xsec.Eval(700+i)-g_obs3.Eval(700+i)>0):
+	# 		print "Observed: Mass %d  Obs Excl %g " %(700+i,g_obs3.Eval(700+i))
+
+
+
+
 	if compareLimits:
-		can.SaveAs(odir+'TChiHHResults_V18_Combo_CompareObsExpAll.pdf');
-		txtb.Draw();
-		can.SaveAs(odir+'TChiHHResults_V18_Combo_CompareObsExpAll_prelim.pdf');
+		can.SaveAs(outDIR+'Figure_012.pdf');
+		# txtb.Draw();
+		# can.SaveAs(outDIR+'TChiHHResults_V18_Combo_CompareObsExpAll_prelim.pdf');
 	else:
-		can.SaveAs(odir+'TChiHHResults_V18_Combo_ObsExp.pdf');
-		txtb.Draw();
-		can.SaveAs(odir+'TChiHHResults_V18_Combo_ObsExp_prelim.pdf');
+		can.SaveAs(outDIR+'Figure_011.pdf');
 
 
-	####### Save ROOT file with all limits
+		# txtb.Draw();
+		# can.SaveAs(outDIR+'TChiHHResults_V18_Combo_ObsExp_prelim.pdf');
+
+
+	####### Save ROOT file with all limits for HEPData
 	if saveRootFile:
-		fNEW=ROOT.TFile(odir+"CMS-SUS-20-004_TChiHH1DLimits.root", "RECREATE")
+		fNEW=ROOT.TFile(outDIR+"CMS-SUS-20-004_Figure_011.root", "RECREATE")
 		can2 = ROOT.TCanvas("can2","can2",1600,1200);
 		g_xsec.Write("TheoryXSec");
 		g_xsec_hino.Write("TheoryXSec_N1N2");
@@ -538,6 +590,7 @@ def main():
 	#Second is saveRootFile, does the same thing regardless of first argument
 	makeBrazilFlag(True,True) #boostedOnly vs resolvedOnly
 	makeBrazilFlag(False,False) #Combination with 1- and 2-sigma bands
+	# makeBrazilFlag(True,False) #boostedOnly vs resolvedOnly
 
 
 if __name__ == "__main__":
