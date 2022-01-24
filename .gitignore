@@ -7,7 +7,11 @@ src/**/*.eps
 **/*~
 **/*root
 !src/*root
-output/*
+output/*.pdf
+output/*.txt
+!output/notUsefulTextFile.txt
+output/*.png
+output/*.root
 **/*exe
 **/*stdout
 **/*stderr
@@ -17,6 +21,7 @@ output/*
 **/*pyc
 src/*/
 !src/evtCount
+!src/*root
 **/*.d
 **/*.so
 **/*.pcm
@@ -29,3 +34,5 @@ datacards/*
 scripts/ALPHABET
 scripts/cutflow
 scripts/cutflowFromNtuples
+scripts/jobs/*
+!scripts/jobs/notUsefulTextFile.txt

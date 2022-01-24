@@ -1,0 +1,1 @@
+This text file exists solely so the output directory exists on git. You're welcome
