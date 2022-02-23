@@ -266,8 +266,12 @@ void MakeLimitPlotCombo(vector<double> vmx, vector<double> vmy, vector<double> v
   ltitle.SetNDC(); rtitle.SetNDC(); ltitle_prelim.SetNDC();
   ltitle.SetTextAlign(12); rtitle.SetTextAlign(32); ltitle_prelim.SetTextAlign(12);
 
-  TLatex txtd(0.15,0.85,"pp#rightarrow "+chi02+" "+chi03+" #rightarrow HH "+chi01+" "+chi01);
+  TLatex txtd(0.15,0.85,"pp#rightarrow "+chi02+" "+chi03+" #rightarrow HH "+chi01+" "+chi01+",");
   txtd.SetNDC(); txtd.SetTextFont(42); txtd.SetTextSize(0.038);
+
+  TLatex txte(0.5,0.85,"m("+chi03+") = m("+chi02+")");
+  txte.SetNDC(); txte.SetTextFont(42); txte.SetTextSize(0.038);
+
   c.SetRightMargin(0.16);
   c.SetLeftMargin(0.12); c.SetLogz();
   glim.Draw("colz");
@@ -318,6 +322,7 @@ void MakeLimitPlotCombo(vector<double> vmx, vector<double> vmy, vector<double> v
   l.Draw("same");
   ltitle.Draw("same"); //Preliminary
   rtitle.Draw("same"); txtd.Draw("same");
+  txte.Draw("same");
   leg2.Draw("same"); leg3.Draw("same");
   leg4.Draw("same"); leg5.Draw("same");
   leg6.Draw("same"); leg7.Draw("same");

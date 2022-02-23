@@ -45,24 +45,26 @@ def systBinContent(histoNom,histoVar,binNum):
 
 
 def getMassPoints(model):
-    mass_points = []
-    if model == "TChiHH":
-        namesFile=open("../src/higgsino2DFileNames.txt", 'r'); #Just to grab the mass points of the scan
-        for line in namesFile:
-            x = line.split('_')
-            hino_mass = int(x[5])
-            LSP_mass = int(x[6])
-            if hino_mass>810: break;
-            mass_points.append([hino_mass, LSP_mass])
-        #Add 1D scan
-        for i in range(0, 27):
-            hino_mass=150+i*25
-            mass_points.append([hino_mass, 1])
-    elif model == "TChiHH-G":
-        mass_points = [[150+item*25, 1]for item in range(0, 55)]
-    elif model == "T5HH":
-        mass_points = [[1000+item*100,1] for item in range(0,16)]
-    return mass_points
+	mass_points = []
+	if model == "TChiHH":
+		namesFile=open("../src/higgsino2DFileNames.txt", 'r'); #Just to grab the mass points of the scan
+		for line in namesFile:
+			x = line.split('_')
+			hino_mass = int(x[5])
+			LSP_mass = int(x[6])
+			if hino_mass>810: break;
+			mass_points.append([hino_mass, LSP_mass])
+		#Add 1D scan
+		for i in range(0, 27):
+			hino_mass=150+i*25
+			mass_points.append([hino_mass, 1])
+	elif model == "TChiHH-G":
+		mass_points = [[150+item*25, 1]for item in range(0, 55)]
+	elif model == "T5HH":
+		mass_points = [[1000+item*100,1] for item in range(0,16)]
+	elif model == "T5HHextra":
+		mass_points = [[1000,1], [1200,1], [1400,1], [1600,1], [1800,1]]
+	return mass_points
 
 
 
@@ -119,7 +121,9 @@ def makeDatacards(model,which,data):
 	elif signal == "T5HH":
 		if which == "boost": sigFileName = baseDir+"T5HH1D_FullSIM/ALPHABET_1DT5HH_FullSIM.root"
 		else: sigFileName = baseDir+"T5HH1D_FullSIM_veto/ALPHABET_1DSignal.root"
-	else: print("Something is wrong with your signal...")
+	if model == "T5HHextra":
+		sigFileName = baseDir+"testing_mN2_T5HH/ALPHABET_1DSignalExtra.root"
+	# else: print("Something is wrong with your signal...")
 
 	f2=TFile(sigFileName, "READ")
 	if signal=="TChiHH" and runMETavg==True: f2_genMET=TFile(sigGenFileName, "READ");
@@ -175,6 +179,7 @@ def makeDatacards(model,which,data):
 		finalLSP=LSP
 		if (finalLSP==1): finalLSP=1;
 		elif (finalLSP%5!=0): finalLSP=finalLSP+2;
+		if model=="T5HHextra": signal="T5HH"
 
 		print("\n\n\n-----------------------------------------------------")
 		print("Signal: %s, looping over mass=%d, mLSP=%d now" %(model,hino,finalLSP))
@@ -615,20 +620,23 @@ def runCombine(model,which,data):
 if __name__ == '__main__':
 
 	#Options for makeDatacards(model,which,data) - runs for BoostOnly and BoostVeto (with overlapping events removed)
-	# makeDatacards("TChiHH-G","boost",True)
-	# makeDatacards("TChiHH-G","veto",True)
-	# makeDatacards("TChiHH","boost",True)
-	# makeDatacards("TChiHH","veto",True)
+	makeDatacards("TChiHH-G","boost",True)
+	makeDatacards("TChiHH-G","veto",True)
+	makeDatacards("TChiHH","boost",True)
+	makeDatacards("TChiHH","veto",True)
 	# makeDatacards("TChiHH","only2H",True) #For EWK Combine only
 	makeDatacards("T5HH","boost",True)
 	makeDatacards("T5HH","veto",True)
+	# makeDatacards("T5HHextra","boost",True)
 
-	combineDatacards("TChiHH-G","all",True) #all = runs boost, res, and comb
-	combineDatacards("TChiHH","all",True) #runs boost, res, and comb
+
+	# I would advise not running the following
+	# combineDatacards("TChiHH-G","all",True) #all = runs boost, res, and comb
+	# combineDatacards("TChiHH","all",True) #runs boost, res, and comb
 	# combineDatacards("TChiHH","only2H",True) #EWK combine only (for higgsino interpretation)
-	combineDatacards("T5HH","all",True)
+	# combineDatacards("T5HH","all",True)
 
-	#runCombine(model,which,data) - recommend running using combineAndRunDatacards.py
+	# runCombine(model,which,data) - recommend running using combineAndRunDatacards.py
 	# runCombine("TChiHH-G","all",True)
 	# runCombine("TChiHH","all",True)
 	# runCombine("T5HH","all",True)

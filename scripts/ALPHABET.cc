@@ -13,29 +13,29 @@
 using namespace std;
 
 int main(int argc, char** argv){
-  int region(0); region = atoi(argv[1]); //0 lepton, 1D signal, 2D signal, single muon, single electron, photon
-  TString Year(argv[2]); //MC2016
-  int runVeto(0); runVeto = atoi(argv[3]); //remove events that overlap with resolved
-  int mass2D(0); mass2D = atoi(argv[4]); //For running over signal
+  int region(0); region = atoi(argv[1]); // 0 lepton, 1D signal, 2D signal, single muon, single electron, photon
+  TString Year(argv[2]); // MC2016 for example
+  int runVeto(0); runVeto = atoi(argv[3]); // 1: Remove events that overlap with resolved
+  int mass2D(0); mass2D = atoi(argv[4]); // For running over signal, NLSP mass
   std::string mass2D_string = std::to_string(mass2D);
   string yearStr = "2016"; if (Year=="MC2017") yearStr = "2017"; if (Year=="MC2018") yearStr = "2018";
 
   setMasses(mass2D_string,"1");
   bool runMC = true;
   bool runData = true;
-  bool applySFs_ = true; //btag SFs, SFs for photons, electrons, and muons - only used for MC/data comparisons
-  bool runFullSIM = false; //only for 1D T5HH
-  bool saveBoostedEvt = false; //for WX, saves the boosted event counts in the analysis regions
+  bool applySFs_ = true; // btag SFs, SFs for photons, electrons, and muons - only used for MC/data comparisons
+  bool runFullSIM = false; // Set to true for 1D T5HH
+  bool saveBoostedEvt = false; // Saves the boosted event counts in the analysis regions for overlap studies (with WX)
   string outDir_evtCount = "../src/evtCount/boost/";
   bool debugPrint = false;
 
 
-  // if (region==0 && runData) runMC = false; //don't run MC for 0-lepton at the same time as data
+  // Quick trick to run either data or MC
   if (region==0) {
     if (mass2D==0) { runMC = true; runData = false; }
     else if (mass2D==1) { runMC = false; runData = true; }
   }
-  else if (region==1 || region==2) runData=false; //don't run data for SUSY signals
+  else if (region==1 || region==2) runData=false; // don't run data for SUSY signals
   if (region==0 || region==1 || region==2) applySFs_ = false;
   // if (region==1 || region==2) applySFs_ = false; //toggle if doing data/MC comparisons for 0-lepton region
 
@@ -63,8 +63,6 @@ int main(int argc, char** argv){
   if (region == 1 && runFullSIM) regionName = "1DT5HH_FullSIM";
   else if (region == 2 && mass2D<810) regionName = "2DTChiHH"; //for datacards
   else if (region == 2 && mass2D>810) regionName = "2DT5HH";  //for datacards
-  // else if (region == 2) regionName = "2DTChiHH";
-  // else if (region == 2) regionName = "2DT5HH";
   else if (region == 3) regionName="singleMu";
   else if (region == 4) regionName="singleEle";
   else if (region == 5) regionName="photon";
@@ -99,23 +97,17 @@ int main(int argc, char** argv){
   plot J2_M_jetBins(*fillSubLeadingJetMass<RA2bTree>,"J2_M_jetBins","m_{J} [GeV]",3,mJbins);
   plot J1_deepbbtag(*fillLeadingdeepBBtag<RA2bTree>,"LeadDeepBBTag","Lead jet deep bb-tag",50,0.0,1.0);
   plot J2_deepbbtag(*fillSubLeadingdeepBBtag<RA2bTree>,"SubLeadDeepBBTag","Sub-lead jet deep bb-tag",50,0.0,1.0);
+  plot numAK8(*fillNAK8Jets<RA2bTree>,"numAK8","Number AK8 jets with p_{T}>300 GeV",10,0.,10.);
+  plot numAK4(*fillNJets<RA2bTree>,"numAK4","Number AK4 jets with p_{T}>30 GeV",20,0.,20.);
+  plot numGenH(*bothJetsGen<RA2bTree>,"numGenH","Number gen-matched H AK8 jets as lead or sublead",3,0.,3.);
+
+
 
   TH2F * h_j1vj2_mass_baseline = new TH2F("j1vj2_mass_baseline",";J2 soft-drop mass [GeV]; J1 soft-drop mass [GeV]",400,60, 260, 400, 60, 260);
   TH2F * h_j1vj2_mass_0H = new TH2F("j1vj2_mass_0H",";J2 soft-drop mass [GeV]; J1 soft-drop mass [GeV]",400,60, 260, 400, 60, 260);
   TH2F * h_j1vj2_mass_1H = new TH2F("j1vj2_mass_1H",";J2 soft-drop mass [GeV]; J1 soft-drop mass [GeV]",400,60, 260, 400, 60, 260);
   TH2F * h_j1vj2_mass_2H = new TH2F("j1vj2_mass_2H",";J2 soft-drop mass [GeV]; J1 soft-drop mass [GeV]",400,60, 260, 400, 60, 260);
 
-  TH1F * h_numGenHbb = new TH1F("numGenHbb",";Gen H to bb;Percent",9,0, 9);
-  h_numGenHbb->GetXaxis()->SetBinLabel(1,"Num 2H events");
-  h_numGenHbb->GetXaxis()->SetBinLabel(2,"Num 1H events");
-  h_numGenHbb->GetXaxis()->SetBinLabel(3,"Num 0H events");
-
-  h_numGenHbb->GetXaxis()->SetBinLabel(4,"2H events, 2 gen H matched");
-  h_numGenHbb->GetXaxis()->SetBinLabel(5,"1H events, 1+ gen H matched");
-  h_numGenHbb->GetXaxis()->SetBinLabel(6,"1H events, 2 gen H matched");
-  h_numGenHbb->GetXaxis()->SetBinLabel(7,"1H events, 1 gen H matched incorrectly");
-  h_numGenHbb->GetXaxis()->SetBinLabel(8,"0H events, 1+ gen H matched");
-  h_numGenHbb->GetXaxis()->SetBinLabel(9,"0H events, 2 gen H matched");
 
   vector<plot> baselinePlots;
   vector<plot> doubletagSRPlots;
@@ -141,6 +133,11 @@ int main(int argc, char** argv){
   baselinePlots.push_back(plot(J2pt_Mplot));
   baselinePlots.push_back(plot(J1_deepbbtag));
   baselinePlots.push_back(plot(J2_deepbbtag));
+  baselinePlots.push_back(plot(numAK8));
+  baselinePlots.push_back(plot(numAK4));
+  baselinePlots.push_back(plot(numGenH));
+
+
 
   doubletagSRPlots.push_back(plot(J1pt_Ptplot));
   doubletagSRPlots.push_back(plot(J2pt_Ptplot));
@@ -148,6 +145,9 @@ int main(int argc, char** argv){
   doubletagSRPlots.push_back(plot(J2pt_Mplot));
   doubletagSRPlots.push_back(plot(J1_deepbbtag));
   doubletagSRPlots.push_back(plot(J2_deepbbtag));
+  doubletagSRPlots.push_back(plot(numAK8));
+  doubletagSRPlots.push_back(plot(numAK4));
+  doubletagSRPlots.push_back(plot(numGenH));
 
   doubletagSBPlots.push_back(plot(J1pt_Ptplot));
   doubletagSBPlots.push_back(plot(J2pt_Ptplot));
@@ -155,6 +155,9 @@ int main(int argc, char** argv){
   doubletagSBPlots.push_back(plot(J2pt_Mplot));
   doubletagSBPlots.push_back(plot(J1_deepbbtag));
   doubletagSBPlots.push_back(plot(J2_deepbbtag));
+  doubletagSBPlots.push_back(plot(numAK8));
+  doubletagSBPlots.push_back(plot(numAK4));
+  doubletagSBPlots.push_back(plot(numGenH));
 
   tagSRPlots.push_back(plot(J1pt_Ptplot));
   tagSRPlots.push_back(plot(J2pt_Ptplot));
@@ -162,6 +165,9 @@ int main(int argc, char** argv){
   tagSRPlots.push_back(plot(J2pt_Mplot));
   tagSRPlots.push_back(plot(J1_deepbbtag));
   tagSRPlots.push_back(plot(J2_deepbbtag));
+  tagSRPlots.push_back(plot(numAK8));
+  tagSRPlots.push_back(plot(numAK4));
+  tagSRPlots.push_back(plot(numGenH));
 
   tagSBPlots.push_back(plot(J1pt_Ptplot));
   tagSBPlots.push_back(plot(J2pt_Ptplot));
@@ -169,6 +175,10 @@ int main(int argc, char** argv){
   tagSBPlots.push_back(plot(J2pt_Mplot));
   tagSBPlots.push_back(plot(J1_deepbbtag));
   tagSBPlots.push_back(plot(J2_deepbbtag));
+  tagSBPlots.push_back(plot(numAK8));
+  tagSBPlots.push_back(plot(numAK4));
+  tagSBPlots.push_back(plot(numGenH));
+
 
   antitagSRPlots.push_back(plot(J1pt_Ptplot));
   antitagSRPlots.push_back(plot(J2pt_Ptplot));
@@ -176,6 +186,9 @@ int main(int argc, char** argv){
   antitagSRPlots.push_back(plot(J2pt_Mplot));
   antitagSRPlots.push_back(plot(J1_deepbbtag));
   antitagSRPlots.push_back(plot(J2_deepbbtag));
+  antitagSRPlots.push_back(plot(numAK8));
+  antitagSRPlots.push_back(plot(numAK4));
+  antitagSRPlots.push_back(plot(numGenH));
 
   antitagSBPlots.push_back(plot(J1pt_Ptplot));
   antitagSBPlots.push_back(plot(J2pt_Ptplot));
@@ -183,6 +196,9 @@ int main(int argc, char** argv){
   antitagSBPlots.push_back(plot(J2pt_Mplot));
   antitagSBPlots.push_back(plot(J1_deepbbtag));
   antitagSBPlots.push_back(plot(J2_deepbbtag));
+  antitagSBPlots.push_back(plot(numAK8));
+  antitagSBPlots.push_back(plot(numAK4));
+  antitagSBPlots.push_back(plot(numGenH));
 
   antitagBTagPlots.push_back(plot(J1pt_Ptplot));
   antitagBTagPlots.push_back(plot(J2pt_Ptplot));
@@ -190,6 +206,9 @@ int main(int argc, char** argv){
   antitagBTagPlots.push_back(plot(J2pt_Mplot));
   antitagBTagPlots.push_back(plot(J1_deepbbtag));
   antitagBTagPlots.push_back(plot(J2_deepbbtag));
+  antitagBTagPlots.push_back(plot(numAK8));
+  antitagBTagPlots.push_back(plot(numAK4));
+  antitagBTagPlots.push_back(plot(numGenH));
 
   baselinePlots.push_back(plot(METall_Plot));
   baselinePlots.push_back(plot(METother_Plot));
@@ -303,7 +322,6 @@ int main(int argc, char** argv){
       else if (region==2) readResVeto_Sig2D(yearStr,"TChiHH");
       else readResVeto_MC(yearStr);
       if (debugPrint) std::cout<<"Here? 4"<<std::endl;
-
     }
 
     if (debugPrint) std::cout<<"Here? 5"<<std::endl;
@@ -327,37 +345,35 @@ int main(int argc, char** argv){
       TH2F * h_0H = (TH2F*)h_j1vj2_mass_0H->Clone("j1vj2M_0H_"+skims.sampleName[iSample]);
       TH2F * h_1H = (TH2F*)h_j1vj2_mass_1H->Clone("j1vj2M_1H_"+skims.sampleName[iSample]);
       TH2F * h_2H = (TH2F*)h_j1vj2_mass_2H->Clone("j1vj2M_2H_"+skims.sampleName[iSample]);
-      TH1F * h_genHbb = (TH1F*)h_numGenHbb->Clone("genHbb_"+skims.sampleName[iSample]);
 
 
 
 
       int numEvents = ntuple->fChain->GetEntries();
-      ntupleBranchStatus<RA2bTree>(ntuple); //these are set in definitions
+      ntupleBranchStatus<RA2bTree>(ntuple); // These are set in definitions.cc
       bool passBaseline;
       TFile *fin;
 
       if (debugPrint) std::cout<<"Here? 7"<<std::endl;
 
       TString startFilename = ntuple->fChain->GetFile()->GetName();
-      double this_lumi = 137191.0;
-      // double this_lumi = 35922.0;
+      // double this_lumi = 137191.0;
+      double this_lumi = 35922.0;
       if ( startFilename.Contains("2017") ) this_lumi = 41529.0;
       else if ( startFilename.Contains("2018") ) this_lumi = 59740.0;
+
 
       setSignalMasses(ntuple,region);
 
       if (debugPrint) std::cout<<"Here? 8"<<std::endl;
 
       int TotalEvents = 0; TH1F* h_norm;
-      // if (startFilename.Contains("TChiHH_HToBB") || startFilename.Contains("T5qqqqZH") || startFilename.Contains("T5HH") ) {
-        if (startFilename.Contains("TChiHH_HToBB") || startFilename.Contains("T5qqqqHH") || runFullSIM) {
-          fin = TFile::Open(startFilename);
-          h_norm = (TH1F*)fin->Get("PDFNorm"); //used for scales for signal systematics
-          TH1F *nEventsHisto = (TH1F*)fin->Get("nEventProc");
-          TotalEvents = nEventsHisto->GetBinContent(1); //used to fix weight branch in signal
-        }
-      // }
+      if (startFilename.Contains("TChiHH_HToBB") || startFilename.Contains("T5qqqqHH") || startFilename.Contains("T5HH") || runFullSIM) {
+        fin = TFile::Open(startFilename);
+        h_norm = (TH1F*)fin->Get("PDFNorm"); // Used for scales for signal systematics
+        TH1F *nEventsHisto = (TH1F*)fin->Get("nEventProc");
+        TotalEvents = nEventsHisto->GetBinContent(1); // Used to fix weight branch in signal
+      }
 
       if (debugPrint) std::cout<<"Here? 9"<<std::endl;
 
@@ -374,8 +390,8 @@ int main(int argc, char** argv){
         btagsf_->SetEffs(fin);
       }
 
-      //Counters are for filling the signal mass points for the 2D mass plots in the paper
-      //Specifically for 1D T5HH1600
+      // Counters are for filling the signal mass points for the 2D mass plots in the paper (right column, figure 9)
+      // Specifically for 1D T5HH1600
       int counter2HSR = 0; int counter2HSB = 0;
       int counter1HSR = 0; int counter1HSB = 0;
       int counter0HSR = 0; int counter0HSB = 0;
@@ -395,8 +411,9 @@ int main(int argc, char** argv){
         double puweight = 1.0; double prefireWeight = 1.0; float scalesSyst = 1.0;
         double BSFwt = 1.0; double SFweight = 1.0;
         float bb_tag = 1.0; float bbtag_FastSIM = 1.0; float sdMass_FastSIM = 1.0;
+
         //because I never re-ran skims, so at least only do necessary calcualtions once per event
-        setHT(ntuple,"none"); //also sets JEC/JER systematics
+        setHT(ntuple,"none"); //also sets JEC/JER systematics, check definitions.cc
         setMET(ntuple); setJetPT(ntuple); setJetMass(ntuple); setDeltaPhis(ntuple);
 
         passBaseline=true;
@@ -404,11 +421,11 @@ int main(int argc, char** argv){
           passBaseline&=baselineCut(ntuple);
           if (!passBaseline) continue;
         }
-        if (!passBaseline) continue; //probably not necessary, but ya know CYA
+        if (!passBaseline) continue; // probably not necessary, but ya know CYA
 
         // if (!(gen4bs(ntuple))) continue;
 
-        if (runVeto){
+        if (runVeto) {
           if (resEventFound(ntuple,yearStr)) continue;
         }
 
@@ -418,11 +435,11 @@ int main(int argc, char** argv){
           else if (ntuple->GenMET>150.0) continue;
         }
 
-
-        if ((thisFilename.Contains("T5qqqqZH")||thisFilename.Contains("T5HH")) && getNumGenHiggses(ntuple)!=2) continue;
+        if ((thisFilename.Contains("T5qqqqZH")||thisFilename.Contains("T5HH") ||thisFilename.Contains("T5qqqqHH")) && getNumGenHiggses(ntuple)!=2) continue;
         double thisMET = fillMET(ntuple); double thisHT = fillHT(ntuple);
 
 
+        // Trigger efficiency
         if (region == 5) {
           trigWeight = photonTrigEff(ntuple, eTrigEff_);
           if (applySFs_) SFweight = photonSFs(ntuple, hSFeff_);
@@ -440,7 +457,7 @@ int main(int argc, char** argv){
             if (applySFs_) SFweight = electronSFs(ntuple, Year, hSFeff_);
             lept_pt = ntuple->Electrons->at(0).Pt();
           }
-          //up and down for signal systematics
+          //up and down for signal systematics, instead of none
           trigWeight = triggerEfficiencies(whichTrigRegion, Year, thisMET, thisHT, lept_pt, "none");
         }
 
@@ -449,10 +466,10 @@ int main(int argc, char** argv){
         puweight = PUCorrections(ntuple,"none");
         prefireWeight = prefireCorr(ntuple,Year,"none");
         scalesSyst = scalesSystematic(ntuple,h_norm,"none"); //none returns 1.0
-        weight = ntuple->Weight*this_lumi*trigWeight*isrweight*puweight*prefireWeight*SFweight*scalesSyst;
-        // weight = ntuple->Weight*this_lumi; //used for signal efficiency
 
-        // std::cout<<"trig: "<<trigWeight<<", isr: "<<isrweight<<", PU: "<< puweight<<", prefire: "<< prefireWeight;
+        weight = ntuple->Weight*this_lumi*trigWeight*isrweight*puweight*prefireWeight*SFweight*scalesSyst;
+
+
         //check if a new file has been opened, and if yes, reset btag efficiency histos
         if (btagsf_ && startFilename!=thisFilename) {
           std::cout<<"Open file: "<< thisFilename<<std::endl;
@@ -461,8 +478,8 @@ int main(int argc, char** argv){
           startFilename=thisFilename;
         }
 
-        //b-tag SF, only used for the MC mismodeling systematic (not signal systematics)
-        //Applied later on for just 0H+region
+        // b-tag SF, only used for the MC mismodeling systematic (not signal systematics)
+        // Applied later on for just 0H+region, so don't uncomment this bit
         // if (applySFs_) {
         //   BSFwt = btagsf_->weight(ntuple->Jets, ntuple->Jets_hadronFlavor, ntuple->Jets_HTMask, ntuple->Jets_bJetTagDeepCSVBvsAll,0,0); //central
           // float btag_pt1 = btagsf_->weight(ntuple->Jets, ntuple->Jets_hadronFlavor, ntuple->Jets_HTMask, ntuple->Jets_bJetTagDeepCSVBvsAll,1,0); //up
@@ -474,13 +491,11 @@ int main(int argc, char** argv){
         float reweightXSEC = 1.0;
         if (region==1 && thisFilename.Contains("TChiHH_HToBB")) reweightXSEC = reweightSignalXSEC(mass2D_string);
 
-        if ( thisFilename.Contains("TChiHH_HToBB")||thisFilename.Contains("TChiHH") || (thisFilename.Contains("T5qqqqZH")||thisFilename.Contains("T5HH")) && !runFullSIM) weight = weight/TotalEvents*(0.5823329*0.5823329);
-        // if ( thisFilename.Contains("TChiHH_HToBB")||thisFilename.Contains("TChiHH") || (thisFilename.Contains("T5qqqqZH")||thisFilename.Contains("T5HH")) && !runFullSIM) weight = weight*reweightXSEC;
+        if ( thisFilename.Contains("TChiHH_HToBB") || thisFilename.Contains("TChiHH") || (thisFilename.Contains("T5qqqqZH") || thisFilename.Contains("T5HH")) && !runFullSIM) weight = weight/TotalEvents*(0.5823329*0.5823329);
         else if ( (thisFilename.Contains("T5qqqqZH")||thisFilename.Contains("T5HH"))) weight = weight/TotalEvents*4; //for FullSIM
-        else weight = weight/TotalEvents;
-        //first trying just weight
 
-        //Re-weight 1D TChiHH to 2D
+
+        // Re-weight 1DTChiHH to 2D
         if (region==2 && thisFilename.Contains("TChiHH") && !(thisFilename.Contains("2D"))) weight = weight/reweightXSEC;
 
         // up and down for signal systematics
@@ -488,7 +503,7 @@ int main(int argc, char** argv){
         bb_tag = bbSFs(ntuple,"none");
         bbtag_FastSIM = bbFastSIMSFs(ntuple,"none");
         weight = weight*bb_tag*bbtag_FastSIM*sdMass_FastSIM;
-        // std::cout<<", sdFS: "<< sdMass_FastSIM<<", bb: "<< bb_tag<<", bbFS: "<<bbtag_FastSIM<<std::endl;
+
 
         //For boosted evtCount
         std::stringstream METstream;
@@ -503,10 +518,6 @@ int main(int argc, char** argv){
         // first check for 2H
         if (doubleTaggingLooseCut(ntuple)) {
           count2H++;
-          // if (numOverlapBs(ntuple,0)) count1bOverlap++;
-          // if (numOverlapBs(ntuple,1)) count1bOverlap++;
-          // if (genHbbMatched(ntuple, ntuple->JetsAK8->at(0).Eta(), ntuple->JetsAK8->at(0).Phi()) &&
-          //     genHbbMatched(ntuple, ntuple->JetsAK8->at(1).Eta(), ntuple->JetsAK8->at(1).Phi()) ) count2HTrue++;
           if (doubletagSRCut(ntuple)) {
             if (saveBoostedEvt) txtfile_2HSR << runLumiEvtMET << endl;
             counter2HSR++;
@@ -524,13 +535,6 @@ int main(int argc, char** argv){
         //then check for 1H
         else if (singleHiggsTagLooseCut(ntuple)) {
           count1H++;
-          // bool j1_gen = genHbbMatched(ntuple, ntuple->JetsAK8->at(0).Eta(), ntuple->JetsAK8->at(0).Phi());
-          // bool j2_gen = genHbbMatched(ntuple, ntuple->JetsAK8->at(1).Eta(), ntuple->JetsAK8->at(1).Phi());
-          //
-          // if (j1_gen || j2_gen) count1HTrue++;
-          // if (j1_gen && j2_gen) count1H2HFalse++;
-          // if (ntuple->JetsAK8_pfMassIndependentDeepDoubleBvLJetTagsProbHbb->at(0)>0.7 && !j1_gen) count1HFalse++;
-          // if (ntuple->JetsAK8_pfMassIndependentDeepDoubleBvLJetTagsProbHbb->at(1)>0.7 && !j2_gen) count1HFalse++;
           if (tagSRCut(ntuple)) {
             if (saveBoostedEvt) txtfile_1HSR << runLumiEvtMET << endl;
             counter1HSR++;
@@ -548,10 +552,6 @@ int main(int argc, char** argv){
         //then check for 0H
         else if (antiTaggingLooseCut(ntuple)) {
           count0H++;
-          // bool j1_gen = genHbbMatched(ntuple, ntuple->JetsAK8->at(0).Eta(), ntuple->JetsAK8->at(0).Phi());
-          // bool j2_gen = genHbbMatched(ntuple, ntuple->JetsAK8->at(1).Eta(), ntuple->JetsAK8->at(1).Phi());
-          // if (j1_gen || j2_gen) count0HFalse++;
-          // if (j1_gen && j2_gen) count0H2HFalse++;
           if (applySFs_) BSFwt = btagsf_->weight(ntuple->Jets, ntuple->Jets_hadronFlavor, ntuple->Jets_HTMask, ntuple->Jets_bJetTagDeepCSVBvsAll,0,0); //central
           if (antitagPlusBCut(ntuple)) {
             if (saveBoostedEvt) txtfile_0Hb << runLumiEvtMET << endl;
@@ -570,43 +570,25 @@ int main(int argc, char** argv){
             for (unsigned int i = 0; i < antitagSBPlots.size(); i++) antitagSBPlots[i].fill(ntuple,weight);
           }
         } //end 0H region
+
         clearGlobalConstants();
       } // end event loop
+
       outputFile->cd();
       h_baseline->Write(); h_0H->Write(); h_1H->Write(); h_2H->Write();
-
-      // float per2HTrue = (float)count2HTrue/(float)count2H; float per1HTrue = (float)count1HTrue/(float)count1H;
-      // float per1H2HFalse = (float)count1H2HFalse/(float)count1H; float per1HFalse = (float)count1HFalse/(float)count1H;
-      // float per0HFalse = (float)count0HFalse/(float)count0H; float per0H2HFalse = (float)count0H2HFalse/(float)count0H;
-      // h_genHbb->SetBinContent(1,count2H);
-      // h_genHbb->SetBinContent(2,count1H);
-      // h_genHbb->SetBinContent(3,count0H);
-      //
-      // h_genHbb->SetBinContent(4,per2HTrue);
-      // h_genHbb->SetBinContent(5,per1HTrue);
-      // h_genHbb->SetBinContent(6,per1H2HFalse);
-      // h_genHbb->SetBinContent(7,per1HFalse);
-      // h_genHbb->SetBinContent(8,per0HFalse);
-      // h_genHbb->SetBinContent(9,per0H2HFalse);
-      // h_genHbb->Write();
-      //
-      // float quickCalc = (float)count1bOverlap/(2.0*(float)count2H);
-      // std::cout<<yearStr<<": "<<quickCalc<<"% jets with 1 overlapping b"<<std::endl;
     } // end sample loop
+
     if (saveBoostedEvt) {
       txtfile_2HSR.close(); txtfile_2HSB.close(); txtfile_1HSR.close(); txtfile_1HSB.close();
       txtfile_0HSR.close(); txtfile_0HSB.close(); txtfile_0Hb.close();
     }
 
-  }
+  } // end runMC
 
 
   // Begin data
   if (region!=1 && region!=2 && runData) {
-    if (region==0 && runVeto) {
-      readResVeto_Data(yearStr);
-      std::cout<<"got veto events"<<std::endl;
-    }
+    if (region==0 && runVeto) readResVeto_Data(yearStr);
     RA2bTree* ntuple = skims.dataNtuple;
     for (unsigned int i = 0; i < baselinePlots.size(); i++) {
       baselinePlots[i].addDataNtuple(ntuple,"baseline_data");
@@ -665,8 +647,8 @@ int main(int argc, char** argv){
         passBaseline&=baselineCut(ntuple);
         if (!passBaseline ) continue;
       }
-      if (!passBaseline) continue; //probably not necessary, but just in case, ya know. CYA
-      if (ntuple->eeBadScFilter!=1) continue; //apply to data only, moved from FiltersCut
+      if (!passBaseline) continue; //probably not necessary, but just in case, ya know
+      if (ntuple->eeBadScFilter!=1) continue; // Apply to data only, moved from FiltersCut
 
       if (region == 0 && !signalTriggerCut(ntuple)) continue;
       else if (region == 3 && !singleMuTriggerCut(ntuple)) continue;
@@ -740,9 +722,11 @@ int main(int argc, char** argv){
     }
   } // end run data
 
+  // Begin writing histograms to output
   bool sumBkgs = true;
   if (region == 1 || region == 2 || runData) sumBkgs = false;
   outputFile->cd();
+
   for (unsigned int i = 0; i < baselinePlots.size(); i++) {
     baselinePlots[i].Write(runData);
     if (sumBkgs) {
@@ -750,7 +734,6 @@ int main(int argc, char** argv){
       baselinePlots[i].sum->Write();
     }
   }
-
   for (unsigned int i = 0; i < doubletagSRPlots.size(); i++) {
     doubletagSRPlots[i].Write(runData);
     if (sumBkgs) {

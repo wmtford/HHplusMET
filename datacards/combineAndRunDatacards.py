@@ -19,7 +19,7 @@ Running options in main at the bottom
 def getTChiHHMassPoints():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     mass_points = []
-    #G rab the mass points from the NAMES file - just need the mass points
+    # Grab the mass points from the NAMES file - just need the mass points
     with open(script_dir+"/../src/higgsino2DFileNames.txt", 'r') as namesFile:
         for line in namesFile:
             x = line.split('_')
@@ -85,6 +85,7 @@ def makeMergeGluinoCommands(whichDString,signal,hino,LSP,dataMCString, phase_spa
     # Boosted only
     if 'boosted' in phase_space:
         combineCommands.append("combineCards.py SRMerge_%s%s%d_LSP%d_%s.txt CRBMerge_%s%s%d_LSP%d_%s.txt CRCMerge_%s%s%d_LSP%d_%s.txt CRDMerge_%s%s%d_LSP%d_%s.txt CREMerge_%s%s%d_LSP%d_%s.txt > %s%s%d_LSP%d_BothBoostedH_%s.txt "%(whichDString,signal,hino,finalLSP,dataMCString,whichDString,signal,hino,finalLSP,dataMCString,whichDString,signal,hino,finalLSP,dataMCString,whichDString,signal,hino,finalLSP,dataMCString,whichDString,signal,hino,finalLSP,dataMCString,whichDString,signal,hino,finalLSP,dataMCString))
+        #combineCommands.append("combineCards.py SRMerge_%s%s%d_LSP%d_%s.txt CRBMerge_%s%s%d_LSP%d_%s.txt CRCMerge_%s%s%d_LSP%d_%s.txt CRDMerge_%s%s%d_LSP%d_%s.txt CREMerge_%s%s%d_LSP%d_%s.txt > %s%s%d_LSP%d_BothBoostedHExtra_%s.txt "%(whichDString,signal,hino,finalLSP,dataMCString,whichDString,signal,hino,finalLSP,dataMCString,whichDString,signal,hino,finalLSP,dataMCString,whichDString,signal,hino,finalLSP,dataMCString,whichDString,signal,hino,finalLSP,dataMCString,whichDString,signal,hino,finalLSP,dataMCString))
     # Resolved only
     if 'resolved' in phase_space:
         combineCommands.append("combineCards.py resData/%sT5HH_%s_btagfix/datacard-%s_mGluino-%d_mLSP-%d_Tune_2016,2017,2018_priority1_resolved.txt > %s%s%d_LSP%d_%s_ResOnly.txt "%(whichDString,dataMCString,signal,hino,finalLSP,whichDString,signal,hino,finalLSP,dataMCString))
@@ -107,12 +108,15 @@ def makeCombineCommands(whichDString,signal,hino,LSP,dataMCString, phase_space):
     # Boosted only
     if 'boosted' in phase_space:
         combineCommands.append("combine -M AsymptoticLimits -n %s%s%d_LSP%d_BothBoostedH_%s %s%s%d_LSP%d_BothBoostedH_%s.txt " %(whichDString,signal,hino,finalLSP,dataMCString,whichDString,signal,hino,finalLSP,dataMCString))
+        #combineCommands.append("combine -M AsymptoticLimits -n %s%s%d_LSP%d_BothBoostedHExtra_%s %s%s%d_LSP%d_BothBoostedHExtra_%s.txt " %(whichDString,signal,hino,finalLSP,dataMCString,whichDString,signal,hino,finalLSP,dataMCString))
     # Resolved only
     if 'resolved' in phase_space:
         combineCommands.append("combine -M AsymptoticLimits -n %s%s%d_LSP%d_%s_ResOnly %s%s%d_LSP%d_%s_ResOnly.txt " %(whichDString,signal,hino,finalLSP,dataMCString,whichDString,signal,hino,finalLSP,dataMCString))
     # Combination
     if 'combined' in phase_space:
         combineCommands.append("combine -M AsymptoticLimits -n %s%s%d_LSP%d_%s_Combo %s%s%d_LSP%d_%s_Combo.txt " %(whichDString,signal,hino,finalLSP,dataMCString,whichDString,signal,hino,finalLSP,dataMCString))
+        # To run HybridNew limits:
+        # combineCommands.append("combine -M HybridNew --LHCmode LHC-limits -n %s%s%d_LSP%d_%s_Combo %s%s%d_LSP%d_%s_Combo.txt " %(whichDString,signal,hino,finalLSP,dataMCString,whichDString,signal,hino,finalLSP,dataMCString))
     return combineCommands
 
 
@@ -168,11 +172,14 @@ if __name__ == '__main__':
         if args.signal_model == "TChiHH-G": mass_points = [[150+item*25, 1]for item in range(0, 55)]
         elif args.signal_model == "TChiHH": mass_points = getTChiHHMassPoints()
         elif args.signal_model == "T5HH": mass_points = [[1000+item*100,1] for item in range(0,16)]
+        # elif args.signal_model == "T5HH": mass_points = [[2000,1], [2000,1800], [2000,1600], [2000,1400], [2000,1200], [2000,1000], [2000,800], [2000, 600], [2000, 400], [2000, 200], [1400,1350], [1400,1300], [1400,1250], [1400,1200], [1400, 1150]]
+        # elif args.signal_model == "T5HH": mass_points = [[1000,1], [1200,1], [1400,1], [1600,1], [1800,1]]
+        # Above are for the 2D T5HH extra mass points (where the NLSP mass is NOT 50 GeV below gluino mass)
     else:
         raw_mass_points = args.mass_points.split(',')
         mass_points = [item.split('_') for item in raw_mass_points]
 
-    #Get phase space we're running over
+    # Get phase space we're running over
     # phase_space = [resolved, boosted, combined]
     if args.phase_space == "all": phase_space = ['resolved', 'boosted', 'combined']
     else: phase_space = args.phase_space.split(',')

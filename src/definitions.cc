@@ -107,7 +107,6 @@ template<typename ntupleType>void ntupleBranchStatus(ntupleType* ntuple) {
   ntuple->fChain->SetBranchStatus("Jets_bJetTagDeepCSVBvsAll",1);
   ntuple->fChain->SetBranchStatus("puWeight",1);
   ntuple->fChain->SetBranchStatus("puSys*",1);
-  ntuple->fChain->SetBranchStatus("GenParticles*",1);
   ntuple->fChain->SetBranchStatus("NonPrefiringProb*",1);
   ntuple->fChain->SetBranchStatus("JetsAK8_pfMassIndependentDeepDoubleBvLJetTagsProbHbb",1);
   ntuple->fChain->SetBranchStatus("JetsAK8_ID",1);
@@ -189,6 +188,16 @@ template<typename ntupleType> bool gen4bs(ntupleType* ntuple) {
     if (abs(ntuple->GenParticles_PdgId->at(i)) == 5) numBs++;
   }
   return (numHiggses==2 && numBs>3);
+}
+
+template<typename ntupleType> int numgen4bs(ntupleType* ntuple) {
+  int numHiggses=0; int numBs=0;
+  for (unsigned int i=0 ; i < ntuple->GenParticles->size(); i++) {
+    if (ntuple->GenParticles_PdgId->at(i) == 25 && ntuple->GenParticles_Status->at(i) == 22) numHiggses++;
+    // if (ntuple->GenParticles_PdgId->at(i) == 25) numHiggses++;
+    if (abs(ntuple->GenParticles_PdgId->at(i)) == 5) numBs++;
+  }
+  return (numBs);
 }
 
 template<typename ntupleType> int getNumGenHiggses(ntupleType* ntuple) {
@@ -319,9 +328,19 @@ template<typename ntupleType> double fillMET(ntupleType* ntuple) {
   return eventMET;
 }
 
+template<typename ntupleType> double fillMET2HSR(ntupleType* ntuple) {
+  if (doubletagSRCut(ntuple)) return eventMET;
+  else return -999;
+}
+
+template<typename ntupleType> double fillMET1HSR(ntupleType* ntuple) {
+  if (tagSRCut(ntuple)) return eventMET;
+  else return -999;
+}
+
 template<typename ntupleType> void setJetPT(ntupleType* ntuple) {
   if (ntuple->JetsAK8->size()>1) {
-    jetPt1 = RemakeAK8Jets(ntuple,0); //returns jet pt
+    jetPt1 = RemakeAK8Jets(ntuple,0);
     jetPt2 = RemakeAK8Jets(ntuple,1);
   }
 }
@@ -361,7 +380,16 @@ template<typename ntupleType> double fillMETRatio(ntupleType* ntuple) {
 template<typename ntupleType> double fillOne(ntupleType* ntuple) { return 1.; }
 
 template<typename ntupleType> double fillNJets(ntupleType* ntuple) {
-  return ntuple->NJets;
+  double thisNumJets = numJets(ntuple);
+  return thisNumJets;
+}
+
+template<typename ntupleType> double fillNAK8Jets(ntupleType* ntuple) {
+  int counter=0;
+  for (unsigned j = 0; j < ntuple->JetsAK8->size(); ++j) {
+    if (ntuple->JetsAK8->at(j).Pt()>300.0) counter++;
+  }
+  return counter;
 }
 
 template<typename ntupleType> double fillBTags(ntupleType* ntuple) {
@@ -371,6 +399,7 @@ template<typename ntupleType> double fillBTags(ntupleType* ntuple) {
 template<typename ntupleType> void setSignalMasses(ntupleType* ntuple, int region) {
   TString filename = ntuple->fChain->GetFile()->GetName();
   TString justSample = filename;
+
   if (region==1 || region==2) {
     justSample.Remove(0,93);
     justSample.Remove(justSample.Length()-12,justSample.Length());
@@ -673,7 +702,7 @@ template<typename ntupleType> void setHT(ntupleType* ntuple, TString thisJEC) {
 }
 
 template<typename ntupleType> void setIsoTracks(ntupleType* ntuple) {
-  //if running from ntuples
+  // if running from ntuples (and not skims)
   int isoMuonCounter = 0;
   int isoElectronCounter = 0;
   int isoPionCounter = 0;
@@ -725,9 +754,6 @@ template<typename ntupleType> int numJets(ntupleType* ntuple) { //Returns the nu
 }
 
 //Using deepCSV, returns the number of b's based on loose, medium, and tight WPs
-//2016: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation2016Legacy#Supported_Algorithms_and_Operati
-//2017: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation94X
-//2018: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation102X#Supported_Algorithms_and_Operati
 template<typename ntupleType> std::vector<int> numDeepBs(ntupleType* ntuple) {
   TString filename = ntuple->fChain->GetFile()->GetName();
   double CSVBtagLoose = 0.2217;
@@ -735,16 +761,19 @@ template<typename ntupleType> std::vector<int> numDeepBs(ntupleType* ntuple) {
   double CSVBtagTight = 0.8953;
 
   if (filename.Contains("2016") || filename.Contains("Summer16v3")) {
+    //2016: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation2016Legacy#Supported_Algorithms_and_Operati
     CSVBtagLoose = 0.2217;
     CSVBtagMed   = 0.6321;
     CSVBtagTight = 0.8953;
   }
   else if (filename.Contains("2017") || filename.Contains("Fall17")) {
+    //2017: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation94X
     CSVBtagLoose = 0.1522;
     CSVBtagMed   = 0.4941;
     CSVBtagTight = 0.8001;
   }
   else if (filename.Contains("2018") || filename.Contains("Autumn18")) {
+    //2018: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation102X#Supported_Algorithms_and_Operati
     CSVBtagLoose = 0.1241;
     CSVBtagMed   = 0.4184;
     CSVBtagTight = 0.7527;
@@ -842,6 +871,9 @@ template<typename ntupleType> bool isHighPU(ntupleType* ntuple) { // high is >35
 /////////////////////////////
 ////////   Filters   ////////
 /////////////////////////////
+// Most are for if running from ntuples, not skims
+
+
 template<typename ntupleType> bool METRatioFilterCut(ntupleType* ntuple) {
   return (eventMET/ntuple->CaloMET<2.0);
 }
@@ -976,7 +1008,7 @@ template<typename ntupleType> bool MuonJetFilter(ntupleType* ntuple) {
   if (sample.Contains("fast") || sample.Contains("Fast")) return true;
 
   bool noMuonJet = true;
-  //check for inconsistent case
+  // check for inconsistent case
   if (ntuple->Jets->size()!=ntuple->Jets_muonEnergyFraction->size()) {
     std::cout<<"Can't make MuonJetFilter myself"<<std::endl;
     return true;
@@ -1209,6 +1241,11 @@ template<typename ntupleType> bool cutflowIsoPionTrackVeto(ntupleType* ntuple) {
   return (numIsoPionTracks==0);
 }
 
+template<typename ntupleType> bool cutflowIsoTrackVetos(ntupleType* ntuple) {
+  //if not in skims
+  return (numIsoMuonTracks+numIsoElectronTracks+numIsoPionTracks==0);
+}
+
 template<typename ntupleType> bool cutflowLeptVeto(ntupleType* ntuple) {
   //if not in skims
   return (ntuple->NMuons==0 && ntuple->NElectrons==0);
@@ -1220,7 +1257,7 @@ template<typename ntupleType> bool cutflowDPhiCut(ntupleType* ntuple) {
 }
 
 template<typename ntupleType> bool cutflowBoostBase(ntupleType* ntuple) {
-  //AKA Hadronic Baselin
+  //AKA Hadronic Baseline
   TString filename = ntuple->fChain->GetFile()->GetName();
   return (
     eventMET > 300. && eventHT > 300. &&
@@ -1327,7 +1364,6 @@ void readResVeto_Data(string whichYear) {
       std::vector<std::string> x = split(line, ',');
       string thisOne = x[1].erase(0,1) + "," + x[2].erase(0,1) + "," + x[3].erase(0,1) + "," + x[4].erase(0,1)+ ",1";
       vYearRunLumiEvt.insert(thisOne);
-      // std::cout<<"Check: "<<thisOne<<std::endl;
     }
   }
 }
@@ -1445,13 +1481,10 @@ template<typename ntupleType> bool resEventFound(ntupleType* ntuple,string yearS
     thisLSP = std::to_string(lspmass);
   }
   string check = yearStr+","+runNumber+","+lumiNumber+","+evtNumber+","+thisLSP;
-  // std::cout<<"My check: "<<check<<std::endl;
 
   bool foundEvent = false;
   set<string>::iterator it = vYearRunLumiEvt.find(check);
-  if (it != vYearRunLumiEvt.end()) {
-    foundEvent = true;
-  }
+  if (it != vYearRunLumiEvt.end()) foundEvent = true;
   return foundEvent;
 }
 
@@ -1469,11 +1502,36 @@ template<typename ntupleType> bool resVetoCutflowAll(ntupleType* ntuple) {
   bool isFound = resEventFound(ntuple,"all");
   return !isFound;
 }
+
+
+
 ////////////////////////////////////////////////////////////
 /////////////////////////// BOOSTED ////////////////////////
 ////////////////////////////////////////////////////////////
+template<typename ntupleType> bool boostedBaselineCutCutflow(ntupleType* ntuple) { //only run on 0l and signal, over ntuples
+  if (ntuple->JetsAK8_pfMassIndependentDeepDoubleBvLJetTagsProbHbb->size()<2) return false;
+  if (ntuple->JetsAK8_ID->at(0)!=1 || ntuple->JetsAK8_ID->at(1)!=1) return false;
+
+  return (
+    eventMET > 300. &&
+    eventHT > 600. &&
+    ntuple->JetsAK8->size() >= 2 &&
+    jetPt1 > 300. &&
+    jetPt2 > 300. &&
+    jetMass1 > baselineMassLow &&
+    jetMass1 < baselineMassHigh &&
+    jetMass2 > baselineMassLow &&
+    jetMass2 < baselineMassHigh &&
+    DeltaPhiCuts(ntuple) &&
+    FiltersCutflow(ntuple) &&
+    METRatioFilterCut(ntuple) && //apply to 0-lepton only
+    METMHTFilterCut(ntuple) //apply to 0-lepton only
+ );
+}
+
 
 //isoTrack veto and lepton veto applied at skim-level
+// This is for ALPHABET
 template<typename ntupleType> bool boostedBaselineCut(ntupleType* ntuple) { //only run on 0l and signal
   if (ntuple->JetsAK8_pfMassIndependentDeepDoubleBvLJetTagsProbHbb->size()<2) return false;
   if (ntuple->JetsAK8_ID->at(0)!=1 || ntuple->JetsAK8_ID->at(1)!=1) return false;
@@ -1764,6 +1822,8 @@ template<typename ntupleType> bool SR_2H1H(ntupleType* ntuple) {
   return (doubletagSRCut(ntuple) || tagSRCut(ntuple));
 }
 
+
+
 /////////////////////////////////////////////////
 //               Trigger Cuts                  //
 /////////////////////////////////////////////////
@@ -1799,8 +1859,6 @@ template<typename ntupleType> bool signalTriggerCut(ntupleType* ntuple) {
   passingTriggers.push_back("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60_v");
   passingTriggers.push_back("HLT_PFMETNoMu130_PFMHTNoMu130_IDTight_PFHT60_v");
   passingTriggers.push_back("HLT_PFMETNoMu140_PFMHTNoMu140_IDTight_PFHT60_v");
-
-  //Need to check these
   passingTriggers.push_back("HLT_PFMET120_PFMHT120_IDTight_HFCleaned_v");
   passingTriggers.push_back("HLT_PFMET120_PFMHT120_IDTight_PFHT60_HFCleaned_v");
   passingTriggers.push_back("HLT_PFMETNoMu120_PFMHTNoMu120 IDTight HFCleaned_v");
@@ -1904,6 +1962,7 @@ template<typename ntupleType> bool photonTriggerCut(ntupleType* ntuple) {
   }
   return false; //if no triggers we want were fired
 }
+
 
 template<typename ntupleType>float PUCorrections(ntupleType* ntuple, TString whichSyst) {
   float pu = 1.0;
@@ -2090,9 +2149,9 @@ template<typename ntupleType> double bbFastSIMSFs(ntupleType* ntuple, TString wh
         else if (jetPt>=900)              {sf1 = 0.881; sf1_unc = 0.075;}
       }
     }
-    evtWeight=evtWeight*sf1; //nominal
-    // evtWeight=evtWeight*(sf1+sf1_unc); //up
-    // evtWeight=evtWeight*(sf1-sf1_unc); //down
+    if (whichSyst=="none") evtWeight=evtWeight*sf1*sf2; //nominal
+    else if (whichSyst=="up") evtWeight=evtWeight*(sf1+sf1_unc)*(sf2+sf2_unc); //up
+    else if (whichSyst=="down") evtWeight=evtWeight*(sf1-sf1_unc)*(sf2-sf2_unc); //down
     return evtWeight;
   } //end 1H
   else if (region=="2H") {
@@ -2327,7 +2386,7 @@ template<typename ntupleType> double bbSFs_2H(ntupleType* ntuple, TString whichS
   } //end signal
 
   else {
-    //Commented out bits are for deriving the MC mismodeling systematic
+    //Commented out bits are for deriving the MC mismodeling systematic, up and down variations
     int numBs_1 = numOverlapBs(ntuple,0);
     if (numBs_1==0) {
       if (jetPt1>300. && jetPt1<=400) evtWeight=evtWeight*0.989;
@@ -2406,7 +2465,7 @@ template<typename ntupleType> double bbSFs_1H(ntupleType* ntuple, TString whichS
   } //end signal
 
   else {
-    //commented out parts are for deriving the MC mismodeling systematic
+    //commented out parts are for deriving the MC mismodeling systematic, up and down
     int numBs = numOverlapBs(ntuple,thisIsOurJet);
     if (numBs==0) {
       if (jetPt>300. && jetPt<=400) evtWeight=evtWeight*0.989;
@@ -2445,8 +2504,8 @@ template<typename ntupleType> double RemakeAK8Jets(ntupleType* ntuple,int j) {
   for (unsigned jet = 0; jet < ntuple->JetsAK8_origIndex->size(); ++jet) {
     newIndex[ntuple->JetsAK8_origIndex->at(jet)] = jet;
   }
-
   int i = newIndex[ntuple->JetsAK8JECup_origIndex->at(j)];
+
 
   if (whichJEC=="none" && isSignal && doTheB) {
     TLorentzVector newAK8Jet = ntuple->JetsAK8->at(i)*0.97;
@@ -2574,7 +2633,7 @@ std::vector<TH2F*> openSFFiles(TString Year, int region) {
     }
     else if (Year == "MC2018") {
       TFile* elecIDandIsoSFFile_ = TFile::Open("../data/Electrons2018_SF_ISOandID.root");
-      // TFile* elecRecoLowSFFile_ = TFile::Open("../data/Electrons2017_SF_RECOlow.root");//not available yet for 2018 - FIXME
+      // TFile* elecRecoLowSFFile_ = TFile::Open("../data/Electrons2017_SF_RECOlow.root"); //not available yet for 2018 - FIXME
       TFile* elecRecoHighSFFile_ = TFile::Open("../data/Electrons2018_SF_RECOhigh.root");
 
       hSFeff_.push_back((TH2F*) elecIDandIsoSFFile_->Get("Run2018_CutBasedVetoNoIso94XV2"));

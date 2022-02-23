@@ -13,7 +13,7 @@ gROOT.SetBatch(True)
 import tdrstyle
 tdrstyle.setTDRStyle()
 
-idir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/myVersion/CMSSW_10_2_13/src/boostedHiggsPlusMET/datacards/";
+idir = "/uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/HHplusMET/datacards/";
 odir = "../output/";
 
 def columnToList(fn,col):
@@ -91,7 +91,7 @@ def makeBrazilFlag(compareLimits,saveRootFile):
 	results3.append( ExtractFile(idir+'higgsCombine1DT5HH2400_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','2400') );
 	results3.append( ExtractFile(idir+'higgsCombine1DT5HH2500_LSP1_Data_ResOnly.AsymptoticLimits.mH120.root','2500') );
 
-	#Starting at 1 TeV
+	# Starting at 1 TeV
 	xsecs=[0.325388, 0.163491, 0.0856418, 0.0460525, 0.0252977, 0.0141903, 0.00810078, 0.00470323, 0.00276133, 0.00163547, 0.000981077, 0.000591918,0.000359318,0.000219049,0.000133965,8.20068E-05]
 
 	names   = []; names2   = []; names3   = []; names4   = [];
@@ -250,6 +250,8 @@ def makeBrazilFlag(compareLimits,saveRootFile):
 	chi02 = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0}}}#kern[-0.9]{#scale[0.85]{_{2}}}";
 	chi01 = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0 }}}#kern[-1.2]{#scale[0.85]{_{1 }}}";
 	chi01nospace = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0}}}#kern[-1.3]{#scale[0.85]{_{1}}}";
+	chi02nospace = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0}}}#kern[-1.3]{#scale[0.85]{_{2}}}";
+	chi03nospace = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0}}}#kern[-1.3]{#scale[0.85]{_{3}}}";
 	chipm1nospace = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{#pm}}}#kern[-1.3]{#scale[0.85]{_{1}}}";
 
 
@@ -259,8 +261,10 @@ def makeBrazilFlag(compareLimits,saveRootFile):
 	txtb.SetNDC(); txtb.SetTextFont(52); txtb.SetTextSize(0.042);
 	txtc = ROOT.TLatex(0.7,0.95,"137 fb^{-1} (13 TeV)");
 	txtc.SetNDC(); txtc.SetTextFont(42); txtc.SetTextSize(0.05);
-	txtd = ROOT.TLatex(0.41,0.85,"pp #rightarrow #tilde{g} #tilde{g},  #tilde{g} #rightarrow q #bar{q} "+chi02+",  "+chi02+" #rightarrow H "+chi01);
-	txtd.SetNDC(); txtd.SetTextFont(42); txtd.SetTextSize(0.05);
+	txtd = ROOT.TLatex(0.395,0.85,"pp #rightarrow #tilde{g} #tilde{g},  #tilde{g} #rightarrow q #bar{q} "+chi02+",  "+chi02+" #rightarrow H "+chi01);
+	txtd.SetNDC(); txtd.SetTextFont(42); txtd.SetTextSize(0.046);
+	txte = ROOT.TLatex(0.395,0.79,"m("+chi02+") = m(#tilde{g}#scale[0.55]{_{ }}) - 50 GeV, m("+chi01nospace+") = 1 GeV");
+	txte.SetNDC(); txte.SetTextFont(42); txte.SetTextSize(0.046);
 	if compareLimits:
 		txtf = ROOT.TLatex(0.16,0.805,"Supplementary");
 		txtf.SetNDC(); txtf.SetTextFont(52); txtf.SetTextSize(0.042);
@@ -274,7 +278,8 @@ def makeBrazilFlag(compareLimits,saveRootFile):
 		count=count+1
 	g_xsec=ROOT.TGraph(len(a_stop), a_stop, a_xsec)
 
-	leg = ROOT.TLegend(0.4,0.53,0.65,0.83);
+	if compareLimits: leg = ROOT.TLegend(0.4,0.53,0.65,0.83);
+	else: leg = ROOT.TLegend(0.6,0.47,0.85,0.73);
 	leg.SetFillStyle(4050);leg.SetFillColor(0);
 	leg.SetTextFont(42);leg.SetBorderSize(0);
 	leg.SetTextSize(0.045);
@@ -325,6 +330,7 @@ def makeBrazilFlag(compareLimits,saveRootFile):
 		g_exp.Draw('lsames');
 
 	txta.Draw(); txtc.Draw(); txtd.Draw();
+	txte.Draw()
 	leg.Draw(); leg2.Draw();
 	g_xsec.SetLineStyle(2); g_xsec.SetLineWidth(2);
 	g_xsec.SetLineColor(ROOT.kRed);

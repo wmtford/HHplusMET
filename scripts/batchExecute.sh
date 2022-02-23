@@ -33,6 +33,7 @@ args1=$3
 args2=$4
 args3=$5
 args4=$6
+args5=$7
 echo "output_dir ${output_dir}"
 echo "executable ${executable}"
 echo "args ${args}"
@@ -52,8 +53,8 @@ cd scripts
 
 echo ""
 eval 'echo g++ -o $executable $executable.cc `root-config --cflags --libs` '
-
-eval `echo ./$executable $args1 $args2 $args3 $args4`
+echo "./$executable $args1 $args2 $args3 $args4 $args5"
+eval `echo ./$executable $args1 $args2 $args3 $args4 $args5`
 
 echo "PWD ${PWD}"
 ls *root

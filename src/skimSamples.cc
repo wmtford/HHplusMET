@@ -55,7 +55,7 @@ class skimSamples {
     if (r == kSLe) skimType=BASE_DIR+"tree_SLe_METVars";
     if (r == kPhoton) skimType=BASE_DIR+"tree_GJet_CleanMETVars";
 
-    //bools that determine which processes are run, as a subset of signal
+    // Bools that determine which processes are run
     bool runData = false;
     bool run_singleT = false;
     bool run_TT = false;
@@ -72,9 +72,11 @@ class skimSamples {
     bool run_T5HH1DAll = false;
 
 
+
     if ( (r==kSignal || r==kSLm || r==kSLe || kPhoton) && mass2D==1) runData=true;
 
-    if (r==kSignal && mass2D==0) { //run MC bkg
+    if (r==kSignal && mass2D==0) {
+      // Run MC bkg
       run_singleT = true;
       run_TT = true;
       run_QCD = true;
@@ -82,29 +84,34 @@ class skimSamples {
       run_ZJets = true;
     }
     if (r == kSLm || r == kSLe) {
+      // Single lepton validation sample
       run_singleT = true;
       run_TT = true;
       run_WJets = true;
     }
     if (kPhoton) {
+      // Single photon validation sample
       run_QCD = true;
       run_GJets = true;
     }
     if (r == k1DSignal) {
+      // Change here for which type of signal you want to run
       run_T5HH1D = true;
       run_TChiHH1D = false;
     }
     if (r == k2DSignal) {
       run_TChiHH2D = true;
       run_T5HH2D = false;
-      if (mass2D>810){
-        run_TChiHH2D = false;
-        run_T5HH2D = true;
-      }
+      // if (mass2D>810) {
+      //   // Make sure you have good 2DT5HH samples first
+      //   run_TChiHH2D = false;
+      //   run_T5HH2D = true;
+      // }
     }
     if (r == k1DTChiHHAll) run_TChiHH1DAll = true;
     if (r == k1DT5HHAll) run_T5HH1DAll = true;
     if (r == k2DTChiHHAll) run_TChiHH2DAll = true;
+
 
     ///////////////////////////////////////////////////////////////////////
     // - - - - - - - - - - BACKGROUND INPUTS - - - - - - - - - - - - - - //
@@ -119,9 +126,9 @@ class skimSamples {
       ZJetsFileNames.push_back("tree_ZJetsToNuNu_HT-1200to2500_"+Year+".root");
       ZJetsFileNames.push_back("tree_ZJetsToNuNu_HT-2500toInf_"+Year+".root");
       ZJets = new TChain("tree");
-      for (unsigned int i = 0 ; i < ZJetsFileNames.size() ; i++) {
+      for (unsigned int i = 0 ; i < ZJetsFileNames.size() ; i++)
         ZJets->Add(skimType+"/"+ZJetsFileNames[i]);
-      }
+
       ntuples.push_back(new RA2bTree(ZJets));
       sampleName.push_back("ZJets");
     }
@@ -137,9 +144,9 @@ class skimSamples {
       WJetsFileNames.push_back("tree_WJetsToLNu_HT-2500toInf_"+Year+".root");
 
       WJets = new TChain("tree");
-      for (unsigned int i = 0 ; i < WJetsFileNames.size() ; i++) {
+      for (unsigned int i = 0 ; i < WJetsFileNames.size() ; i++)
         WJets->Add(skimType+"/"+WJetsFileNames[i]);
-      }
+
       ntuples.push_back(new RA2bTree(WJets));
       sampleName.push_back("WJets");
     }
@@ -162,9 +169,9 @@ class skimSamples {
       }
 
       TT = new TChain("tree");
-      for (unsigned int i = 0 ; i < TTFileNames.size() ; i++) {
+      for (unsigned int i = 0 ; i < TTFileNames.size() ; i++)
         TT->Add(skimType+"/"+TTFileNames[i]);
-      }
+
       ntuples.push_back(new RA2bTree(TT));
       sampleName.push_back("TT");
     }
@@ -179,9 +186,9 @@ class skimSamples {
       QCDFileNames.push_back("tree_QCD_HT-1500to2000_"+Year+".root");
       QCDFileNames.push_back("tree_QCD_HT-2000toInf_"+Year+".root");
       QCD = new TChain("tree");
-      for (unsigned int i = 0 ; i < QCDFileNames.size() ; i++) {
+      for (unsigned int i = 0 ; i < QCDFileNames.size() ; i++)
         QCD->Add(skimType+"/"+QCDFileNames[i]);
-      }
+
       ntuples.push_back(new RA2bTree(QCD));
       sampleName.push_back("QCD");
     }
@@ -194,9 +201,9 @@ class skimSamples {
       SnglTFileNames.push_back("tree_ST_tW_antitop_"+Year+".root");
       SnglTFileNames.push_back("tree_ST_tW_top_"+Year+".root");
       SnglT = new TChain("tree");
-      for (unsigned int i = 0 ; i < SnglTFileNames.size() ; i++) {
+      for (unsigned int i = 0 ; i < SnglTFileNames.size() ; i++)
         SnglT->Add(skimType+"/"+SnglTFileNames[i]);
-      }
+
       ntuples.push_back(new RA2bTree(SnglT));
       sampleName.push_back("SnglT");
     }
@@ -208,9 +215,9 @@ class skimSamples {
       GJets0p4FileNames.push_back("tree_GJets_DR-0p4_HT-400to600_"+Year+".root");
       GJets0p4FileNames.push_back("tree_GJets_DR-0p4_HT-600toInf_"+Year+".root");
       GJets0p4 = new TChain("tree");
-      for (unsigned int i = 0 ; i < GJets0p4FileNames.size() ; i++) {
+      for (unsigned int i = 0 ; i < GJets0p4FileNames.size() ; i++)
         GJets0p4->Add(skimType+"/"+GJets0p4FileNames[i]);
-      }
+
       ntuples.push_back(new RA2bTree(GJets0p4));
       sampleName.push_back("GJets");
     }
@@ -231,9 +238,9 @@ class skimSamples {
       METFileNames.push_back("tree_MET_2016G.root");
       METFileNames.push_back("tree_MET_2016H.root");
       data2016 = new TChain("tree");
-      for (unsigned int i = 0 ; i < METFileNames.size() ; i++) {
+      for (unsigned int i = 0 ; i < METFileNames.size() ; i++)
         data2016->Add(BASE_DIRUnblind+METFileNames[i]);
-      }
+
       dataNtuple = new RA2bTree(data2016);
     }
 
@@ -244,9 +251,9 @@ class skimSamples {
       METFileNames.push_back("tree_MET_2017E.root");
       METFileNames.push_back("tree_MET_2017F.root");
       data2017 = new TChain("tree");
-      for (unsigned int i = 0 ; i < METFileNames.size() ; i++) {
+      for (unsigned int i = 0 ; i < METFileNames.size() ; i++)
         data2017->Add(BASE_DIRUnblind+METFileNames[i]);
-      }
+
       dataNtuple = new RA2bTree(data2017);
     }
 
@@ -256,9 +263,9 @@ class skimSamples {
       METFileNames.push_back("tree_MET_2018C.root");
       METFileNames.push_back("tree_MET_2018D.root");
       data2018 = new TChain("tree");
-      for (unsigned int i = 0 ; i < METFileNames.size() ; i++) {
+      for (unsigned int i = 0 ; i < METFileNames.size() ; i++)
         data2018->Add(BASE_DIRUnblind+METFileNames[i]);
-      }
+
       dataNtuple = new RA2bTree(data2018);
     }
 
@@ -275,9 +282,9 @@ class skimSamples {
       SingleElectronNames.push_back("tree_SingleElectron_2016G.root");
       SingleElectronNames.push_back("tree_SingleElectron_2016H.root");
       data2016 = new TChain("tree");
-      for (unsigned int i = 0 ; i < SingleElectronNames.size() ; i++) {
+      for (unsigned int i = 0 ; i < SingleElectronNames.size() ; i++)
         data2016->Add(skimType+"/"+SingleElectronNames[i]);
-      }
+
       dataNtuple = new RA2bTree(data2016);
     }
 
@@ -290,9 +297,9 @@ class skimSamples {
       SingleMuonNames.push_back("tree_SingleMuon_2016G.root");
       SingleMuonNames.push_back("tree_SingleMuon_2016H.root");
       data2016 = new TChain("tree");
-      for (unsigned int i = 0 ; i < SingleMuonNames.size() ; i++) {
+      for (unsigned int i = 0 ; i < SingleMuonNames.size() ; i++)
         data2016->Add(skimType+"/"+SingleMuonNames[i]);
-      }
+
       dataNtuple = new RA2bTree(data2016);
     }
 
@@ -305,9 +312,9 @@ class skimSamples {
       SinglePhotonFileNames.push_back("tree_SinglePhoton_2016G.root");
       SinglePhotonFileNames.push_back("tree_SinglePhoton_2016H.root");
       data2016 = new TChain("tree");
-      for (unsigned int i = 0 ; i < SinglePhotonFileNames.size() ; i++) {
+      for (unsigned int i = 0 ; i < SinglePhotonFileNames.size() ; i++)
         data2016->Add(skimType+"/"+SinglePhotonFileNames[i]);
-      }
+
       dataNtuple = new RA2bTree(data2016);
     }
 
@@ -318,9 +325,9 @@ class skimSamples {
       SingleElectronNames.push_back("tree_SingleElectron_2017E.root");
       SingleElectronNames.push_back("tree_SingleElectron_2017F.root");
       data2017 = new TChain("tree");
-      for (unsigned int i = 0 ; i < SingleElectronNames.size() ; i++) {
+      for (unsigned int i = 0 ; i < SingleElectronNames.size() ; i++)
         data2017->Add(skimType+"/"+SingleElectronNames[i]);
-      }
+
       dataNtuple = new RA2bTree(data2017);
     }
 
@@ -331,9 +338,9 @@ class skimSamples {
       SingleMuonNames.push_back("tree_SingleMuon_2017E.root");
       SingleMuonNames.push_back("tree_SingleMuon_2017F.root");
       data2017 = new TChain("tree");
-      for (unsigned int i = 0 ; i < SingleMuonNames.size() ; i++) {
+      for (unsigned int i = 0 ; i < SingleMuonNames.size() ; i++)
         data2017->Add(skimType+"/"+SingleMuonNames[i]);
-      }
+
       dataNtuple = new RA2bTree(data2017);
     }
 
@@ -344,9 +351,9 @@ class skimSamples {
       SinglePhotonFileNames.push_back("tree_SinglePhoton_2017E.root");
       SinglePhotonFileNames.push_back("tree_SinglePhoton_2017F.root");
       data2017 = new TChain("tree");
-      for (unsigned int i = 0 ; i < SinglePhotonFileNames.size() ; i++) {
+      for (unsigned int i = 0 ; i < SinglePhotonFileNames.size() ; i++)
         data2017->Add(skimType+"/"+SinglePhotonFileNames[i]);
-      }
+
       dataNtuple = new RA2bTree(data2017);
     }
 
@@ -357,9 +364,9 @@ class skimSamples {
       SingleElectronNames.push_back("tree_EGamma_2018C.root");
       SingleElectronNames.push_back("tree_EGamma_2018D.root");
       data2018 = new TChain("tree");
-      for (unsigned int i = 0 ; i < SingleElectronNames.size() ; i++) {
+      for (unsigned int i = 0 ; i < SingleElectronNames.size() ; i++)
         data2018->Add(skimType+"/"+SingleElectronNames[i]);
-      }
+
       dataNtuple = new RA2bTree(data2018);
     }
 
@@ -369,9 +376,9 @@ class skimSamples {
       SingleMuonNames.push_back("tree_SingleMuon_2018C.root");
       SingleMuonNames.push_back("tree_SingleMuon_2018D.root");
       data2018 = new TChain("tree");
-      for (unsigned int i = 0 ; i < SingleMuonNames.size() ; i++) {
+      for (unsigned int i = 0 ; i < SingleMuonNames.size() ; i++)
         data2018->Add(skimType+"/"+SingleMuonNames[i]);
-      }
+
       dataNtuple = new RA2bTree(data2018);
     }
 
@@ -380,7 +387,7 @@ class skimSamples {
     // - - - - - - - - - - - - - - Signal  - - - - - - - - - - - - - - //
     /////////////////////////////////////////////////////////////////////
 
-    if (run_T5HH1D) { //to check FullSIM
+    if (run_T5HH1D) { // Run FullSIM sample
       for (int i=1000;i<2700;i+=100) {
         if (i!=mass2D) continue;
         T5HH = new TChain("tree");
@@ -392,36 +399,32 @@ class skimSamples {
     }
 
     if (run_T5HH2D) {
-      // ifstream file("Gluino2DScanNames.txt");
-      // ifstream file("root://cmseos.fnal.gov//uscms_data/d3/emacdona/WorkingArea/CombinedHiggs/forGithub/CMSSW_10_2_13/src/HHplusMET/src/Gluino2DScanNamesNEW.txt");
       std::ifstream file;
-      file.open("Gluino2DScanNamesNEW.txt", std::ifstream::in);
-      // ifstream file("Gluino2DScanNamesNEW.txt");
+      file.open("Gluino2DScanNames.txt", std::ifstream::in); // H->bb decays only
+      // file.open("Gluino2DScanNamesNEW.txt", std::ifstream::in); // All H decays, but 2017 and 2018 messed up
       if (!file.good()) {
         file.close();
-        file.open("../src/Gluino2DScanNamesNEW.txt", std::ifstream::in);
+        file.open("../src/Gluino2DScanNames.txt", std::ifstream::in);
+        // file.open("../src/Gluino2DScanNamesNEW.txt", std::ifstream::in);
       }
-
 
       string line; TString fileName;
       if (file.good()) {
         while(std::getline(file, line)) {
          std::vector<std::string> x = mySplit(line, '_');
-         // int gluino_mass = std::stoi(x[3]); int LSP_mass = std::stoi(x[4]);
-         int gluino_mass = std::stoi(x[4]); int LSP_mass = std::stoi(x[5]);
+         int gluino_mass = std::stoi(x[3]); int LSP_mass = std::stoi(x[4]); // For  "Gluino2DScanNames.txt", H->bb decays only
+         // int gluino_mass = std::stoi(x[4]); int LSP_mass = std::stoi(x[5]); // For newer 2D scan, that has messed up 2017 and 2018
          if (mass2D!=815 && gluino_mass!=mass2D) {continue;}
          T5HH = new TChain("tree");
-         // if (LSP_mass!=1) {continue;}
-         // fileName = V18Signal_DIR+"tree_T5qqqqZH_HToBB_"+TString::Format("%d_%d_",gluino_mass,LSP_mass)+Year+"_fast.root";
-         fileName = emilysDir+"tree_T5qqqqHH_HToBB_2D_"+TString::Format("%d_%d_",gluino_mass,LSP_mass)+Year+"_fast.root";
+         // if (LSP_mass!=1) continue;
+         fileName = V18Signal_DIR+"tree_T5qqqqZH_HToBB_"+TString::Format("%d_%d_",gluino_mass,LSP_mass)+Year+"_fast.root"; // H->bb decays only
+         // fileName = emilysDir+"tree_T5qqqqHH_HToBB_2D_"+TString::Format("%d_%d_",gluino_mass,LSP_mass)+Year+"_fast.root"; // All H decays, but 2017 and 2018 messed up
          T5HH->Add(fileName);
          ntuples.push_back(new RA2bTree(T5HH));
          sampleName.push_back(TString::Format("T5HH%d_LSP%d", gluino_mass, LSP_mass));
         }
       }
-      else {
-        std::cout<<"Not good?"<<std::endl;
-      }
+      else  std::cout<<"Not good file?"<<std::endl;
 
     }
 
@@ -459,6 +462,7 @@ class skimSamples {
         sampleName.push_back(TString::Format("TChiHH%d_LSP1", i));
       }
     }
+
     if (run_TChiHH1DAll) {
       for (int i=150;i<1525;i+=25) {
         if (i!=mass2D) continue;
@@ -480,7 +484,7 @@ class skimSamples {
       while(std::getline(file, line)) {
        std::vector<std::string> x = mySplit(line, '_');
        int hino_mass = std::stoi(x[5]); int LSP_mass = std::stoi(x[6]);
-       if (mass2D!=805 && hino_mass!=mass2D) continue;
+       // if (mass2D!=805 && hino_mass!=mass2D) continue;
        TChiHH = new TChain("tree");
        fileName = keithsDir+"tree_TChiHH_HToBB_HToBB_2D_"+TString::Format("%d_%d_",hino_mass,LSP_mass)+"MC2016_fast.root";
        TChiHH->Add(fileName);
@@ -493,7 +497,7 @@ class skimSamples {
       }
       for (int i=150;i<810;i+=25) {
         TString fileName;
-        if (mass2D!=805 && i!=mass2D) continue;
+        // if (mass2D!=805 && i!=mass2D) continue;
         TChiHH = new TChain("tree");
         fileName = keithsDir+"tree_TChiHH_HToBB_HToBB_"+TString::Format("%d",i)+"_1_MC2016_fast.root";
         TChiHH->Add(fileName);
@@ -506,9 +510,9 @@ class skimSamples {
       }
     }
 
-    if (run_T5HH1DAll) { //to check FullSIM
+    if (run_T5HH1DAll) { // To run all FullSIM
       for (int i=1000;i<2700;i+=100) {
-        if (i!=mass2D) continue;
+        // if (i!=mass2D) continue;
         TString fileName;
         T5HH = new TChain("tree");
         fileName = V18Signal_DIR+"tree_T5qqqqZH-mGluino-1000to2500_"+TString::Format("%d",i)+"_1_MC2016.root";
@@ -521,7 +525,7 @@ class skimSamples {
         sampleName.push_back(TString::Format("T5HH%d_LSP1", i));
       }
     }
-  }; //end Skim samples
+  }; // End skimSamples
 
   RA2bTree* findNtuple(TString name) {
     for (unsigned int iSam = 0 ; iSam < sampleName.size() ; iSam++) {
