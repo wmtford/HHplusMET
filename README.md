@@ -48,8 +48,7 @@ To make all the paper plots from pre-existing datacards in Emily's area, you can
 cd scripts/
 bash runPaperPlots.sh        
 </pre>
-This creates all the paper plots (and a few more) and writes them to the *output* directory. If you need plots that are in the supplementary materials,
-see the bottom of this README. If you need plots that are in the AN, they'll be in `ABCD.C`. You'll probably have to change the code a bit to get it to run what you want.
+This creates all the paper plots (and the auxiliary material plots) and writes them to the *output* directory. If you need plots that are in the AN, they'll be in `ABCD.C`. You'll probably have to change the code a bit to get it to run what you want.
 
 ## Batch submission:
 
@@ -251,10 +250,6 @@ The first argument is the model (N1N2 for 2D TChiHH, and Gluino for 2D T5HH). Th
 "comb" for the combination, "res" for resolved only, and "boost" for boosted only.
 If you wish to change the directory of the datacards, you can do that here: https://github.com/emacdonald16/HHplusMET/blob/f227a4e88a51027040635d4db52db959d0ced69d/scripts/scan_point.cxx#L23
 
-You will need to re-run `scan_point.cxx`, or delete the saved files in the *src* directory and run `runPaperPlots.sh`, which will automatically
-run scan_point if the files don't exist. After `scan_point.cxx` is run, you can then run  `limit_scan.cxx`.
-
-
 All of the final plots are in the *output* directory.
 
 
@@ -273,5 +268,4 @@ You can change the directory of the datacards at the top of the code. Output PDF
 - `writeCutflow.py`: Creates a txt file with Latex-style output used in the auxiliary material for the cutflow table. Can also be modified to write out the
 more-detailed cutflow. You need to first run `cutflowFromNtuples.cc` for this to work, but it's setup to use ones I've already ran.
 - `ABCD.C`: The main plotting script for the boosted part of the analysis, making a lot of the plots and tables in the paper, AN, and the auxilary materials.
-It is currently setup to only run the plots in the paper.
-There are bools at the top that you can change to run other plots.
+It is currently setup to only run the plots in the paper and in the auxiliary materials (no tables, nor AN plots).
