@@ -16,14 +16,10 @@
 
 void makeABCDPlot(vector<TH1F*> dem_histos, TString type, TString tagType);
 void makeStackPlot(TH1F* h_QCD,TH1F* h_TT,TH1F* h_WJets,TH1F* h_ZJets,TH1F* h_SnglT, TH1F* h_T5HH1600,TH1F* h_T5HH2000,TH1F* h_T5HH2200,TH1F* h_TChiHH500,TH1F* h_TChiHH800,TH1F* h_TChiHH1000,TString which);
-void makeSingleLeptStackPlot(TH1F* h_TT,TH1F* h_WJets,TH1F* h_SnglT,TH1F* h_data,TString which);
-void makePhotonStackPlot(TH1F* h_QCD,TH1F* h_GJets,TString which);
 void makeMETStack(TH1F* h_QCD,TH1F* h_TT,TH1F* h_WJets,TH1F* h_ZJets, TH1F* h_SnglT, TH1F* h_T5HH1600,TH1F* h_T5HH2000,TH1F* h_T5HH2200,TH1F* h_TChiHH500,TH1F* h_TChiHH800,TH1F* h_TChiHH1000,TString tagType);
 void makeFullBkgClosure(vector<TH1F*> dem_histos, TString bkgType, TString tagType);
 void makeMETNormCompare(vector<TH1F*> dem_histos, TString bkgType, bool drawData, bool saveOthers);
 TH1F* make0EventUncSum(vector<TH1F*> dem_histos);
-TH1F* make0EventUncSum_photon(vector<TH1F*> dem_histos);
-TH1F* make0EventUncSum_1l(vector<TH1F*> dem_histos);
 void styleCanvas(TCanvas *can_h);
 void addLumiCanv(TCanvas * &can_h);
 void DrawOverflow(TH1F* &h);
@@ -31,11 +27,9 @@ void tableOfYields(vector<TH1F*> dem_histos, TString bkgType);
 void giantTableOfYields(vector< vector<TH1F*> > dem_histos);
 void tableOfMETNorm(vector<TH1F*> dem_histos, TString bkgType);
 void pieChart(vector<TH1F*> h_QCD, vector<TH1F*> h_WJets, vector<TH1F*> h_ZJets, vector<TH1F*> h_TT, vector<TH1F*> h_SnglT, TString regionLabel, TString bin);
-void pieChart1l(vector<TH1F*> h_WJets, vector<TH1F*> h_TT, vector<TH1F*> h_SnglT, TString regionLabel, TString bin);
-void pieChartPhoton(vector<TH1F*> h_GJets, vector<TH1F*> h_QCD, TString regionLabel, TString bin);
 void massCorrelations(vector<TH1F*> dem_histos,vector<TH1F*> dem_histos_data, TString bkgType);
 void makeMCvDataComp(TH1F* h_MC, TH1F* h_data, TString region, TString type);
-void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F * h_MC_sum, TH1F* h_data,TH1F* h_sig1,TH1F* h_sig2, TString region, TString type, bool save);
+void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F * h_MC_sum, TH1F* h_data,TH1F* h_sig1,TH1F* h_sig2, TString region, TString type, bool drawData);
 void justBB(TH1F* h_bkgOrig, TH1F* h_sigOrig, TString bkgType, TString sigType, TString sigMass);
 void tableOfFullPred(vector<TH1F*> h_histos, TString bkgType);
 void compareSignals(TString type, TString reg);
@@ -44,9 +38,21 @@ void quickTable();
 void makePretty();
 vector<float> getHistoForTable(TString model, TFile * openFile);
 
-//for running
+
+//For validation regions
+void makeSingleLeptStackPlot(TH1F* h_TT,TH1F* h_WJets,TH1F* h_SnglT,TH1F* h_data,TString which);
+void makePhotonStackPlot(TH1F* h_QCD,TH1F* h_GJets,TString which);
+TH1F* make0EventUncSum_photon(vector<TH1F*> dem_histos);
+TH1F* make0EventUncSum_1l(vector<TH1F*> dem_histos);
+void pieChart1l(vector<TH1F*> h_WJets, vector<TH1F*> h_TT, vector<TH1F*> h_SnglT, TString regionLabel, TString bin);
+void pieChartPhoton(vector<TH1F*> h_GJets, vector<TH1F*> h_QCD, TString regionLabel, TString bin);
+
+
+
+// for running individual things
+// bool runPaperPlots = true;
 ofstream myfile;
-bool runDataVMCStack = true;
+bool runDataVMCStack = false;
 bool runSIGSBRatio = false;
 bool runABCDPlots = false;
 bool runFullBkg = false; //Make full background closure plots (MC and data)
@@ -62,7 +68,6 @@ string whichRegion = "signal";
 // string whichRegion = "singleLept";
 // string whichRegion = "photon";
 
-bool runPaperPlots = false;
 
 
 
@@ -100,10 +105,12 @@ Int_t col_snglt = TColor::GetColorTransparent(kGray+2, 0.95);
 
 //ALPHABET files to open
 TFile * f = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/boosted_veto_Final/ALPHABET_0l.root");
+// TFile * f = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/boosted_noVeto_Final/ALPHABET_0l.root");
 TFile * f2 = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/moreMETbins/ALPHABET_all_forMoreMET_resVeto.root"); //needed for more MET bins
 TFile * fData = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/boosted_veto_Final/ALPHABET_0lData.root");
 TFile * fSignal = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/boosted_veto_FastSIMSFs/ALPHABET_1DSignal.root");
 TFile * fSignal2 = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/T5HH1D_FullSIM_veto/ALPHABET_1DSignal.root");
+
 //No overlapping events removed
 // TFile * f = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/boosted_noVeto_Final/ALPHABET_0l.root");
 // TFile * fData = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/boosted_noVeto_Final/ALPHABET_0lData.root");
@@ -127,22 +134,22 @@ TDirectory *cdStack  = fout->mkdir("StackPlots");
 TDirectory *cdOther  = fout->mkdir("OtherPlots");
 
 
-void runABCD() {
-  if (runPaperPlots==true) {
+void runABCD(bool runPaperPlots, bool runSuppPlots) {
+  if (runPaperPlots==true || runSuppPlots==true) {
     runDataVMCStack = true;
     runSIGSBRatio = true;
     runABCDPlots = false;
-    runFullBkg = false; //Make full background closure plots (MC and data)
+    runFullBkg = true; // Background closure plots (MC and data)
     runStacks = false;
     runMETNorm = true;
     runTableOfYields = false; //Creates txt file of yields
-    runPies = false;
+    runPies = true;
     savePDFs = false; //For AN, requires subdirectories
   }
 
+
   gStyle->SetTextFont(52);
   TH1F * h_A_data; TH1F * h_B_data; TH1F * h_A1_data; TH1F * h_B1_data; TH1F *h_C_data; TH1F *h_D_data; TH1F *h_Opt1_data; TH1F * h_baseline_MET_data; TH1F * h_baseline_METall_data; TH1F * h_baseline_METother_data; TH1F * h_0H_MET_data; TH1F * h_1H_MET_data; TH1F * h_2H_MET_data; TH1F * h_H_MET_data;
-
   TH1F * h_nH_sum = new TH1F("nH_sum","nH_sum", 3,0,4);
   TH1F * h_nH_data = new TH1F("nH_data","nH_data", 3,0,4);
   h_nH_sum->GetXaxis()->SetBinLabel(1,"0H");h_nH_sum->GetXaxis()->SetBinLabel(2,"1H");h_nH_sum->GetXaxis()->SetBinLabel(3,"2H");
@@ -420,6 +427,7 @@ void runABCD() {
   double b_int_data; double b_error_data; double b1_int_data; double b1_error_data;
   double c_int_data; double c_error_data; double d_int_data; double d_error_data;
 
+
   if (whichRegion=="signal") {
     h_A_data = (TH1F*)fData->Get("MET_doubletagSR_data"); h_B_data = (TH1F*)fData->Get("MET_doubletagSB_data");
     h_A1_data = (TH1F*)fData->Get("MET_tagSR_data"); h_B1_data = (TH1F*)fData->Get("MET_tagSB_data");
@@ -452,6 +460,7 @@ void runABCD() {
     h_Opt1_ZJets = (TH1F*)f->Get("MET_antitagOpt1_ZJets");
     h_Opt1_data = (TH1F*)fData->Get("MET_antitagOpt1_data");
 
+
     //Adding uncertainties to 0-event bins
     h_A_sum = make0EventUncSum({h_A_QCD,h_A_TT,h_A_WJets,h_A_ZJets,h_A_SnglT});
     h_B_sum = make0EventUncSum({h_B_QCD,h_B_TT,h_B_WJets,h_B_ZJets,h_B_SnglT});
@@ -460,6 +469,7 @@ void runABCD() {
     h_C_sum = make0EventUncSum({h_C_QCD,h_C_TT,h_C_WJets,h_C_ZJets,h_C_SnglT});
     h_D_sum = make0EventUncSum({h_D_QCD,h_D_TT,h_D_WJets,h_D_ZJets,h_D_SnglT});
     h_Opt1_sum = make0EventUncSum({h_Opt1_QCD,h_Opt1_TT,h_Opt1_WJets,h_Opt1_ZJets,h_Opt1_SnglT});
+
 
     //If unblinding signal region
     h_baseline_MET_SnglT = (TH1F*)f->Get("MET_baseline_SnglT");
@@ -529,6 +539,7 @@ void runABCD() {
     h_nH_data->SetBinContent(1,c_int_data+d_int_data);   h_nH_data->SetBinError(1,sqrt(c_error_data*c_error_data + d_error_data*d_error_data));
     h_nH_data->SetBinContent(2,a1_int_data+b1_int_data); h_nH_data->SetBinError(2,sqrt(a1_error_data*a1_error_data + b1_error_data*b1_error_data));
     h_nH_data->SetBinContent(3,a_int_data+b_int_data);   h_nH_data->SetBinError(3,sqrt(a_error_data*a_error_data + b_error_data*b_error_data));
+
 
     cdABCDReg->cd();
     h_A_sum->Write("h_A2_sum");
@@ -1290,6 +1301,7 @@ void runABCD() {
     h_H_j1bb_TChiHH1000 = (TH1F*)h_baseline_j1bb_TChiHH1000->Clone("h_H_j1bb_TChiHH1000"); h_H_j1bb_TChiHH1000->Add(h_J1BB_antitagSR_TChiHH1000,-1); h_H_j1bb_TChiHH1000->Add(h_J1BB_antitagSB_TChiHH1000,-1);
     h_H_j2bb_TChiHH1000 = (TH1F*)h_baseline_j2bb_TChiHH1000->Clone("h_H_j2bb_TChiHH1000"); h_H_j2bb_TChiHH1000->Add(h_J2BB_antitagSR_TChiHH1000,-1); h_H_j2bb_TChiHH1000->Add(h_J2BB_antitagSB_TChiHH1000,-1);
   }
+
   else if (whichRegion=="photon") {
     h_A_data = (TH1F*)fPhoton->Get("MET_doubletagSR_data"); h_B_data = (TH1F*)fPhoton->Get("MET_doubletagSB_data");
     h_A1_data = (TH1F*)fPhoton->Get("MET_tagSR_data"); h_B1_data = (TH1F*)fPhoton->Get("MET_tagSB_data");
@@ -1758,63 +1770,69 @@ void runABCD() {
   vector<TH1F*> vec_2H_jbb_0l = {h_2H_jbb_ZJets,h_2H_jbb_WJets,h_2H_jbb_QCD,h_2H_jbb_TT,h_2H_jbb_SnglT};
   vector<TH1F*> vec_baseline_jbb_0l = {h_baseline_jbb_ZJets,h_baseline_jbb_WJets,h_baseline_jbb_QCD,h_baseline_jbb_TT,h_baseline_jbb_SnglT};
 
-  if (runSIGSBRatio){
+
+  if (runSIGSBRatio && runPaperPlots) {
     std::cout<<"Running sig:sb event ratios..."<<std::endl;
     massCorrelations(histos_allRegions_sum,histos_allRegions_data,"BkgSum");
   }
 
-  if (runPies){
+  if (runPies) {
     std::cout<<"Running pies..."<<std::endl;
-    if (whichRegion=="signal"){
-      pieChart({h_baseline_MET_QCD}, {h_baseline_MET_WJets}, {h_baseline_MET_ZJets}, {h_baseline_MET_TT},{h_baseline_MET_SnglT}, "Baseline", "all");
-      pieChart({h_A_QCD,h_B_QCD}, {h_A_WJets,h_B_WJets}, {h_A_ZJets,h_B_ZJets}, {h_A_TT,h_B_TT},{h_A_SnglT,h_B_SnglT}, "2H", "all");
-      pieChart({h_A_QCD}, {h_A_WJets}, {h_A_ZJets}, {h_A_TT},{h_A_SnglT}, "2HSR", "all");
-      pieChart({h_B_QCD}, {h_B_WJets}, {h_B_ZJets}, {h_B_TT},{h_B_SnglT}, "2HSB", "all");
-      pieChart({h_A1_QCD,h_B1_QCD}, {h_A1_WJets,h_B1_WJets}, {h_A1_ZJets,h_B1_ZJets}, {h_A1_TT,h_B1_TT}, {h_A1_SnglT,h_B1_SnglT}, "1H", "all");
-      pieChart({h_A1_QCD}, {h_A1_WJets}, {h_A1_ZJets}, {h_A1_TT},{h_A1_SnglT}, "1HSR", "all");
-      pieChart({h_B1_QCD}, {h_B1_WJets}, {h_B1_ZJets}, {h_B1_TT},{h_B1_SnglT}, "1HSB", "all");
-      pieChart({h_C_QCD,h_D_QCD}, {h_C_WJets,h_D_WJets}, {h_C_ZJets,h_D_ZJets}, {h_C_TT,h_D_TT}, {h_C_SnglT,h_D_SnglT}, "0H", "all");
-      pieChart({h_C_QCD}, {h_C_WJets}, {h_C_ZJets}, {h_C_TT}, {h_C_SnglT}, "0HSR", "all");
-      pieChart({h_D_QCD}, {h_D_WJets}, {h_D_ZJets}, {h_D_TT}, {h_D_SnglT}, "0HSB", "all");
-      pieChart({h_Opt1_QCD}, {h_Opt1_WJets}, {h_Opt1_ZJets}, {h_Opt1_TT}, {h_Opt1_SnglT}, "0Hb", "all");
-
-      pieChart({h_baseline_MET_QCD}, {h_baseline_MET_WJets}, {h_baseline_MET_ZJets}, {h_baseline_MET_TT},{h_baseline_MET_SnglT}, "Baseline", "bin1");
-      pieChart({h_A_QCD,h_B_QCD}, {h_A_WJets,h_B_WJets}, {h_A_ZJets,h_B_ZJets}, {h_A_TT,h_B_TT},{h_A_SnglT,h_B_SnglT}, "2H", "bin1");
-      pieChart({h_A_QCD}, {h_A_WJets}, {h_A_ZJets}, {h_A_TT},{h_A_SnglT}, "2HSR", "bin1");
-      pieChart({h_B_QCD}, {h_B_WJets}, {h_B_ZJets}, {h_B_TT},{h_B_SnglT}, "2HSB", "bin1");
-      pieChart({h_A1_QCD,h_B1_QCD}, {h_A1_WJets,h_B1_WJets}, {h_A1_ZJets,h_B1_ZJets}, {h_A1_TT,h_B1_TT}, {h_A1_SnglT,h_B1_SnglT}, "1H", "bin1");
-      pieChart({h_A1_QCD}, {h_A1_WJets}, {h_A1_ZJets}, {h_A1_TT},{h_A1_SnglT}, "1HSR", "bin1");
-      pieChart({h_B1_QCD}, {h_B1_WJets}, {h_B1_ZJets}, {h_B1_TT},{h_B1_SnglT}, "1HSB", "bin1");
-      pieChart({h_C_QCD,h_D_QCD}, {h_C_WJets,h_D_WJets}, {h_C_ZJets,h_D_ZJets}, {h_C_TT,h_D_TT}, {h_C_SnglT,h_D_SnglT}, "0H", "bin1");
-      pieChart({h_C_QCD}, {h_C_WJets}, {h_C_ZJets}, {h_C_TT}, {h_C_SnglT}, "0HSR", "bin1");
-      pieChart({h_D_QCD}, {h_D_WJets}, {h_D_ZJets}, {h_D_TT}, {h_D_SnglT}, "0HSB", "bin1");
-      pieChart({h_Opt1_QCD}, {h_Opt1_WJets}, {h_Opt1_ZJets}, {h_Opt1_TT}, {h_Opt1_SnglT}, "0Hb", "bin1");
-
-      pieChart({h_baseline_MET_QCD}, {h_baseline_MET_WJets}, {h_baseline_MET_ZJets}, {h_baseline_MET_TT},{h_baseline_MET_SnglT}, "Baseline", "bin2");
-      pieChart({h_A_QCD,h_B_QCD}, {h_A_WJets,h_B_WJets}, {h_A_ZJets,h_B_ZJets}, {h_A_TT,h_B_TT},{h_A_SnglT,h_B_SnglT}, "2H", "bin2");
-      pieChart({h_A_QCD}, {h_A_WJets}, {h_A_ZJets}, {h_A_TT},{h_A_SnglT}, "2HSR", "bin2");
-      pieChart({h_B_QCD}, {h_B_WJets}, {h_B_ZJets}, {h_B_TT},{h_B_SnglT}, "2HSB", "bin2");
-      pieChart({h_A1_QCD,h_B1_QCD}, {h_A1_WJets,h_B1_WJets}, {h_A1_ZJets,h_B1_ZJets}, {h_A1_TT,h_B1_TT}, {h_A1_SnglT,h_B1_SnglT}, "1H", "bin2");
-      pieChart({h_A1_QCD}, {h_A1_WJets}, {h_A1_ZJets}, {h_A1_TT},{h_A1_SnglT}, "1HSR", "bin2");
-      pieChart({h_B1_QCD}, {h_B1_WJets}, {h_B1_ZJets}, {h_B1_TT},{h_B1_SnglT}, "1HSB", "bin2");
-      pieChart({h_C_QCD,h_D_QCD}, {h_C_WJets,h_D_WJets}, {h_C_ZJets,h_D_ZJets}, {h_C_TT,h_D_TT}, {h_C_SnglT,h_D_SnglT}, "0H", "bin2");
-      pieChart({h_C_QCD}, {h_C_WJets}, {h_C_ZJets}, {h_C_TT}, {h_C_SnglT}, "0HSR", "bin2");
-      pieChart({h_D_QCD}, {h_D_WJets}, {h_D_ZJets}, {h_D_TT}, {h_D_SnglT}, "0HSB", "bin2");
-      pieChart({h_Opt1_QCD}, {h_Opt1_WJets}, {h_Opt1_ZJets}, {h_Opt1_TT}, {h_Opt1_SnglT}, "0Hb", "bin2");
-
-      pieChart({h_baseline_MET_QCD}, {h_baseline_MET_WJets}, {h_baseline_MET_ZJets}, {h_baseline_MET_TT},{h_baseline_MET_SnglT}, "Baseline", "bin3");
-      pieChart({h_A_QCD,h_B_QCD}, {h_A_WJets,h_B_WJets}, {h_A_ZJets,h_B_ZJets}, {h_A_TT,h_B_TT},{h_A_SnglT,h_B_SnglT}, "2H", "bin3");
-      pieChart({h_A_QCD}, {h_A_WJets}, {h_A_ZJets}, {h_A_TT},{h_A_SnglT}, "2HSR", "bin3");
-      pieChart({h_B_QCD}, {h_B_WJets}, {h_B_ZJets}, {h_B_TT},{h_B_SnglT}, "2HSB", "bin3");
-      pieChart({h_A1_QCD,h_B1_QCD}, {h_A1_WJets,h_B1_WJets}, {h_A1_ZJets,h_B1_ZJets}, {h_A1_TT,h_B1_TT}, {h_A1_SnglT,h_B1_SnglT}, "1H", "bin3");
-      pieChart({h_A1_QCD}, {h_A1_WJets}, {h_A1_ZJets}, {h_A1_TT},{h_A1_SnglT}, "1HSR", "bin3");
-      pieChart({h_B1_QCD}, {h_B1_WJets}, {h_B1_ZJets}, {h_B1_TT},{h_B1_SnglT}, "1HSB", "bin3");
-      pieChart({h_C_QCD,h_D_QCD}, {h_C_WJets,h_D_WJets}, {h_C_ZJets,h_D_ZJets}, {h_C_TT,h_D_TT}, {h_C_SnglT,h_D_SnglT}, "0H", "bin3");
-      pieChart({h_C_QCD}, {h_C_WJets}, {h_C_ZJets}, {h_C_TT}, {h_C_SnglT}, "0HSR", "bin3");
-      pieChart({h_D_QCD}, {h_D_WJets}, {h_D_ZJets}, {h_D_TT}, {h_D_SnglT}, "0HSB", "bin3");
-      pieChart({h_Opt1_QCD}, {h_Opt1_WJets}, {h_Opt1_ZJets}, {h_Opt1_TT}, {h_Opt1_SnglT}, "0Hb", "bin3");
+    //Pie charts based on region and MET bin
+    if (whichRegion=="signal") {
+      if (runSuppPlots) {
+        pieChart({h_A_QCD}, {h_A_WJets}, {h_A_ZJets}, {h_A_TT}, {h_A_SnglT}, "2HSR", "all");
+        pieChart({h_B_QCD}, {h_B_WJets}, {h_B_ZJets}, {h_B_TT},{h_B_SnglT}, "2HSB", "all");
+        pieChart({h_A1_QCD}, {h_A1_WJets}, {h_A1_ZJets}, {h_A1_TT},{h_A1_SnglT}, "1HSR", "all");
+        pieChart({h_B1_QCD}, {h_B1_WJets}, {h_B1_ZJets}, {h_B1_TT},{h_B1_SnglT}, "1HSB", "all");
+        pieChart({h_C_QCD}, {h_C_WJets}, {h_C_ZJets}, {h_C_TT}, {h_C_SnglT}, "0HSR", "all");
+        pieChart({h_D_QCD}, {h_D_WJets}, {h_D_ZJets}, {h_D_TT}, {h_D_SnglT}, "0HSB", "all");
+        pieChart({h_Opt1_QCD}, {h_Opt1_WJets}, {h_Opt1_ZJets}, {h_Opt1_TT}, {h_Opt1_SnglT}, "0Hb", "all");
+      }
+      //Extra pie charts
+      // pieChart({h_baseline_MET_QCD}, {h_baseline_MET_WJets}, {h_baseline_MET_ZJets}, {h_baseline_MET_TT},{h_baseline_MET_SnglT}, "Baseline", "all");
+      // pieChart({h_A_QCD,h_B_QCD}, {h_A_WJets,h_B_WJets}, {h_A_ZJets,h_B_ZJets}, {h_A_TT,h_B_TT},{h_A_SnglT,h_B_SnglT}, "2H", "all");
+      // pieChart({h_A1_QCD,h_B1_QCD}, {h_A1_WJets,h_B1_WJets}, {h_A1_ZJets,h_B1_ZJets}, {h_A1_TT,h_B1_TT}, {h_A1_SnglT,h_B1_SnglT}, "1H", "all");
+      // pieChart({h_C_QCD,h_D_QCD}, {h_C_WJets,h_D_WJets}, {h_C_ZJets,h_D_ZJets}, {h_C_TT,h_D_TT}, {h_C_SnglT,h_D_SnglT}, "0H", "all");
+      //
+      //
+      // pieChart({h_baseline_MET_QCD}, {h_baseline_MET_WJets}, {h_baseline_MET_ZJets}, {h_baseline_MET_TT},{h_baseline_MET_SnglT}, "Baseline", "bin1");
+      // pieChart({h_A_QCD,h_B_QCD}, {h_A_WJets,h_B_WJets}, {h_A_ZJets,h_B_ZJets}, {h_A_TT,h_B_TT},{h_A_SnglT,h_B_SnglT}, "2H", "bin1");
+      // pieChart({h_A_QCD}, {h_A_WJets}, {h_A_ZJets}, {h_A_TT},{h_A_SnglT}, "2HSR", "bin1");
+      // pieChart({h_B_QCD}, {h_B_WJets}, {h_B_ZJets}, {h_B_TT},{h_B_SnglT}, "2HSB", "bin1");
+      // pieChart({h_A1_QCD,h_B1_QCD}, {h_A1_WJets,h_B1_WJets}, {h_A1_ZJets,h_B1_ZJets}, {h_A1_TT,h_B1_TT}, {h_A1_SnglT,h_B1_SnglT}, "1H", "bin1");
+      // pieChart({h_A1_QCD}, {h_A1_WJets}, {h_A1_ZJets}, {h_A1_TT},{h_A1_SnglT}, "1HSR", "bin1");
+      // pieChart({h_B1_QCD}, {h_B1_WJets}, {h_B1_ZJets}, {h_B1_TT},{h_B1_SnglT}, "1HSB", "bin1");
+      // pieChart({h_C_QCD,h_D_QCD}, {h_C_WJets,h_D_WJets}, {h_C_ZJets,h_D_ZJets}, {h_C_TT,h_D_TT}, {h_C_SnglT,h_D_SnglT}, "0H", "bin1");
+      // pieChart({h_C_QCD}, {h_C_WJets}, {h_C_ZJets}, {h_C_TT}, {h_C_SnglT}, "0HSR", "bin1");
+      // pieChart({h_D_QCD}, {h_D_WJets}, {h_D_ZJets}, {h_D_TT}, {h_D_SnglT}, "0HSB", "bin1");
+      // pieChart({h_Opt1_QCD}, {h_Opt1_WJets}, {h_Opt1_ZJets}, {h_Opt1_TT}, {h_Opt1_SnglT}, "0Hb", "bin1");
+      //
+      // pieChart({h_baseline_MET_QCD}, {h_baseline_MET_WJets}, {h_baseline_MET_ZJets}, {h_baseline_MET_TT},{h_baseline_MET_SnglT}, "Baseline", "bin2");
+      // pieChart({h_A_QCD,h_B_QCD}, {h_A_WJets,h_B_WJets}, {h_A_ZJets,h_B_ZJets}, {h_A_TT,h_B_TT},{h_A_SnglT,h_B_SnglT}, "2H", "bin2");
+      // pieChart({h_A_QCD}, {h_A_WJets}, {h_A_ZJets}, {h_A_TT},{h_A_SnglT}, "2HSR", "bin2");
+      // pieChart({h_B_QCD}, {h_B_WJets}, {h_B_ZJets}, {h_B_TT},{h_B_SnglT}, "2HSB", "bin2");
+      // pieChart({h_A1_QCD,h_B1_QCD}, {h_A1_WJets,h_B1_WJets}, {h_A1_ZJets,h_B1_ZJets}, {h_A1_TT,h_B1_TT}, {h_A1_SnglT,h_B1_SnglT}, "1H", "bin2");
+      // pieChart({h_A1_QCD}, {h_A1_WJets}, {h_A1_ZJets}, {h_A1_TT},{h_A1_SnglT}, "1HSR", "bin2");
+      // pieChart({h_B1_QCD}, {h_B1_WJets}, {h_B1_ZJets}, {h_B1_TT},{h_B1_SnglT}, "1HSB", "bin2");
+      // pieChart({h_C_QCD,h_D_QCD}, {h_C_WJets,h_D_WJets}, {h_C_ZJets,h_D_ZJets}, {h_C_TT,h_D_TT}, {h_C_SnglT,h_D_SnglT}, "0H", "bin2");
+      // pieChart({h_C_QCD}, {h_C_WJets}, {h_C_ZJets}, {h_C_TT}, {h_C_SnglT}, "0HSR", "bin2");
+      // pieChart({h_D_QCD}, {h_D_WJets}, {h_D_ZJets}, {h_D_TT}, {h_D_SnglT}, "0HSB", "bin2");
+      // pieChart({h_Opt1_QCD}, {h_Opt1_WJets}, {h_Opt1_ZJets}, {h_Opt1_TT}, {h_Opt1_SnglT}, "0Hb", "bin2");
+      //
+      // pieChart({h_baseline_MET_QCD}, {h_baseline_MET_WJets}, {h_baseline_MET_ZJets}, {h_baseline_MET_TT},{h_baseline_MET_SnglT}, "Baseline", "bin3");
+      // pieChart({h_A_QCD,h_B_QCD}, {h_A_WJets,h_B_WJets}, {h_A_ZJets,h_B_ZJets}, {h_A_TT,h_B_TT},{h_A_SnglT,h_B_SnglT}, "2H", "bin3");
+      // pieChart({h_A_QCD}, {h_A_WJets}, {h_A_ZJets}, {h_A_TT},{h_A_SnglT}, "2HSR", "bin3");
+      // pieChart({h_B_QCD}, {h_B_WJets}, {h_B_ZJets}, {h_B_TT},{h_B_SnglT}, "2HSB", "bin3");
+      // pieChart({h_A1_QCD,h_B1_QCD}, {h_A1_WJets,h_B1_WJets}, {h_A1_ZJets,h_B1_ZJets}, {h_A1_TT,h_B1_TT}, {h_A1_SnglT,h_B1_SnglT}, "1H", "bin3");
+      // pieChart({h_A1_QCD}, {h_A1_WJets}, {h_A1_ZJets}, {h_A1_TT},{h_A1_SnglT}, "1HSR", "bin3");
+      // pieChart({h_B1_QCD}, {h_B1_WJets}, {h_B1_ZJets}, {h_B1_TT},{h_B1_SnglT}, "1HSB", "bin3");
+      // pieChart({h_C_QCD,h_D_QCD}, {h_C_WJets,h_D_WJets}, {h_C_ZJets,h_D_ZJets}, {h_C_TT,h_D_TT}, {h_C_SnglT,h_D_SnglT}, "0H", "bin3");
+      // pieChart({h_C_QCD}, {h_C_WJets}, {h_C_ZJets}, {h_C_TT}, {h_C_SnglT}, "0HSR", "bin3");
+      // pieChart({h_D_QCD}, {h_D_WJets}, {h_D_ZJets}, {h_D_TT}, {h_D_SnglT}, "0HSB", "bin3");
+      // pieChart({h_Opt1_QCD}, {h_Opt1_WJets}, {h_Opt1_ZJets}, {h_Opt1_TT}, {h_Opt1_SnglT}, "0Hb", "bin3");
     }
-    else if (whichRegion=="singleLept"){
+    else if (whichRegion=="singleLept") {
       pieChart1l({h_baseline_MET_WJets},{h_baseline_MET_TT},{h_baseline_MET_SnglT}, "Baseline", "all");
       pieChart1l({h_A_WJets,h_B_WJets}, {h_A_TT,h_B_TT}, {h_A_SnglT,h_B_SnglT}, "2H", "all");
       pieChart1l({h_A_WJets}, {h_A_TT}, {h_A_SnglT}, "2HSR", "all");
@@ -1863,8 +1881,7 @@ void runABCD() {
       pieChart1l({h_D_WJets}, {h_D_TT}, {h_D_SnglT}, "0HSB", "bin3");
       pieChart1l({h_Opt1_WJets}, {h_Opt1_TT}, {h_Opt1_SnglT}, "0Hb", "bin3");
     }
-
-    else if (whichRegion=="photon"){ //GJets, QCD
+    else if (whichRegion=="photon") { //GJets, QCD
       pieChartPhoton({h_baseline_MET_GJets},{h_baseline_MET_QCD}, "Baseline", "all");
       pieChartPhoton({h_A_GJets,h_B_GJets}, {h_A_QCD,h_B_QCD}, "2H", "all");
       pieChartPhoton({h_A_GJets}, {h_A_QCD}, "2HSR", "all");
@@ -1915,19 +1932,20 @@ void runABCD() {
     }
   }
 
-  if (runFullBkg) {
+
+  if (runFullBkg && runSuppPlots) {
     std::cout<<"Running full bkg closure..."<<std::endl;
     makeFullBkgClosure(histos_ABCD_sum, "BkgSum", "Double");
     makeFullBkgClosure(histos_A1B1CD_sum, "BkgSum", "Single");
     makeFullBkgClosure(histos_ABCD_data, "Data", "Double");
     makeFullBkgClosure(histos_A1B1CD_data, "Data", "Single");
-    tableOfFullPred(histos_allRegions_sum, "BkgSum");
-    tableOfFullPred(histos_allRegions_data, "Data");
+    // tableOfFullPred(histos_allRegions_sum, "BkgSum");
+    // tableOfFullPred(histos_allRegions_data, "Data");
   }
 
-  if (runABCDPlots){
+  if (runABCDPlots) {
     std::cout<<"Running ABCD plots..."<<std::endl;
-    if (whichRegion=="signal"){
+    if (whichRegion=="signal") {
       makeABCDPlot(histos_ABCD_sum, "BkgSum", "Double");
       makeABCDPlot(histos_A1B1CD_sum, "BkgSum", "Single");
 
@@ -1943,7 +1961,7 @@ void runABCD() {
       makeABCDPlot(histos_A1B1CD_WJets, "WJets", "Single");
       makeABCDPlot(histos_A1B1CD_ZJets, "ZJets", "Single");
     }
-    else if (whichRegion=="singleLept"){
+    else if (whichRegion=="singleLept") {
       makeABCDPlot(histos_ABCD_sum, "BkgSum", "Double");
       makeABCDPlot(histos_A1B1CD_sum, "BkgSum", "Single");
       makeABCDPlot(histos_ABCD_data, "Data", "Double");
@@ -1956,7 +1974,7 @@ void runABCD() {
       makeABCDPlot(histos_A1B1CD_TT, "TT", "Single");
       makeABCDPlot(histos_A1B1CD_WJets, "WJets", "Single");
     }
-    else if (whichRegion=="photon"){
+    else if (whichRegion=="photon") {
       makeABCDPlot(histos_ABCD_sum, "BkgSum", "Double");
       makeABCDPlot(histos_A1B1CD_sum, "BkgSum", "Single");
       makeABCDPlot(histos_ABCD_data, "Data", "Double");
@@ -2002,28 +2020,32 @@ void runABCD() {
 
   if (runDataVMCStack) {
     std::cout<<"Running Data v MC stack plots..."<<std::endl;
-    if (whichRegion=="signal"){
-      makeMCStackvDataComp(vec_baseline_METall_0l, h_baseline_METall_sum, h_baseline_METall_data, h_baseline_METall_TChiHH500,h_baseline_METall_T5HH1600,"baseline", "METall", true);
-      // makeMCStackvDataComp(vec_baseline_METother_0l, h_baseline_METother_sum, h_baseline_METother_data, h_baseline_METother_TChiHH500,h_baseline_METother_T5HH1600,"baseline", "METother", true);
+    if (whichRegion=="signal") {
 
+      if (runPaperPlots) {
+        // makeMCStackvDataComp(vec_baseline_MET_0l, h_baseline_MET_sum, h_baseline_MET_data, h_baseline_MET_TChiHH500,h_baseline_MET_T5HH1600,"baseline", "MET", true); //only 3 MET bins
+        makeMCStackvDataComp(vec_baseline_METall_0l, h_baseline_METall_sum, h_baseline_METall_data, h_baseline_METall_TChiHH500,h_baseline_METall_T5HH1600,"baseline", "METall", true); //more MET bins
+        makeMCStackvDataComp(vec_baseline_jmass_0l, h_baseline_jmass_sum, h_baseline_jmass_data, h_baseline_jmass_TChiHH500,h_baseline_jmass_T5HH1600,"baseline", "jm", true);
+        makeMCStackvDataComp(vec_baseline_jpt_0l, h_baseline_jpt_sum, h_baseline_jpt_data, h_baseline_jpt_TChiHH500,h_baseline_jpt_T5HH1600,"baseline", "jpt", true);
+        makeMCStackvDataComp(vec_baseline_jbb_0l, h_baseline_jbb_sum, h_baseline_jbb_data, h_baseline_jbb_TChiHH500,h_baseline_jbb_T5HH1600,"baseline", "jbb", true);
+        makeMCStackvDataComp(vec_0H_jmass_0l, h_0H_jmass_sum, h_0H_jmass_data, h_0H_jmass_TChiHH500,h_0H_jmass_T5HH1600,"0H", "jm", true);
+        makeMCStackvDataComp(vec_1H_jmass_0l, h_1H_jmass_sum, h_1H_jmass_data, h_1H_jmass_TChiHH500,h_1H_jmass_T5HH1600,"1H", "jm", true);
+        makeMCStackvDataComp(vec_2H_jmass_0l, h_2H_jmass_sum, h_2H_jmass_data, h_2H_jmass_TChiHH500,h_2H_jmass_T5HH1600,"2H", "jm", true);
+      }
 
-      //For paper
-      // makeMCStackvDataComp(vec_baseline_MET_0l, h_baseline_MET_sum, h_baseline_MET_data, h_baseline_MET_TChiHH500,h_baseline_MET_T5HH1600,"baseline", "MET", true);
-      makeMCStackvDataComp(vec_baseline_jmass_0l, h_baseline_jmass_sum, h_baseline_jmass_data, h_baseline_jmass_TChiHH500,h_baseline_jmass_T5HH1600,"baseline", "jm", true);
-      makeMCStackvDataComp(vec_baseline_jpt_0l, h_baseline_jpt_sum, h_baseline_jpt_data, h_baseline_jpt_TChiHH500,h_baseline_jpt_T5HH1600,"baseline", "jpt", true);
-      makeMCStackvDataComp(vec_baseline_jbb_0l, h_baseline_jbb_sum, h_baseline_jbb_data, h_baseline_jbb_TChiHH500,h_baseline_jbb_T5HH1600,"baseline", "jbb", true);
-      makeMCStackvDataComp(vec_0H_jmass_0l, h_0H_jmass_sum, h_0H_jmass_data, h_0H_jmass_TChiHH500,h_0H_jmass_T5HH1600,"0H", "jm", true);
-      makeMCStackvDataComp(vec_1H_jmass_0l, h_1H_jmass_sum, h_1H_jmass_data, h_1H_jmass_TChiHH500,h_1H_jmass_T5HH1600,"1H", "jm", true);
-      makeMCStackvDataComp(vec_2H_jmass_0l, h_2H_jmass_sum, h_2H_jmass_data, h_2H_jmass_TChiHH500,h_2H_jmass_T5HH1600,"2H", "jm", true);
+      if (runSuppPlots) {
+        makeMCStackvDataComp(vec_baseline_j1mass_0l, h_baseline_j1mass_sum, h_baseline_j1mass_data, h_baseline_j1mass_TChiHH500,h_baseline_j1mass_T5HH1600,"baseline", "j1m", true);
+        makeMCStackvDataComp(vec_baseline_j2mass_0l, h_baseline_j2mass_sum, h_baseline_j2mass_data, h_baseline_j2mass_TChiHH500,h_baseline_j2mass_T5HH1600,"baseline", "j2m", true);
+        makeMCStackvDataComp(vec_baseline_j1pt_0l, h_baseline_j1pt_sum, h_baseline_j1pt_data, h_baseline_j1pt_TChiHH500,h_baseline_j1pt_T5HH1600,"baseline", "j1pt", true);
+        makeMCStackvDataComp(vec_baseline_j2pt_0l, h_baseline_j2pt_sum, h_baseline_j2pt_data, h_baseline_j2pt_TChiHH500,h_baseline_j2pt_T5HH1600,"baseline", "j2pt", true);
+        makeMCStackvDataComp(vec_baseline_j1bb_0l, h_baseline_j1bb_sum, h_baseline_j1bb_data, h_baseline_j1bb_TChiHH500,h_baseline_j1bb_T5HH1600,"baseline", "j1bb", true);
+        makeMCStackvDataComp(vec_baseline_j2bb_0l, h_baseline_j2bb_sum, h_baseline_j2bb_data, h_baseline_j2bb_TChiHH500,h_baseline_j2bb_T5HH1600,"baseline", "j2bb", true);
+
+        makeMCStackvDataComp(vec_2HSR_MET_0l, h_A_sum, h_A_data, h_A_TChiHH500,h_A_T5HH1600,"2HSR", "MET", "false");
+        makeMCStackvDataComp(vec_1HSR_MET_0l, h_A1_sum, h_A1_data, h_A1_TChiHH500,h_A1_T5HH1600,"1HSR", "MET", "false");
+      }
 
       ////// Extras //////
-      // makeMCStackvDataComp(vec_baseline_j1mass_0l, h_baseline_j1mass_sum, h_baseline_j1mass_data, h_baseline_j1mass_TChiHH500,h_baseline_j1mass_T5HH1600,"baseline", "j1m", true);
-      // makeMCStackvDataComp(vec_baseline_j2mass_0l, h_baseline_j2mass_sum, h_baseline_j2mass_data, h_baseline_j2mass_TChiHH500,h_baseline_j2mass_T5HH1600,"baseline", "j2m", true);
-      // makeMCStackvDataComp(vec_baseline_j1pt_0l, h_baseline_j1pt_sum, h_baseline_j1pt_data, h_baseline_j1pt_TChiHH500,h_baseline_j1pt_T5HH1600,"baseline", "j1pt", true);
-      // makeMCStackvDataComp(vec_baseline_j2pt_0l, h_baseline_j2pt_sum, h_baseline_j2pt_data, h_baseline_j2pt_TChiHH500,h_baseline_j2pt_T5HH1600,"baseline", "j2pt", true);
-      // makeMCStackvDataComp(vec_baseline_j1bb_0l, h_baseline_j1bb_sum, h_baseline_j1bb_data, h_baseline_j1bb_TChiHH500,h_baseline_j1bb_T5HH1600,"baseline", "j1bb", true);
-      // makeMCStackvDataComp(vec_baseline_j2bb_0l, h_baseline_j2bb_sum, h_baseline_j2bb_data, h_baseline_j2bb_TChiHH500,h_baseline_j2bb_T5HH1600,"baseline", "j2bb", true);
-
       // makeMCStackvDataComp(vec_0H_MET_0l, h_0H_MET_sum, h_0H_MET_data, h_0H_MET_TChiHH500, h_0H_MET_T5HH1600,"0H", "MET", false);
       // makeMCStackvDataComp(vec_0H_jpt_0l, h_0H_jpt_sum, h_0H_jpt_data, h_0H_jpt_TChiHH500,h_0H_jpt_T5HH1600,"0H", "jpt", false);
       // makeMCStackvDataComp(vec_0H_jbb_0l, h_0H_jbb_sum, h_0H_jbb_data, h_0H_jbb_TChiHH500,h_0H_jbb_T5HH1600,"0H", "jbb", false);
@@ -2034,7 +2056,6 @@ void runABCD() {
       // makeMCStackvDataComp(vec_2H_jpt_0l, h_2H_jpt_sum, h_2H_jpt_data, h_2H_jpt_TChiHH500,h_2H_jpt_T5HH1600,"2H", "jpt", false);
       // makeMCStackvDataComp(vec_2H_jbb_0l, h_2H_jbb_sum, h_2H_jbb_data, h_2H_jbb_TChiHH500,h_2H_jbb_T5HH1600,"2H", "jbb", false);
 
-      // makeMCStackvDataComp(vec_1HSR_MET_0l, h_A1_sum, h_A1_data, h_A1_TChiHH500,h_A1_T5HH1600,"1HSR", "MET");
       // makeMCStackvDataComp(vec_1HSR_j1mass_0l, h_J1M_tagSR_sum, h_J1M_tagSR_data, h_J1M_tagSR_TChiHH500,h_J1M_tagSR_T5HH1600,"1HSR", "j1m");
       // makeMCStackvDataComp(vec_1HSR_j2mass_0l, h_J2M_tagSR_sum, h_J2M_tagSR_data, h_J2M_tagSR_TChiHH500,h_J2M_tagSR_T5HH1600,"1HSR", "j2m");
       // makeMCStackvDataComp(vec_1HSR_j1pt_0l, h_J1Pt_tagSR_sum, h_J1Pt_tagSR_data, h_J1Pt_tagSR_TChiHH500,h_J1Pt_tagSR_T5HH1600,"1HSR", "j1pt");
@@ -2042,7 +2063,6 @@ void runABCD() {
       // makeMCStackvDataComp(vec_1HSR_j1bb_0l, h_J1BB_tagSR_sum, h_J1BB_tagSR_data, h_J1BB_tagSR_TChiHH500,h_J1BB_tagSR_T5HH1600,"1HSR", "j1bb");
       // makeMCStackvDataComp(vec_1HSR_j2bb_0l, h_J2BB_tagSR_sum, h_J2BB_tagSR_data, h_J2BB_tagSR_TChiHH500,h_J2BB_tagSR_T5HH1600,"1HSR", "j2bb");
 
-      // makeMCStackvDataComp(vec_2HSR_MET_0l, h_A_sum, h_A_data, h_A_TChiHH500,h_A_T5HH1600,"2HSR", "MET");
       // makeMCStackvDataComp(vec_2HSR_j1mass_0l, h_J1M_doubletagSR_sum, h_J1M_doubletagSR_data, h_J1M_doubletagSR_TChiHH500,h_J1M_doubletagSR_T5HH1600,"2HSR", "j1m");
       // makeMCStackvDataComp(vec_2HSR_j2mass_0l, h_J2M_doubletagSR_sum, h_J2M_doubletagSR_data, h_J2M_doubletagSR_TChiHH500,h_J2M_doubletagSR_T5HH1600,"2HSR", "j2m");
       // makeMCStackvDataComp(vec_2HSR_j1pt_0l, h_J1Pt_doubletagSR_sum, h_J1Pt_doubletagSR_data, h_J1Pt_doubletagSR_TChiHH500,h_J1Pt_doubletagSR_T5HH1600,"2HSR", "j1pt");
@@ -2058,8 +2078,7 @@ void runABCD() {
       // makeMCStackvDataComp(vec_0H_j1bb_0l, h_0H_j1bb_sum, h_0H_j1bb_data, "0H", "j1bb");
       // makeMCStackvDataComp(vec_0H_j2bb_0l, h_0H_j2bb_sum, h_0H_j2bb_data, "0H", "j2bb");
     }
-
-    else if (whichRegion=="singleLept"){
+    else if (whichRegion=="singleLept") {
       //Just compare MC to data
       makeMCvDataComp(h_A_sum, h_A_data, "2HSR", "MET");
       makeMCvDataComp(h_B_sum, h_B_data, "2HSB", "MET");
@@ -2085,7 +2104,7 @@ void runABCD() {
       // makeMCStackvDataComp(vec_baseline_j1bb_1l, h_baseline_j1bb_sum, h_baseline_j1bb_data, "Baseline", "j1bb");
       // makeMCStackvDataComp(vec_baseline_j2bb_1l, h_baseline_j2bb_sum, h_baseline_j2bb_data, "Baseline", "j2bb");
     }
-    else if (whichRegion=="photon"){
+    else if (whichRegion=="photon") {
       //Just compare MC to data
       makeMCvDataComp(h_A_sum, h_A_data, "2HSR", "MET");
       makeMCvDataComp(h_B_sum, h_B_data, "2HSB", "MET");
@@ -2113,18 +2132,18 @@ void runABCD() {
     }
   }
 
-  if (runMETNorm) {
+  if (runMETNorm && runPaperPlots) {
     std::cout<<"Running MET shape comparison..."<<std::endl;
-    makeMETNormCompare(h_METShape_bkgSum_wData,"BkgSum",true,false); //Draw data 0H+b as well?
+    makeMETNormCompare(h_METShape_bkgSum_wData,"BkgSum",true,false); //Draw data 0H+b as well? Last arg is save extras
 
     //Extras (not in paper)
     // makeMETNormCompare(h_METShape_data,"Data",false,false);
     // justBB(h_baseline_j1bb_TT, h_baseline_j1bb_T5HH1600, "TT", "T5HH", "1600");
   }
 
-  if (runTableOfYields){
+  if (runTableOfYields) {
     std::cout<<"Running table of yields..."<<std::endl;
-    if (whichRegion=="signal"){
+    if (whichRegion=="signal") {
       tableOfYields(histos_allRegions_data, "Data");
       tableOfYields(histos_allRegions_sum, "BkgSum");
       tableOfYields(histos_allRegions_QCD, "QCD");
@@ -2136,8 +2155,7 @@ void runABCD() {
       tableOfMETNorm(h_METShape_sum_all, "BkgSum");
       tableOfMETNorm(h_METShape_data_all, "Data");
     }
-
-    else if (whichRegion=="singleLept"){
+    else if (whichRegion=="singleLept") {
       tableOfYields(histos_allRegions_data, "Data");
       tableOfYields(histos_allRegions_sum, "BkgSum");
       tableOfYields(histos_allRegions_SnglT, "SnglT");
@@ -2145,7 +2163,7 @@ void runABCD() {
       tableOfYields(histos_allRegions_WJets, "WJets");
       giantTableOfYields(all_ABCDHistos_1l);
     }
-    else if (whichRegion=="photon"){
+    else if (whichRegion=="photon") {
       tableOfYields(histos_allRegions_data, "Data");
       tableOfYields(histos_allRegions_sum, "BkgSum");
       tableOfYields(histos_allRegions_QCD, "QCD");
@@ -2210,7 +2228,7 @@ void makeABCDPlot(vector<TH1F*> dem_histos, TString bkgType, TString tagType) {
 
   TLegend* legend = new TLegend(0.60,0.7,0.93,0.91);
   legend->SetBorderSize(0);
-  if (!isData){
+  if (!isData) {
     if (tagType=="Double") {
       legend->AddEntry(histo_A,"MC: A2","lp");
       legend->AddEntry(histo_pred,"Pred: B2*C/D","f");
@@ -2313,33 +2331,33 @@ void makeFullBkgClosure(vector<TH1F*> dem_histos, TString bkgType, TString tagTy
   bkgFrac3 = histo_MET->GetBinContent(3); bkgFrac3_error = histo_MET->GetBinError(3);
 
   //V18
-  if (whichRegion=="signal"){
+  if (whichRegion=="signal") {
     if (tagType=="Double") kappa_error = 0.17;
     else if (tagType=="Single") kappa_error = 0.04;
   }
-  else if (whichRegion=="singleLept"){
-    if (bkgType=="BkgSum"){
-      if (tagType=="Double"){
+  else if (whichRegion=="singleLept") {
+    if (bkgType=="BkgSum") {
+      if (tagType=="Double") {
         kappa = 1.03; kappa_error = 0.03;
       }
-      else if (tagType=="Single"){
+      else if (tagType=="Single") {
         kappa = 0.97; kappa_error = 0.01;
       }
     }
-    else if (bkgType=="Data"){
-      if (tagType=="Double"){
+    else if (bkgType=="Data") {
+      if (tagType=="Double") {
         kappa = 1.07; kappa_error = 0.14;
       }
-      else if (tagType=="Single"){
+      else if (tagType=="Single") {
         kappa = 0.92; kappa_error = 0.08;
       }
     }
   }
-  else if (whichRegion=="photon"){
-    if (tagType=="Double"){
+  else if (whichRegion=="photon") {
+    if (tagType=="Double") {
       kappa = 0.52; kappa_error = 0.37;
     }
-    else if (tagType=="Single"){
+    else if (tagType=="Single") {
       kappa = 1.10; kappa_error = 0.20;
     }
   }
@@ -2449,13 +2467,21 @@ void makeFullBkgClosure(vector<TH1F*> dem_histos, TString bkgType, TString tagTy
 
   cdClose->cd();
   can_h->Write("FullBkg_"+bkgType+tagType);
+  if (bkgType=="BkgSum") {
+    if (tagType=="Single") can_h->SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_016-a.pdf","PDF");
+    else if (tagType=="Double") can_h->SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_016-b.pdf","PDF");
+  }
+  else if (bkgType=="Data") {
+    if (tagType=="Single") can_h->SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_016-c.pdf","PDF");
+    else if (tagType=="Double") can_h->SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_016-d.pdf","PDF");
+  }
   if (savePDFs) can_h->SaveAs("boostedFigures/"+whichRegion+"/fullClosure/FullClosure_"+bkgType+tagType+".pdf","PDF");
-  can_h->SaveAs(outDIR+"FullClosure_"+bkgType+tagType+".pdf","PDF");
-  can_h->SaveAs(outDIR+"FullClosure_"+bkgType+tagType+".png");
+  // can_h->SaveAs(outDIR+"FullClosure_"+bkgType+tagType+".pdf","PDF");
+  // can_h->SaveAs(outDIR+"FullClosure_"+bkgType+tagType+".png");
   delete can_h;
 }
 
-void makeStackPlot(TH1F* h_QCD,TH1F* h_TT,TH1F* h_WJets,TH1F* h_ZJets, TH1F* h_SnglT, TH1F* h_T5HH1600,TH1F* h_T5HH2000,TH1F* h_T5HH2200,TH1F* h_TChiHH500,TH1F* h_TChiHH800,TH1F* h_TChiHH1000,TString which){
+void makeStackPlot(TH1F* h_QCD,TH1F* h_TT,TH1F* h_WJets,TH1F* h_ZJets, TH1F* h_SnglT, TH1F* h_T5HH1600,TH1F* h_T5HH2000,TH1F* h_T5HH2200,TH1F* h_TChiHH500,TH1F* h_TChiHH800,TH1F* h_TChiHH1000,TString which) {
   TH1F* h_QCD_stack = (TH1F*)h_QCD->Clone("QCDAll");
   h_QCD_stack->SetFillColor(col_qcd); h_QCD_stack->SetMarkerStyle(21); h_QCD_stack->SetMarkerColor(col_qcd); h_QCD_stack->SetLineColor(kBlack);
 
@@ -2557,7 +2583,7 @@ void makeStackPlot(TH1F* h_QCD,TH1F* h_TT,TH1F* h_WJets,TH1F* h_ZJets, TH1F* h_S
   delete can_h;
 }
 
-void makeSingleLeptStackPlot(TH1F* h_TT,TH1F* h_WJets,TH1F* h_SnglT, TH1F* h_dataOrig, TString which){
+void makeSingleLeptStackPlot(TH1F* h_TT,TH1F* h_WJets,TH1F* h_SnglT, TH1F* h_dataOrig, TString which) {
   TH1F * h_TT_stack = (TH1F*)h_TT->Clone("TTAll");
   h_TT_stack->SetFillColor(kCyan); h_TT_stack->SetMarkerStyle(21); h_TT_stack->SetMarkerColor(kCyan);
 
@@ -2618,7 +2644,7 @@ void makeSingleLeptStackPlot(TH1F* h_TT,TH1F* h_WJets,TH1F* h_SnglT, TH1F* h_dat
   delete can_h;
 }
 
-void makePhotonStackPlot(TH1F* h_QCD,TH1F* h_GJets, TString which){
+void makePhotonStackPlot(TH1F* h_QCD,TH1F* h_GJets, TString which) {
   TH1F * h_QCD_stack = (TH1F*)h_QCD->Clone("QCDAll");
   h_QCD_stack->SetFillColor(kCyan); h_QCD_stack->SetMarkerStyle(21); h_QCD_stack->SetMarkerColor(kCyan);
 
@@ -2667,7 +2693,7 @@ void makePhotonStackPlot(TH1F* h_QCD,TH1F* h_GJets, TString which){
   delete can_h;
 }
 
-void makeMETStack(TH1F* h_QCD,TH1F* h_TT,TH1F* h_WJets,TH1F* h_ZJets,TH1F* h_SnglT, TH1F* h_T5HH1600,TH1F* h_T5HH2000,TH1F* h_T5HH2200,TH1F* h_TChiHH500,TH1F* h_TChiHH800, TH1F* h_TChiHH1000,TString tagType){
+void makeMETStack(TH1F* h_QCD,TH1F* h_TT,TH1F* h_WJets,TH1F* h_ZJets,TH1F* h_SnglT, TH1F* h_T5HH1600,TH1F* h_T5HH2000,TH1F* h_T5HH2200,TH1F* h_TChiHH500,TH1F* h_TChiHH800, TH1F* h_TChiHH1000,TString tagType) {
   h_QCD->SetFillColor(col_qcd); h_QCD->SetMarkerStyle(21); h_QCD->SetMarkerColor(col_qcd); h_QCD->SetLineColor(kBlack);
   h_TT->SetFillColor(col_tt); h_TT->SetMarkerStyle(21); h_TT->SetMarkerColor(col_tt); h_TT->SetLineColor(kBlack);
   h_SnglT->SetFillColor(col_snglt); h_SnglT->SetMarkerStyle(21); h_SnglT->SetMarkerColor(col_snglt); h_SnglT->SetLineColor(kBlack);
@@ -2824,9 +2850,11 @@ void makeMETNormCompare(vector<TH1F*> dem_histos, TString bkgType, bool drawData
 
   cdMET->cd();
   can_h->Write(bkgType+"_METShapeComp");
-  can_h->SaveAs(outDIR+"METShape.pdf","PDF");
-  ltitle_prelim.Draw("same");
-  can_h->SaveAs(outDIR+"METShape_prelim.pdf","PDF");
+  can_h->SaveAs(outDIR+"Figure_006-b.pdf","PDF");
+
+  // can_h->SaveAs(outDIR+"METShape.pdf","PDF");
+  // ltitle_prelim.Draw("same");
+  // can_h->SaveAs(outDIR+"METShape_prelim.pdf","PDF");
 
   if (saveOthers) {
     pad1->cd();
@@ -2846,7 +2874,8 @@ void makeMETNormCompare(vector<TH1F*> dem_histos, TString bkgType, bool drawData
   delete can_h;
 }
 
-void tableOfYields(vector<TH1F*> dem_histos, TString bkgType){
+void tableOfYields(vector<TH1F*> dem_histos, TString bkgType) {
+  std::cout<<"Here? 9.1"<<std::endl;
   TH1F * histo_A = (TH1F*)dem_histos[0]->Clone("histo_A"); TH1F * histo_A1 = (TH1F*)dem_histos[1]->Clone("histo_A1");
   TH1F * histo_B = (TH1F*)dem_histos[2]->Clone("histo_B"); TH1F * histo_B1 = (TH1F*)dem_histos[3]->Clone("histo_B1");
   TH1F * histo_C = (TH1F*)dem_histos[4]->Clone("histo_C"); TH1F * histo_D = (TH1F*)dem_histos[5]->Clone("histo_D");
@@ -2859,7 +2888,9 @@ void tableOfYields(vector<TH1F*> dem_histos, TString bkgType){
   double c_int; double c_error;
   double d_int; double d_error;
 
-  if (whichRegion=="signal"){
+  std::cout<<"Here? 9.2"<<std::endl;
+
+  if (whichRegion=="signal") {
     a_int = histo_A->IntegralAndError(1,5,a_error,"");
     a1_int = histo_A1->IntegralAndError(1,5,a1_error,"");
     b_int = histo_B->IntegralAndError(1,5,b_error,"");
@@ -2876,6 +2907,7 @@ void tableOfYields(vector<TH1F*> dem_histos, TString bkgType){
     d_int = histo_D->IntegralAndError(0,5,d_error,"");
   }
 
+  std::cout<<"Here? 9.3"<<std::endl;
 
   TH1F *histo_pred2H = (TH1F*)histo_B->Clone("histo_pred");
   histo_pred2H->Multiply(histo_C);histo_pred2H->Divide(histo_D);
@@ -2896,9 +2928,14 @@ void tableOfYields(vector<TH1F*> dem_histos, TString bkgType){
   double kappa1H = a1_int/bkgNorm1H;
   double kappa1H_error = kappa1H*sqrt(TMath::Power(a1_error/a1_int,2) + TMath::Power(bkgNorm1H_error/bkgNorm1H,2));
 
+  std::cout<<"Here? 9.4"<<std::endl;
+
   TString yieldsFileName = outDIR+"Yields_"+whichRegion+"_"+bkgType+".txt";
   ofstream yields;
   yields.open(yieldsFileName);
+
+  std::cout<<"Here? 9.5"<<std::endl;
+
 
   yields<<"% "<< bkgType <<endl;
   yields <<"\\documentclass[11pt, oneside]{article}\n\n";
@@ -2918,9 +2955,11 @@ void tableOfYields(vector<TH1F*> dem_histos, TString bkgType){
   yields<<"Kappa1H & "<<std::setprecision(3)<< kappa1H << " $\\pm$ "<< kappa1H_error <<"\\\\ \\hline\n";
   yields<<"\\end{tabular}\n"<<"\\end{table}\n"<<"\\end{document}\n";
   yields.close();
+  std::cout<<"Here? 9.6"<<std::endl;
+
 }
 
-void giantTableOfYields(vector< vector<TH1F*> > dem_histos){
+void giantTableOfYields(vector< vector<TH1F*> > dem_histos) {
   vector<string> histoNames;
   vector<float> vec_aint; vector<float> vec_a1int; vector<float> vec_bint; vector<float> vec_b1int; vector<float> vec_cint; vector<float> vec_dint;
   vector<float> vec_aerr; vector<float> vec_a1err; vector<float> vec_berr; vector<float> vec_b1err; vector<float> vec_cerr; vector<float> vec_derr;
@@ -2935,7 +2974,7 @@ void giantTableOfYields(vector< vector<TH1F*> > dem_histos){
     return;
   }
   //Now loop through each background
-  for (int i = 0; i<dem_histos.size(); i++){
+  for (int i = 0; i<dem_histos.size(); i++) {
     TH1F * histo_A = (TH1F*)dem_histos[i][0]->Clone("histo_A"); TH1F * histo_A1 = (TH1F*)dem_histos[i][1]->Clone("histo_A1");
     TH1F * histo_B = (TH1F*)dem_histos[i][2]->Clone("histo_B"); TH1F * histo_B1 = (TH1F*)dem_histos[i][3]->Clone("histo_B1");
     TH1F * histo_C = (TH1F*)dem_histos[i][4]->Clone("histo_C"); TH1F * histo_D = (TH1F*)dem_histos[i][5]->Clone("histo_D");
@@ -2948,7 +2987,7 @@ void giantTableOfYields(vector< vector<TH1F*> > dem_histos){
     double c_int; double c_error;
     double d_int; double d_error;
 
-    if (whichRegion=="signal"){
+    if (whichRegion=="signal") {
       a_int = histo_A->IntegralAndError(1,5,a_error,"");
       a1_int = histo_A1->IntegralAndError(1,5,a1_error,"");
       b_int = histo_B->IntegralAndError(1,5,b_error,"");
@@ -3029,7 +3068,7 @@ void giantTableOfYields(vector< vector<TH1F*> > dem_histos){
   yields.close();
 }
 
-void tableOfFullPred(vector<TH1F*> dem_histos, TString bkgType){
+void tableOfFullPred(vector<TH1F*> dem_histos, TString bkgType) {
   //WARNING: some of these errors are not correct, I think for the MET shape
   TH1F * histo_A = (TH1F*)dem_histos[0]->Clone("histo_A"); TH1F * histo_A1 = (TH1F*)dem_histos[1]->Clone("histo_A1");
   TH1F * histo_B = (TH1F*)dem_histos[2]->Clone("histo_B"); TH1F * histo_B1 = (TH1F*)dem_histos[3]->Clone("histo_B1");
@@ -3044,7 +3083,7 @@ void tableOfFullPred(vector<TH1F*> dem_histos, TString bkgType){
   double c_int; double c_error;
   double d_int; double d_error;
 
-  if (whichRegion=="signal"){
+  if (whichRegion=="signal") {
     a_int = histo_A->IntegralAndError(1,5,a_error,"");
     a1_int = histo_A1->IntegralAndError(1,5,a1_error,"");
     b_int = histo_B->IntegralAndError(1,5,b_error,"");
@@ -3110,7 +3149,7 @@ void tableOfFullPred(vector<TH1F*> dem_histos, TString bkgType){
   yields.close();
 }
 
-void tableOfMETNorm(vector<TH1F*> dem_histos, TString bkgType){
+void tableOfMETNorm(vector<TH1F*> dem_histos, TString bkgType) {
   TH1F * histo_A = (TH1F*)dem_histos[0]->Clone("histo_A"); TH1F * histo_A1 = (TH1F*)dem_histos[1]->Clone("histo_A1");
   TH1F * histo_B = (TH1F*)dem_histos[2]->Clone("histo_B"); TH1F * histo_B1 = (TH1F*)dem_histos[3]->Clone("histo_B1");
   TH1F * histo_CNoCuts = (TH1F*)dem_histos[4]->Clone("histo_CNoCuts");
@@ -3156,7 +3195,7 @@ void tableOfMETNorm(vector<TH1F*> dem_histos, TString bkgType){
 }
 
 
-void pieChart(vector<TH1F*> h_QCD, vector<TH1F*> h_WJets, vector<TH1F*> h_ZJets, vector<TH1F*> h_TTJets,vector<TH1F*> h_SnglT, TString regionLabel, TString bin){
+void pieChart(vector<TH1F*> h_QCD, vector<TH1F*> h_WJets, vector<TH1F*> h_ZJets, vector<TH1F*> h_TTJets,vector<TH1F*> h_SnglT, TString regionLabel, TString bin) {
   TH1F * h_Q = (TH1F*)h_QCD[0]->Clone("h_Q"); for (int i=1;i<h_QCD.size();i++) h_Q->Add(h_QCD[i]);
   TH1F * h_W = (TH1F*)h_WJets[0]->Clone("h_W"); for (int i=1;i<h_WJets.size();i++) h_W->Add(h_WJets[i]);
   TH1F * h_Z = (TH1F*)h_ZJets[0]->Clone("h_Z"); for (int i=1;i<h_ZJets.size();i++) h_Z->Add(h_ZJets[i]);
@@ -3165,28 +3204,28 @@ void pieChart(vector<TH1F*> h_QCD, vector<TH1F*> h_WJets, vector<TH1F*> h_ZJets,
   DrawOverflow(h_Q); DrawOverflow(h_W); DrawOverflow(h_Z); DrawOverflow(h_TT); DrawOverflow(h_T);
 
   double Q_yields;double W_yields;double Z_yields;double TT_yields;double T_yields;
-  if (bin=="all"){
+  if (bin=="all") {
     Q_yields = h_Q->Integral();
     W_yields = h_W->Integral();
     Z_yields = h_Z->Integral();
     TT_yields = h_TT->Integral();
     T_yields = h_T->Integral();
   }
-  else if (bin=="bin1"){
+  else if (bin=="bin1") {
     Q_yields = h_Q->GetBinContent(1);
     W_yields = h_W->GetBinContent(1);
     Z_yields = h_Z->GetBinContent(1);
     TT_yields = h_TT->GetBinContent(1);
     T_yields = h_T->GetBinContent(1);
   }
-  else if (bin=="bin2"){
+  else if (bin=="bin2") {
     Q_yields = h_Q->GetBinContent(2);
     W_yields = h_W->GetBinContent(2);
     Z_yields = h_Z->GetBinContent(2);
     TT_yields = h_TT->GetBinContent(2);
     T_yields = h_T->GetBinContent(2);
   }
-  else if (bin=="bin3"){
+  else if (bin=="bin3") {
     Q_yields = h_Q->GetBinContent(3)+h_Q->GetBinContent(4);
     W_yields = h_W->GetBinContent(3)+h_W->GetBinContent(4);
     Z_yields = h_Z->GetBinContent(3)+h_Z->GetBinContent(4);
@@ -3220,8 +3259,12 @@ void pieChart(vector<TH1F*> h_QCD, vector<TH1F*> h_WJets, vector<TH1F*> h_ZJets,
   TString savename = whichRegion+"_"+regionLabel+"_"+binDef;
   cdPie->cd();
   can_h->Write(savename);
+
+  bool isForSupp = false;
+  if (regionLabel=="2HSR" || regionLabel=="2HSB" || regionLabel=="1HSR" || regionLabel=="1HSB" || regionLabel=="0HSR" || regionLabel=="0HSB" || regionLabel=="0Hb") isForSupp=true;
+  if (bin=="all" && isForSupp) can_h->SaveAs(outDIR+"Figure-aux_013_pie_"+regionLabel+".pdf","PDF");
   if (savePDFs && whichRegion=="signal") can_h->SaveAs("boostedFigures/"+whichRegion+"/pies/pie_"+regionLabel+"_"+binDef+".pdf","PDF");
-  if (regionLabel=="2H" && bin=="all") {
+  if ( bin=="all" && (regionLabel=="2H" || isForSupp) ) {
     TCanvas * can2 = new TCanvas("PieChartLegend","PieChartLegend", 50, 50, 1200, 1200);
     TLegend *leg = pie1->MakeLegend();
     leg->SetBorderSize(0);
@@ -3233,28 +3276,28 @@ void pieChart(vector<TH1F*> h_QCD, vector<TH1F*> h_WJets, vector<TH1F*> h_ZJets,
   delete pie1; delete can_h;
 }
 
-void pieChart1l(vector<TH1F*> h_WJets, vector<TH1F*> h_TTJets, vector<TH1F*> h_SnglT, TString regionLabel, TString bin){
+void pieChart1l(vector<TH1F*> h_WJets, vector<TH1F*> h_TTJets, vector<TH1F*> h_SnglT, TString regionLabel, TString bin) {
   TH1F * h_W = (TH1F*)h_WJets[0]->Clone("h_W"); for (int i=1;i<h_WJets.size();i++) h_W->Add(h_WJets[i]);
   TH1F * h_TT = (TH1F*)h_TTJets[0]->Clone("h_TT");  for (int i=1;i<h_TTJets.size();i++) h_TT->Add(h_TTJets[i]);
   TH1F * h_T = (TH1F*)h_SnglT[0]->Clone("h_T");  for (int i=1;i<h_SnglT.size();i++) h_T->Add(h_SnglT[i]);
   DrawOverflow(h_W); DrawOverflow(h_TT); DrawOverflow(h_T);
   double W_yields;double TT_yields;double T_yields;
-  if (bin=="all"){
+  if (bin=="all") {
     W_yields = h_W->Integral();
     TT_yields = h_TT->Integral();
     T_yields = h_T->Integral();
   }
-  else if (bin=="bin1"){
+  else if (bin=="bin1") {
     W_yields = h_W->GetBinContent(1);
     TT_yields = h_TT->GetBinContent(1);
     T_yields = h_T->GetBinContent(1);
   }
-  else if (bin=="bin2"){
+  else if (bin=="bin2") {
     W_yields = h_W->GetBinContent(2);
     TT_yields = h_TT->GetBinContent(2);
     T_yields = h_T->GetBinContent(2);
   }
-  else if (bin=="bin3"){
+  else if (bin=="bin3") {
     W_yields = h_W->GetBinContent(3)+h_W->GetBinContent(4);
     TT_yields = h_TT->GetBinContent(3)+h_TT->GetBinContent(4);
     T_yields = h_T->GetBinContent(3)+h_T->GetBinContent(4);
@@ -3287,7 +3330,7 @@ void pieChart1l(vector<TH1F*> h_WJets, vector<TH1F*> h_TTJets, vector<TH1F*> h_S
   can_h->Write(savename);
   if (savePDFs) can_h->SaveAs("boostedFigures/"+whichRegion+"/pies/pie_"+regionLabel+"_"+binDef+".pdf","PDF");
 
-  if (regionLabel=="2H" && bin=="all"){
+  if (regionLabel=="2H" && bin=="all") {
     TLegend *leg = pie1->MakeLegend();
     TCanvas * can2 = new TCanvas("PieChartLegend","PieChartLegend", 50, 50, 1200, 1200);
     leg->SetBorderSize(0);
@@ -3300,24 +3343,24 @@ void pieChart1l(vector<TH1F*> h_WJets, vector<TH1F*> h_TTJets, vector<TH1F*> h_S
   delete pie1;delete can_h;
 }
 
-void pieChartPhoton(vector<TH1F*> h_GJets, vector<TH1F*> h_QCD,  TString regionLabel, TString bin){
+void pieChartPhoton(vector<TH1F*> h_GJets, vector<TH1F*> h_QCD,  TString regionLabel, TString bin) {
   TH1F * h_G = (TH1F*)h_GJets[0]->Clone("h_G"); for (int i=1;i<h_GJets.size();i++) h_G->Add(h_GJets[i]);
   TH1F * h_Q = (TH1F*)h_QCD[0]->Clone("h_Q");  for (int i=1;i<h_QCD.size();i++) h_Q->Add(h_QCD[i]);
   DrawOverflow(h_G); DrawOverflow(h_Q);
   double G_yields;double Q_yields;
-  if (bin=="all"){
+  if (bin=="all") {
     G_yields = h_G->Integral();
     Q_yields = h_Q->Integral();
   }
-  else if (bin=="bin1"){
+  else if (bin=="bin1") {
     G_yields = h_G->GetBinContent(1);
     Q_yields = h_Q->GetBinContent(1);
   }
-  else if (bin=="bin2"){
+  else if (bin=="bin2") {
     G_yields = h_G->GetBinContent(2);
     Q_yields = h_Q->GetBinContent(2);
   }
-  else if (bin=="bin3"){
+  else if (bin=="bin3") {
     G_yields = h_G->GetBinContent(3)+h_G->GetBinContent(4);
     Q_yields = h_Q->GetBinContent(3)+h_Q->GetBinContent(4);
   }
@@ -3337,7 +3380,7 @@ void pieChartPhoton(vector<TH1F*> h_GJets, vector<TH1F*> h_QCD,  TString regionL
   else if (bin=="bin2")binDef = "MET500to700";
   else if (bin=="bin3")binDef = "MET700up";
   TString pieName = yieldsFileName + ": " + binDef;
-  if (G_yields+Q_yields>0){
+  if (G_yields+Q_yields>0) {
     TPie *pie1 = new TPie("pie1", "",nvals,vals,colors, labels);
     pie1->SetAngularOffset(145.);
     pie1->SetCircle(0.5,0.5,0.3);
@@ -3350,7 +3393,7 @@ void pieChartPhoton(vector<TH1F*> h_GJets, vector<TH1F*> h_QCD,  TString regionL
     can_h->Write(savename);
     if (savePDFs) can_h->SaveAs("boostedFigures/"+whichRegion+"/pies/pie_"+regionLabel+"_"+binDef+".pdf","PDF");
 
-    if (regionLabel=="2H" && bin=="all"){
+    if (regionLabel=="2H" && bin=="all") {
       TLegend *leg = pie1->MakeLegend();
       TCanvas * can2 = new TCanvas("PieChartLegend","PieChartLegend", 50, 50, 1200, 1200);
       leg->SetBorderSize(0);
@@ -3372,6 +3415,7 @@ TH1F* make0EventUncSum(vector<TH1F*> dem_histos) {
   TH1F * h_ZJets = (TH1F*)dem_histos[3]->Clone("h_ZJets");
   TH1F * h_SnglT = (TH1F*)dem_histos[4]->Clone("h_SnglT");
 
+  // h_ZJets->Scale(0.5);
   TH1F *h_sum = (TH1F*)h_QCD->Clone("h_sum");
   h_sum->Add(h_TT); h_sum->Add(h_WJets);
   h_sum->Add(h_ZJets); h_sum->Add(h_SnglT);
@@ -3400,7 +3444,7 @@ TH1F *make0EventUncSum_1l(vector<TH1F*> dem_histos) {
   return h_sum;
 }
 
-void styleCanvas(TCanvas * can_h){
+void styleCanvas(TCanvas * can_h) {
   can_h->SetFillColor(0); can_h->SetBorderMode(0);
   can_h->SetFrameFillStyle(0); can_h->SetFrameBorderMode(0);
   can_h->SetLeftMargin( L/W ); can_h->SetRightMargin( R/W );
@@ -3408,7 +3452,7 @@ void styleCanvas(TCanvas * can_h){
   can_h->SetTickx(0); can_h->SetTicky(0);
 }
 
-void addLumiCanv(TCanvas * &can_h){
+void addLumiCanv(TCanvas * &can_h) {
   TLatex ltitle(0.17, 1.-0.5*can_h->GetTopMargin()-0.08, "#font[62]{CMS}");
   TLatex ltitle_prelim(0.17, 1.-0.5*can_h->GetTopMargin()-0.14, "#scale[0.76]{#font[52]{ Preliminary}}");
   TLatex rtitle(0.94, 1.-0.5*can_h->GetTopMargin()+0.003, "#scale[0.98]{137 fb^{-1} (13 TeV)}");
@@ -3418,7 +3462,7 @@ void addLumiCanv(TCanvas * &can_h){
   ltitle.Draw("same"); rtitle.Draw("same"); ltitle_prelim.Draw("same");
 }
 
-void DrawOverflow(TH1F* &h){
+void DrawOverflow(TH1F* &h) {
   int lastBin = h->GetNbinsX();
   double lastBinError = sqrt(h->GetBinError(lastBin)*h->GetBinError(lastBin) + h->GetBinError(lastBin+1)*h->GetBinError(lastBin+1));
   double lastBinContent = h->GetBinContent(lastBin)+h->GetBinContent(lastBin+1);
@@ -3428,8 +3472,8 @@ void DrawOverflow(TH1F* &h){
   h->SetBinError(lastBin+1, 0.0);
 }
 
-void massCorrelations(vector<TH1F*> dem_histos,vector<TH1F*> dem_histos_data, TString bkgType){
-  bool runDataHere = false;
+void massCorrelations(vector<TH1F*> dem_histos,vector<TH1F*> dem_histos_data, TString bkgType) {
+  bool runDataHere = false; //paper is MC only
   gStyle->SetTextFont(52);
   TH1F *histo_A = (TH1F*)dem_histos[0]->Clone("histo_A"); TH1F *histo_A1 = (TH1F*)dem_histos[1]->Clone("histo_A1");
   TH1F *histo_B = (TH1F*)dem_histos[2]->Clone("histo_B"); TH1F *histo_B1 = (TH1F*)dem_histos[3]->Clone("histo_B1");
@@ -3540,9 +3584,12 @@ void massCorrelations(vector<TH1F*> dem_histos,vector<TH1F*> dem_histos_data, TS
 
   cdOther->cd();
   can_h->Write("massCorr");
-  can_h->SaveAs(outDIR+"nH_MConly.pdf","PDF");
-  ltitle_prelim.Draw("same");
-  can_h->SaveAs(outDIR+"nH_MConly_prelim.pdf","PDF");
+  can_h->SaveAs(outDIR+"Figure_006-a.pdf","PDF");
+
+
+  // can_h->SaveAs(outDIR+"nH_MConly.pdf","PDF");
+  // ltitle_prelim.Draw("same");
+  // can_h->SaveAs(outDIR+"nH_MConly_prelim.pdf","PDF");
 }
 
 void makeMCvDataComp(TH1F* h_MC_orig, TH1F* h_data_orig, TString region, TString type) {
@@ -3591,7 +3638,7 @@ void makeMCvDataComp(TH1F* h_MC_orig, TH1F* h_data_orig, TString region, TString
   pad2->Draw();
   pad1->cd();
 
-  if (h_MC->GetMaximum()>h_data->GetMaximum()){
+  if (h_MC->GetMaximum()>h_data->GetMaximum()) {
     h_MC->GetXaxis()->SetLabelSize(0); h_MC->GetXaxis()->SetTitleSize(0);
     h_MC->GetYaxis()->SetLabelSize(0.055); h_MC->GetYaxis()->SetTitleSize(0.07); h_MC->GetYaxis()->SetTitleOffset(0.65);
     h_MC->SetMaximum(h_MC->GetMaximum()*1.2);
@@ -3670,7 +3717,7 @@ void makeMCvDataComp(TH1F* h_MC_orig, TH1F* h_data_orig, TString region, TString
   if (savePDFs)  can_h->SaveAs("boostedFigures/"+whichRegion+"/dataVsMC/"+savename+".pdf","PDF");
 }
 
-void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_orig,TH1F* h_sig1_orig,TH1F* h_sig2_orig, TString region, TString type, bool save){
+void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_orig,TH1F* h_sig1_orig,TH1F* h_sig2_orig, TString region, TString type, bool drawData) {
   //Vector length: 5(0l), 3(1l), 2(photon)
   THStack * MCstack = new THStack("hs","");
   TString graphName = region+"_"+type;
@@ -3678,8 +3725,6 @@ void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_
   styleCanvas(can_h);
   TLegend* legend = new TLegend(0.36,0.7,0.9,0.9);
 
-  // float bins[]={300.0,350.0,400.0,450.0,500.0,600.0,700.0,900.0,1400.0};
-  // int binnum=8;
 
   TH1F * h_sig1; TH1F * h_sig2; TH1F * h_data; TH1F * h_MC_sum;
   h_sig1 =(TH1F*)h_sig1_orig->Clone("h_sig1"); h_sig2 =(TH1F*)h_sig2_orig->Clone("h_sig2");
@@ -3715,7 +3760,7 @@ void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_
   bool doRatioPanel = true;
   TPad *pad1 = new TPad("pad1", "top pad" , 0.0, 0.3, 1.0, 1.0);
   TPad *pad2 = new TPad("pad2", "bottom pad", 0.0, 0.0, 1.0, 0.3);
-  if (doRatioPanel){
+  if (doRatioPanel && drawData) {
     pad1->SetTickx(0); pad1->SetTicky(0);
     pad1->SetPad(0., 0., 1., 1.);
     pad1->SetFrameFillColor(0); pad1->SetFillColor(0);
@@ -3734,7 +3779,7 @@ void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_
   }
 
   float scaleMCtoData = h_data_orig->Integral()/h_MC_sum_orig->Integral();
-  h_MC_sum->Scale(scaleMCtoData);
+  if (drawData) h_MC_sum->Scale(scaleMCtoData);
   TGraphAsymmErrors * graph = new TGraphAsymmErrors(h_data, h_MC_sum, "pois");
   graph->SetLineColor(kBlack); graph->SetMarkerColor(kBlack);
   graph->SetTitle(";p_{T}^{miss} [GeV]; #frac{Data}{MC}");
@@ -3743,11 +3788,11 @@ void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_
   TH1F * graph_histo = (TH1F*)h_data->Clone("graph_histo");graph_histo->Divide(h_MC_sum);
   graph_histo->SetLineColor(kBlack); graph_histo->SetMarkerColor(kBlack); graph_histo->SetMarkerStyle(20);
   graph_histo->SetTitle(";p_{T}^{miss} [GeV]; #frac{Data}{MC}");
-  h_MC_sum->Scale(1.0/scaleMCtoData);
+  if (drawData) h_MC_sum->Scale(1.0/scaleMCtoData);
 
   TH1F *h_ZJets; TH1F *h_WJets; TH1F *h_QCD; TH1F *h_TT; TH1F *h_SnglT; TH1F *h_GJets;
 
-  if (h_MC.size()==5){ //0l, ZJets, WJets, QCD, TT, SnglT
+  if (h_MC.size()==5) { //0l, ZJets, WJets, QCD, TT, SnglT
     h_ZJets = (TH1F*)h_MC[0]->Clone("h_ZJets");
     h_WJets = (TH1F*)h_MC[1]->Clone("h_WJets");
     h_QCD = (TH1F*)h_MC[2]->Clone("h_QCD");
@@ -3786,12 +3831,14 @@ void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_
       h_SnglT->SetBinContent(startBin, h_SnglT->GetBinContent(startBin)/2.0); h_SnglT->SetBinContent(startBin+1, h_SnglT->GetBinContent(startBin+1)/2.0);
       h_SnglT->SetBinContent(startBin+2, h_SnglT->GetBinContent(startBin+2)/4.0); h_SnglT->SetBinContent(startBin+3, h_SnglT->GetBinContent(startBin+3)/10.0);
     }
-    h_QCD->Scale(scaleMCtoData); h_SnglT->Scale(scaleMCtoData); h_WJets->Scale(scaleMCtoData);
-    h_TT->Scale(scaleMCtoData); h_ZJets->Scale(scaleMCtoData);
+    if (drawData) {
+      h_QCD->Scale(scaleMCtoData); h_SnglT->Scale(scaleMCtoData); h_WJets->Scale(scaleMCtoData);
+      h_TT->Scale(scaleMCtoData); h_ZJets->Scale(scaleMCtoData);
+    }
 
     MCstack->Add(h_SnglT); MCstack->Add(h_QCD);  MCstack->Add(h_WJets);
     MCstack->Add(h_ZJets); MCstack->Add(h_TT);
-    h_MC_sum->Scale(scaleMCtoData);
+    if (drawData) h_MC_sum->Scale(scaleMCtoData);
 
     std::string scaleString = to_string(scaleMCtoData);
   }
@@ -3825,7 +3872,7 @@ void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_
   }
   else std::cout<<"Length of histogram vector incorrect!! No MC stack will be produced!"<<std::endl;
 
-  legend->AddEntry(h_data, "Data", "lep");
+  if (drawData) legend->AddEntry(h_data, "Data", "lep");
   legend->AddEntry(h_QCD, "QCD", "f");
   legend->AddEntry(h_TT, "t#bar{t}+X", "f");
   legend->AddEntry(h_SnglT, "Other", "f");
@@ -3840,7 +3887,7 @@ void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_
   MCstack->GetXaxis()->SetRangeUser(300.0,1400.0);
   MCstack->Draw("hist");
 
-  if (!doRatioPanel){
+  if (!doRatioPanel) {
     h_data->GetXaxis()->SetLabelSize(0.04); h_data->GetXaxis()->SetTitleSize(0.06); h_data->GetXaxis()->SetTitleOffset(0.9);
     MCstack->GetXaxis()->SetLabelSize(0.04); MCstack->GetXaxis()->SetTitleSize(0.06); MCstack->GetXaxis()->SetTitleOffset(0.9);
     if (type=="MET") {
@@ -3900,14 +3947,8 @@ void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_
     if (region=="baseline") h_MC_sum->GetYaxis()->SetRangeUser(4E0,4E4);
     else h_MC_sum->SetMaximum(thisMax*2.5);
   }
-  else if (type=="METother") {
-    // h_MC_sum->SetMaximum(thisMax*2.5);
-    h_MC_sum->GetYaxis()->SetRangeUser(1E-1,1E4);
-
-  }
-  else if (type=="METall") {
-    h_MC_sum->GetYaxis()->SetRangeUser(1E-1,6E4);
-  }
+  else if (type=="METother") h_MC_sum->GetYaxis()->SetRangeUser(1E-1,1E4);
+  else if (type=="METall") h_MC_sum->GetYaxis()->SetRangeUser(1E-1,6E4);
   else if (type=="jbb" || type=="j1bb" || type=="j2bb") h_MC_sum->SetMaximum(thisMax*10.5);
   else if (type=="j1m" || type=="j2m") h_MC_sum->SetMaximum(thisMax*1.6);
   else if (type=="jm" && region=="baseline") h_MC_sum->SetMaximum(thisMax*1.6);
@@ -3919,14 +3960,14 @@ void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_
 
   h_MC_sum->Draw("E2");
   MCstack->Draw("hist same");
-  h_data->Draw("E0 same");
+  if (drawData) h_data->Draw("E0 same");
   h_sig1->Draw("hist same"); h_sig2->Draw("hist same");
   gPad->RedrawAxis();
 
   if (type=="MET" || type=="METall" || type=="METother" || type=="jbb" || type=="j1bb" || type=="j2bb") gPad->SetLogy();
   can_h->Update();can_h->Modified();
 
-  if (doRatioPanel){
+  if (doRatioPanel && drawData) {
     pad2->cd();
     graph->Draw("APE");
     //Now change everything about this graph
@@ -4031,11 +4072,10 @@ void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_
 
   TLatex regionLabel(0.75, 0.65, region);
   regionLabel.SetNDC(); regionLabel.SetTextAlign(12); regionLabel.SetTextFont(42); regionLabel.SetTextSize(0.06);
-  if (region!="baseline") regionLabel.Draw("same");
+  if (region!="baseline" && region!="2HSR" && region!="1HSR") regionLabel.Draw("same");
 
   TLatex suppLabel(0.16, 0.82, "Supplementary");
   suppLabel.SetNDC(); suppLabel.SetTextFont(extraTextFont); suppLabel.SetTextSize(0.03);
-  // suppLabel.Draw("same");
 
   //Draw lines for signal region
   if (type=="jm" || type=="j1m" || type=="j2m") {
@@ -4073,12 +4113,38 @@ void makeMCStackvDataComp(vector<TH1F*> h_MC, TH1F* h_MC_sum_orig, TH1F* h_data_
   TString savename = "DatavMC_"+type+"_"+region;
   if (type=="METall" || type=="METother") savename = "DatavMC_MET_"+region;
   can_h->Write(savename);
-  can_h->SaveAs(outDIR+savename+".pdf","PDF");
-  latex.DrawLatex(0.30, 0.82, extraText);
-  can_h->SaveAs(outDIR+savename+"_prelim.pdf","PDF");
+
+  if (region=="baseline") {
+    if (type=="METall") can_h->SaveAs(outDIR+"Figure_003-a.pdf","PDF");
+    else if (type=="jpt") can_h->SaveAs(outDIR+"Figure_003-b.pdf","PDF");
+    else if (type=="jbb") can_h->SaveAs(outDIR+"Figure_003-c.pdf","PDF");
+    else if (type=="jm") can_h->SaveAs(outDIR+"Figure_003-d.pdf","PDF");
+
+    else if (type=="j1pt") can_h->SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_015-a.pdf","PDF");
+    else if (type=="j2pt") can_h->SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_015-b.pdf","PDF");
+    else if (type=="j1bb") can_h->SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_015-c.pdf","PDF");
+    else if (type=="j2bb") can_h->SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_015-d.pdf","PDF");
+    else if (type=="j1m") can_h->SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_015-e.pdf","PDF");
+    else if (type=="j2m") can_h->SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_015-f.pdf","PDF");
+
+  }
+  else if (region=="0H" && type=="jm") can_h->SaveAs(outDIR+"Figure_009-a.pdf","PDF");
+  else if (region=="1H" && type=="jm") can_h->SaveAs(outDIR+"Figure_009-c.pdf","PDF");
+  else if (region=="2H" && type=="jm") can_h->SaveAs(outDIR+"Figure_009-e.pdf","PDF");
+  else if (region=="1HSR" && type=="MET") {
+    suppLabel.Draw("same");
+    can_h->SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_014-a.pdf","PDF");
+  }
+  else if (region=="2HSR" && type=="MET") {
+    suppLabel.Draw("same");
+    can_h->SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_014-b.pdf","PDF");
+  }
+  else can_h->SaveAs(outDIR+savename+".pdf","PDF");
+  // latex.DrawLatex(0.30, 0.82, extraText);
+  // can_h->SaveAs(outDIR+savename+"_prelim.pdf","PDF");
 }
 
-void justBB(TH1F* h_bkgOrig, TH1F* h_sigOrig, TString bkgType, TString sigType, TString sigMass){
+void justBB(TH1F* h_bkgOrig, TH1F* h_sigOrig, TString bkgType, TString sigType, TString sigMass) {
   TH1F* h_bkg = (TH1F*)h_bkgOrig->Clone("h_bkg");
   TH1F* h_sig = (TH1F*)h_sigOrig->Clone("h_sig");
   h_bkg->SetLineColor(kBlack); h_bkg->SetFillColor(0); h_bkg->SetLineWidth(3);
@@ -4130,19 +4196,11 @@ void mass2D_plane(TString region) {
   gStyle->SetTextFont(52);
   TLegend l(0.18,0.72,0.48,0.85);
 
-  // Double_t red[9]   = { 0.6, 0.5333, 0.5176, 0.5529, 0.6627, 0.8039, 0.9216, 0.9922, 0.9843};
-  // Double_t green[9] = { 0.5804, 0.7333, 0.7922, 0.8353, 0.8588, 0.8667, 0.8667, 0.8980, 0.9843};
-  // Double_t blue[9]  = { 0.7569, 0.9176, 0.8980, 0.8471, 0.7765, 0.7098, 0.6549, 0.588, 0.5255};
-  Double_t stops[9] = { 0.00000, 0.1250, 0.2500, 0.3750, 0.5000, 0.6250, 0.7500, 0.8750, 1.0000}; //original and even
-
-
-  //Try to make green brighter
+  //My unique color palette
   Double_t red[9]   = { 0.6000, 0.5333, 0.5020, 0.5451, 0.5608, 0.7137,   0.8275, 0.9843,  0.9294};
   Double_t green[9] = { 0.5804, 0.7333, 0.8275, 0.8941, 0.9216, 0.9294,   0.9294, 0.9843,  0.8667};
   Double_t blue[9]  = { 0.7569, 0.9176, 0.9490, 0.9098, 0.7098, 0.5490,   0.5490, 0.5255,  0.5490};
-
-
-  // Double_t stops[9] = { 0.00000, 0.025, 0.035, 0.04, 0.06, 0.10, 0.15, 0.25, 1.0000};
+  Double_t stops[9] = { 0.00000, 0.1250, 0.2500, 0.3750, 0.5000, 0.6250, 0.7500, 0.8750, 1.0000}; //original and even
   Int_t nb=255;
   TColor::CreateGradientColorTable(9, stops, red, green, blue, nb, 1.0);
   int numCont = 50;
@@ -4240,7 +4298,6 @@ void mass2D_plane(TString region) {
   l.Draw("same");
 
   TLatex ltitle_prelim(0.26, 0.943, "#scale[0.76]{#font[52]{ Preliminary}}");
-  // TLatex ltitle(0.16, 0.948, "#font[62]{CMS}");
   TLatex ltitle(0.18, 0.888, "#font[62]{CMS}");
   TLatex rtitle(0.85, 0.948, "#scale[0.8]{137 fb^{-1} (13 TeV)}");
   rtitle.SetTextFont(42);
@@ -4264,11 +4321,14 @@ void mass2D_plane(TString region) {
   line3->Draw("same"); line4->Draw("same");
 
 
-  TString saveName = outDIR+"j1vj2M_"+region;
-  // c->SaveAs(saveName+".png");
-  c->SaveAs(saveName+".pdf","PDF");
-  ltitle_prelim.Draw("same");
-  c->SaveAs(saveName+"_prelim.pdf","PDF");
+  if (region=="0H") c->SaveAs(outDIR+"Figure_009-b.pdf","PDF");
+  else if (region=="1H") c->SaveAs(outDIR+"Figure_009-d.pdf","PDF");
+  else if (region=="2H") c->SaveAs(outDIR+"Figure_009-f.pdf","PDF");
+
+  // TString saveName = outDIR+"j1vj2M_"+region;
+  // c->SaveAs(saveName+".pdf","PDF");
+  // ltitle_prelim.Draw("same");
+  // c->SaveAs(saveName+"_prelim.pdf","PDF");
   delete c;
   f0->Close(); f1->Close(); f2->Close();
 }
@@ -4281,9 +4341,9 @@ void runMass2D() {
 }
 
 void compareSignals(TString type, TString reg) {
-  TFile * f1 = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/boosted_noVeto_FastSIMSFs/ALPHABET_1DSignal.root");
-  TFile * f1_MET = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/moreMETbins/ALPHABET_all_forMoreMET_resVeto.root");
-  TFile * f2 = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/TChiHH_onlyHbb/ALPHABET_1DSignal_Hbb.root");
+  // TFile * f1 = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/boosted_noVeto_FastSIMSFs/ALPHABET_1DSignal.root");
+  // TFile * f1_MET = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/moreMETbins/ALPHABET_all_forMoreMET_resVeto.root");
+  // TFile * f2 = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/TChiHH_onlyHbb/ALPHABET_1DSignal_Hbb.root");
 
   // TFile * f1 = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/boosted_noVeto_FastSIMSFs/ALPHABET_1DSignal_2016only.root");
   // TFile * f1_MET = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/moreMETbins/ALPHABET_1DSignal_2016only.root");
@@ -4293,7 +4353,10 @@ void compareSignals(TString type, TString reg) {
   // TFile * f1_MET = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/moreMETbins/ALPHABET_1DSignal_1718.root");
   // TFile * f2 = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/TChiHH_onlyHbb/ALPHABET_1DSignal_1718.root");
 
-  TH1F * h_sigOrig; TH1F * h_sigNew;
+  TFile * f1 = TFile::Open("/eos/uscms/store/user/emacdona/boostedHiggsPlusMET/testing_mN2_T5HH/ALPHABET_1DSignalExtra.root");
+
+
+  TH1F * h_sigOrig; TH1F * h_sigNew1; TH1F * h_sigNew2; TH1F * h_sigNew3; TH1F * h_sigNew4; TH1F * h_sigNew5;
 
   TString region = "baseline";
   if (reg=="2HSR") region = "doubletagSR";
@@ -4308,20 +4371,46 @@ void compareSignals(TString type, TString reg) {
   else if (type=="j2m") histoType = "J2pt_M";
   else if (type=="j1bb") histoType = "LeadDeepBBTag";
   else if (type=="j2bb") histoType = "SubLeadDeepBBTag";
+  else if (type=="nak8") histoType = "numAK8";
+  else if (type=="nak4") histoType = "numAK4";
+  else if (type=="ngen") histoType = "numGenH";
 
-  TString histoName = histoType+"_"+region+"_TChiHH500_LSP1";
-  if (type!="METall") h_sigOrig = (TH1F*)f1->Get(histoName);
-  else h_sigOrig = (TH1F*)f1_MET->Get(histoName);
-  h_sigNew = (TH1F*)f2->Get(histoName);
+
+
+  TString histoName = histoType+"_"+region+"_T5HH1400_LSP1350";
+  h_sigOrig = (TH1F*)f1->Get(histoName);
+  TString histoName1 = histoType+"_"+region+"_T5HH1400_LSP1300";
+  TString histoName2 = histoType+"_"+region+"_T5HH1400_LSP1250";
+  TString histoName3 = histoType+"_"+region+"_T5HH1400_LSP1200";
+  TString histoName4 = histoType+"_"+region+"_T5HH1400_LSP1150";
+  TString histoName5 = histoType+"_"+region+"_T5HH2000_LSP200";
+
+  h_sigNew1 = (TH1F*)f1->Get(histoName1);
+  h_sigNew2 = (TH1F*)f1->Get(histoName2);
+  h_sigNew3 = (TH1F*)f1->Get(histoName3);
+  h_sigNew4 = (TH1F*)f1->Get(histoName4);
+  h_sigNew5 = (TH1F*)f1->Get(histoName5);
 
 
   //Now make pretty
   h_sigOrig->SetLineColor(kBlack); h_sigOrig->SetMarkerStyle(20); h_sigOrig->SetMarkerSize(1.0); h_sigOrig->SetMarkerColor(kBlack);
-  h_sigNew->SetLineColor(kRed); h_sigNew->SetMarkerStyle(20); h_sigNew->SetMarkerSize(1.0); h_sigNew->SetMarkerColor(kRed);
-  h_sigOrig->SetStats(0); h_sigNew->SetStats(0);
+  h_sigOrig->SetStats(0);
   if (type=="METall") h_sigOrig->GetXaxis()->SetRangeUser(300.0,1400.0);
   else if (type=="HT") h_sigOrig->GetXaxis()->SetRangeUser(600.0,3000.0);
-  if (type=="j1pt" || type=="j2pt") {h_sigOrig->Rebin(2);h_sigNew->Rebin(2);}
+  if (type=="j1pt" || type=="j2pt") {
+    h_sigOrig->Rebin(2); h_sigNew1->Rebin(2); h_sigNew2->Rebin(2);
+    h_sigNew3->Rebin(2); h_sigNew4->Rebin(2); h_sigNew5->Rebin(2);
+  }
+
+
+  h_sigNew1->SetLineColor(kRed); h_sigNew1->SetMarkerStyle(20); h_sigNew1->SetMarkerSize(1.0); h_sigNew1->SetMarkerColor(kRed);
+  h_sigNew2->SetLineColor(kBlue); h_sigNew2->SetMarkerStyle(20); h_sigNew2->SetMarkerSize(1.0); h_sigNew2->SetMarkerColor(kBlue);
+  h_sigNew3->SetLineColor(kGreen); h_sigNew3->SetMarkerStyle(20); h_sigNew3->SetMarkerSize(1.0); h_sigNew3->SetMarkerColor(kGreen);
+  h_sigNew4->SetLineColor(kMagenta); h_sigNew4->SetMarkerStyle(20); h_sigNew4->SetMarkerSize(1.0); h_sigNew4->SetMarkerColor(kMagenta);
+  h_sigNew5->SetLineColor(kCyan); h_sigNew5->SetMarkerStyle(20); h_sigNew5->SetMarkerSize(1.0); h_sigNew5->SetMarkerColor(kCyan);
+
+  h_sigNew1->SetStats(0); h_sigNew2->SetStats(0); h_sigNew3->SetStats(0); h_sigNew4->SetStats(0); h_sigNew5->SetStats(0);
+
 
   TString xAxisName = "MET [GeV]";
   if (type=="HT") xAxisName = "HT [GeV]";
@@ -4331,6 +4420,9 @@ void compareSignals(TString type, TString reg) {
   else if (type=="j2m") xAxisName = "Subleading jet mass [GeV]";
   else if (type=="j1bb") xAxisName = "Leading jet D_{bb}";
   else if (type=="j2bb") xAxisName = "Subleading jet D_{bb}";
+  else if (type=="nak8") xAxisName = "Number AK8 jets with p_{T} > 300 GeV";
+  else if (type=="nak4") xAxisName = "Number AK4 jets with p_{T} > 30 GeV";
+  else if (type=="ngen") xAxisName = "Number gen-matched H jets that are lead or sublead AK8";
   h_sigOrig->SetTitle("");
   h_sigOrig->GetXaxis()->SetTitle(xAxisName);
   h_sigOrig->GetYaxis()->SetTitle("Events");
@@ -4341,49 +4433,107 @@ void compareSignals(TString type, TString reg) {
   else {legend = new TLegend(0.45,0.65,0.85,0.85); legend2 = new TLegend(0.5,0.65,0.9,0.85);}
   legend->SetBorderSize(0);
   legend->SetTextSize(0.04);
-  legend->AddEntry(h_sigOrig,"Original","lp");
-  legend->AddEntry(h_sigNew,"New, H #rightarrow bb only","lp");
+  // legend->AddEntry(h_sigOrig,"(2000,1950,1)","lp");
+  // legend->AddEntry(h_sigNew1,"(2000,1800,1)","lp");
+  // legend->AddEntry(h_sigNew2,"(2000,1400,1)","lp");
+  // legend->AddEntry(h_sigNew3,"(2000,1000,1)","lp");
+  // legend->AddEntry(h_sigNew4,"(2000,600,1)","lp");
+  // legend->AddEntry(h_sigNew5,"(2000,200,1)","lp");
+  legend->AddEntry(h_sigOrig,"(1400,1350,1000)","lp");
+  legend->AddEntry(h_sigNew1,"(1400,1300,1000)","lp");
+  legend->AddEntry(h_sigNew2,"(1400,1250,1000)","lp");
+  legend->AddEntry(h_sigNew3,"(1400,1200,1000)","lp");
+  legend->AddEntry(h_sigNew4,"(1400,1150,1000)","lp");
 
   legend2->SetBorderSize(0);
   legend2->SetTextSize(0.04);
-  legend2->AddEntry(h_sigOrig,"Original","lp");
-  legend2->AddEntry(h_sigNew,"New, H #rightarrow bb only","lp");
+  // legend2->AddEntry(h_sigOrig,"(2000,1950,1)","lp");
+  // legend2->AddEntry(h_sigNew1,"(2000,1800,1)","lp");
+  // legend2->AddEntry(h_sigNew2,"(2000,1400,1)","lp");
+  // legend2->AddEntry(h_sigNew3,"(2000,1000,1)","lp");
+  // legend2->AddEntry(h_sigNew4,"(2000,600,1)","lp");
+  // legend2->AddEntry(h_sigNew5,"(2000,200,1)","lp");
+  legend2->AddEntry(h_sigOrig,"(1400,1350,1000)","lp");
+  legend2->AddEntry(h_sigNew1,"(1400,1300,1000)","lp");
+  legend2->AddEntry(h_sigNew2,"(1400,1250,1000)","lp");
+  legend2->AddEntry(h_sigNew3,"(1400,1200,1000)","lp");
+  legend2->AddEntry(h_sigNew4,"(1400,1150,1000)","lp");
 
-  TCanvas *c = new TCanvas("can","can", 1600, 800);
-  c->SetMargin(0.1, 0.06, 0.11, 0.07);
-  c->Divide(2,1,0,0); c->cd(1);
-  gPad->SetRightMargin(0.12);
-  gPad->SetTopMargin(0.005);
-  h_sigOrig->Draw("lp");
-  h_sigNew->Draw("lp same");
-  legend->Draw("same");
+  // TCanvas *c = new TCanvas("can","can", 1600, 800);
+  TCanvas *c = new TCanvas("can","can", 800, 800);
+  c->SetMargin(0.15, 0.06, 0.11, 0.07);
+  // c->Divide(2,1,0,0); c->cd(1);
+  // gPad->SetRightMargin(0.12);
+  // gPad->SetTopMargin(0.005);
+  // h_sigOrig->Draw("lp");
+  // h_sigNew1->Draw("lp same");
+  // h_sigNew2->Draw("lp same");
+  // h_sigNew3->Draw("lp same");
+  // h_sigNew4->Draw("lp same");
+  // h_sigNew5->Draw("lp same");
+  // legend->Draw("same");
 
-  c->cd(2);
-  gPad->SetLeftMargin(0.12);
-  gPad->SetRightMargin(0.03);
-  gPad->SetTopMargin(0.005);
+  // c->cd(2);
+  // gPad->SetLeftMargin(0.12);
+  // gPad->SetRightMargin(0.03);
+  // gPad->SetTopMargin(0.005);
   TH1F* h_sigOrigClone = (TH1F*)h_sigOrig->Clone("h_sigOrigClone");
   h_sigOrigClone->GetYaxis()->SetTitle("Events (normalized)");
   h_sigOrigClone->GetYaxis()->SetTitleOffset(1.2);
-  h_sigOrigClone->DrawNormalized("lp");
-  h_sigNew->DrawNormalized("lp same");
-  legend2->Draw("same");
+  // h_sigOrigClone->DrawNormalized("lp");
+  h_sigOrigClone->Scale(1.0/h_sigOrigClone->Integral(0,101));
+  h_sigOrigClone->GetYaxis()->SetRangeUser(0.0,0.2);
+  if (type=="nak4" || ( (type=="j1bb" || type=="j2bb") && region=="2HSR") ) h_sigOrigClone->GetYaxis()->SetRangeUser(0.0,0.3);
+  else if (type=="MET" || type=="ngen" || type=="nak8") h_sigOrigClone->GetYaxis()->SetRangeUser(0.0,1.0);
+  else if (type=="METall" || type=="HT") h_sigOrigClone->GetYaxis()->SetRangeUser(0.0,0.1);
+  if (type=="legend") legend2->Draw("same");
+  else {
+    h_sigOrigClone->Draw("lp");
+    h_sigNew1->DrawNormalized("lp same");
+    h_sigNew2->DrawNormalized("lp same");
+    h_sigNew3->DrawNormalized("lp same");
+    h_sigNew4->DrawNormalized("lp same");
+    // h_sigNew5->DrawNormalized("lp same");
+  }
+
+
 
   TString saveName = testDIR+"compSignal_"+reg+"_"+type;
-  c->SaveAs(saveName+"_allYears.pdf","PDF");
+  c->SaveAs(saveName+".pdf","PDF");
   delete c;
 }
 
 void runSigComp() {
-  compareSignals("METall", "baseline");
-  compareSignals("MET", "baseline");
-  compareSignals("HT", "baseline");
-  compareSignals("j1pt", "baseline");
-  compareSignals("j2pt", "baseline");
-  compareSignals("j1m", "baseline");
-  compareSignals("j2m", "baseline");
-  compareSignals("j1bb", "baseline");
-  compareSignals("j2bb", "baseline");
+  compareSignals("legend", "baseline");
+  // compareSignals("METall", "baseline");
+  // compareSignals("MET", "baseline");
+  // compareSignals("HT", "baseline");
+  // compareSignals("j1pt", "baseline");
+  // compareSignals("j2pt", "baseline");
+  // compareSignals("j1m", "baseline");
+  // compareSignals("j2m", "baseline");
+  // compareSignals("j1bb", "baseline");
+  // compareSignals("j2bb", "baseline");
+  //
+  // compareSignals("nak8", "baseline");
+  // compareSignals("nak4", "baseline");
+  // compareSignals("ngen", "baseline");
+  //
+  // compareSignals("j1pt", "2HSR");
+  // compareSignals("j2pt", "2HSR");
+  // compareSignals("j1m", "2HSR");
+  // compareSignals("j2m", "2HSR");
+  // compareSignals("j1bb", "2HSR");
+  // compareSignals("j2bb", "2HSR");
+  // compareSignals("ngen", "2HSR");
+  //
+  // compareSignals("j1pt", "1HSR");
+  // compareSignals("j2pt", "1HSR");
+  // compareSignals("j1m", "1HSR");
+  // compareSignals("j2m", "1HSR");
+  // compareSignals("j1bb", "1HSR");
+  // compareSignals("j2bb", "1HSR");
+  // compareSignals("ngen", "1HSR");
 }
 
 vector<float> getHistoForTable(TString model, TFile * openFile) {
@@ -4440,9 +4590,9 @@ void quickTable() {
 }
 
 void makePretty() {
-
-  TFile * f1 = TFile::Open("CMS-SUS-20-004_Figure-aux_006-a.root");
-  TFile * f2 = TFile::Open("CMS-SUS-20-004_Figure-aux_006-b.root");
+  // Makes covariance and correlation matrix final plots from Bill's input
+  TFile * f1 = TFile::Open("../src/CMS-SUS-20-004_Figure-aux_006-a.root");
+  TFile * f2 = TFile::Open("../src/CMS-SUS-20-004_Figure-aux_006-b.root");
 
   TH1F *h_cov = (TH1F*)f1->Get("hCovSig");
   TH1F *h_corr = (TH1F*)f2->Get("hCorrSig");
@@ -4468,28 +4618,25 @@ void makePretty() {
   ltitle.SetNDC(); ltitle_prelim.SetNDC(); rtitle.SetNDC(); rtitle2.SetNDC();
   ltitle.SetTextAlign(12); ltitle_prelim.SetTextAlign(12); rtitle.SetTextAlign(32); rtitle2.SetTextAlign(32);
   ltitle.Draw("same"); rtitle.Draw("same"); ltitle_prelim.Draw("same");
-
-
-  c->SaveAs("CMS-SUS-20-004_Figure-aux_006-a.pdf", "PDF");
+  c->SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_006-a.pdf", "PDF");
 
   TCanvas *c2 = new TCanvas("can2","can2", 900, 800);
   c2->SetMargin(0.11, 0.15, 0.11, 0.08);
   h_corr->Draw("colz");
   ltitle.Draw("same"); rtitle2.Draw("same"); ltitle_prelim.Draw("same");
-  c2->SaveAs("CMS-SUS-20-004_Figure-aux_006-b.pdf", "PDF");
-
-
+  c2->SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_006-b.pdf", "PDF");
 }
 
-//Currently setup to only run and save the plots in the paper
-//Saves the prelim version too
+//Currently setup to only run and save the plots in the paper or auxilary material
 void ABCD() {
   gROOT->SetBatch(1);
-  // runABCD();
-  // runMass2D();
+
+  // Make paper and supplementary materials plots
+  runABCD(true,true); //runPaperPlots, runSuppPlots
+  runMass2D();
+  makePretty(); //Makes covariance and correlation matrix plots off of Bill's input
 
   // runSigComp();
   // quickTable();
-  makePretty();
   std::exit(1);
 }

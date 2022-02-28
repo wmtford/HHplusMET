@@ -3,8 +3,7 @@ submitDir=$PWD
 branch=$1
 
 #You should change this to be unique to the region you're running maybe
-outputDir=testingNumGenH
-# outputDir=TChiHH_allH
+outputDir=TChiHH_allH
 
 #Useful for when running signal systematics
 # systDir=
@@ -51,8 +50,7 @@ cd $submitDir
 
 
 #1DT5HH FullSIM (make sure to set in skimSamples)
-# for i in {1000..2600..100}
-for i in 1000 1400 1800 2200
+for i in {1000..2600..100}
  do
    condor_submit batchExecute.jdl exec_name="ALPHABET_1DT5HH_2016_$vetoOpt_$i" arguments="${outputDir} ALPHABET 1 MC2016 $vetoOpt $i"
    condor_submit batchExecute.jdl exec_name="ALPHABET_1DT5HH_2017_$vetoOpt_$i" arguments="${outputDir} ALPHABET 1 MC2017 $vetoOpt $i"
