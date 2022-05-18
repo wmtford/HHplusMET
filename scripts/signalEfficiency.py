@@ -191,7 +191,7 @@ def saveEff(model):
     effFile=open(srcDIR+"efficiency_"+model+".txt", 'w');
     NLSPmass = []; LSPmass_final = []; LSPmass_skims = [];
     if model=="N1N2":
-        effFile.write("#NLSPmass LSPmass boostEff resEff totalEff\n")
+        effFile.write("#mNLSP mLSP boostEff resEff totalEff   bin1Eff   bin2Eff   bin3Eff   bin4Eff   bin5Eff   bin6Eff   bin7Eff   bin8Eff   bin9Eff  bin10Eff  bin11Eff  bin12Eff  bin13Eff  bin14Eff  bin15Eff  bin16Eff  bin17Eff  bin18Eff  bin19Eff  bin20Eff  bin21Eff  bin22Eff\n")
         fNames=open(srcDIR+"higgsino2DFileNames.txt", 'r');
         for line in fNames:
             x = line.split('_')
@@ -205,13 +205,13 @@ def saveEff(model):
             thisMass = 150+h*25;
             NLSPmass.append(str(thisMass)); LSPmass_final.append("1"); LSPmass_skims.append("1")
     elif model=="TChiHH":
-        effFile.write("#LSPmass Gmass boostEff resEff totalEff\n")
+        effFile.write("#mChi01 mG boostEff resEff totalEff   bin1Eff   bin2Eff   bin3Eff   bin4Eff   bin5Eff   bin6Eff   bin7Eff   bin8Eff   bin9Eff  bin10Eff  bin11Eff  bin12Eff  bin13Eff  bin14Eff  bin15Eff  bin16Eff  bin17Eff  bin18Eff  bin19Eff  bin20Eff  bin21Eff  bin22Eff\n")
         for h in range(0, 43):
             thisMass = 150+h*25;
             if thisMass==1025 or thisMass==1075 or thisMass==1125 or thisMass==1175: continue;
             NLSPmass.append(str(thisMass)); LSPmass_final.append("1"); LSPmass_skims.append("1")
     elif model=="T5HH":
-        effFile.write("#gluinoMass LSPmass boostEff resEff totalEff\n")
+        effFile.write("#mGluino mLSP boostEff resEff totalEff bin1Eff   bin2Eff   bin3Eff   bin4Eff   bin5Eff   bin6Eff   bin7Eff   bin8Eff   bin9Eff  bin10Eff  bin11Eff  bin12Eff  bin13Eff  bin14Eff  bin15Eff  bin16Eff  bin17Eff  bin18Eff  bin19Eff  bin20Eff  bin21Eff  bin22Eff\n")
         for g in range(0, 16):
             thisMass = 1000+g*100;
             NLSPmass.append(str(thisMass)); LSPmass_final.append("1"); LSPmass_skims.append("1")
@@ -257,8 +257,13 @@ def saveEff(model):
         datacardFile.close()
         boostEff = (boost1H+boost2H)/totalEvt; resEff = (res3b+res4b)/totalEvt; totalEff = passCuts/totalEvt
         # print("boostEff: %.4f, resEff: %.4f, totalEff: %.4f" %(boostEff, resEff, totalEff))
-        line = "%s %s %.7f %.7f %.7f\n" %(NLSPmass[i], LSPmass_final[i], boostEff, resEff, totalEff)
-        effFile.write(line)
+        # line = "%s %s %.7f %.7f %.7f\n" %(NLSPmass[i], LSPmass_final[i], boostEff, resEff, totalEff)
+        line = [] ; line.append("%s" % NLSPmass[i]) ; line.append("%s" % LSPmass_final[i])
+        effs = [] ; effs.extend([boostEff, resEff, totalEff])
+        bins = [35, 59, 83, 107, 37, 61, 85, 109, 47, 71, 95, 119, 49, 73, 97, 121, 7, 9, 11, 1, 3, 5]
+        for bin in bins: effs.append(float(x[bin])/totalEvt)
+        for eff in effs: line.append("%.7f" % eff)
+        effFile.write(' '.join(line)); effFile.write('\n')
     effFile.close()
 
 
@@ -283,6 +288,13 @@ def readInValues(model, which):
         if which=="boost": veff.append(Double(thisLine[2]));
         elif which=="res": veff.append(Double(thisLine[3]));
         elif which=="comb": veff.append(Double(thisLine[4]));
+        else: 
+            try:
+                bin = int(which)
+            except ValueError:
+                print "readInValues: Invalid value of which:  "+which
+                sys.exit(0)
+            veff.append(Double(thisLine[4+int(which)]))
     if model=="N1N2":
         histo = TGraph2D("", "", len(veff), vmx, vmy, veff);
         return(histo)
@@ -290,36 +302,71 @@ def readInValues(model, which):
         histo = TGraph(len(veff), vmx, veff);
         return(histo)
 
-def makeCanvas(model, which):
-    if which=="all" and model=="N2N2":
-        print("Can't make signal efficiency plot for 2D TChiHH with all lines included! Run separately. Exiting now...")
+def makeCanvas(model, binsToPlot, figlabel = None):
+
+    outFn = ''
+    if figlabel is None:
+        outFn = "signalEff_"+model+"_"+which
+    else:
+        outFn = "CMS-SUS-20-004_Figure-"+figlabel
+    pdfFn = outDIR+outFn+".pdf"
+    outRootFile = TFile(outDIR+outFn+".root", "recreate")
+
+    if type(binsToPlot) is str:
+        which = binsToPlot
+        bins = []
+    else:
+        which = 'bins'
+        bins = binsToPlot
+    if (which=="all" or which=="bins") and model=="N2N2":
+        print("Can't make signal efficiency plot for 2D TChiHH with multiple planes! Run separately. Exiting now...")
         sys.exit(0)
+
     SignifScan2 = TGraph2D()
     SignifScan = TGraph(); SignifScanBoost = TGraph(); SignifScanRes = TGraph();
     canvName = model+"_"+which
+    if which == 'bins':
+        for bin in bins:
+            canvName += '-'+bin
+
+    # Set up canvas and fill graph(s) to be drawn and written
+    canv = TCanvas(canvName)
     if model=="N1N2":
         SignifScan2 = readInValues(model, which);
-        SignifScan2.SetNpx(300); SignifScan2.SetNpy(300);
+        hForG2d = TH2F("hForG2d", "", 27, 137.5, 812.5, 27, 12.5, 687.5);
+        hForG2d.GetXaxis().SetNdivisions(207)
+        hForG2d.GetYaxis().SetNdivisions(207)
+        SignifScan2.SetHistogram(hForG2d);
         SignifScan = SignifScan2.GetHistogram(); SignifScan.SetStats(0);
-        canv = TCanvas(canvName,"",1200,1050)
+        canv.SetWindowSize(1200,1050)
         canv.SetRightMargin(0.18);
     elif model=="TChiHH" or model=="T5HH":
         if (which=="all"):
             SignifScan = readInValues(model, "comb");
             SignifScanBoost = readInValues(model, "boost");
             SignifScanRes = readInValues(model, "res");
+        elif which == 'bins' and len(bins) > 0: SignifScan = readInValues(model, bins[0]) 
         else: SignifScan = readInValues(model, which);
-        canv = TCanvas(canvName,"",1200,1200)
+        canv.SetWindowSize(1200,1200)
         canv.SetRightMargin(0.04);
     canv.cd()
     canv.SetLeftMargin(0.13); canv.SetBottomMargin(0.11);canv.SetTopMargin(0.08)
-    SignifScan.SetMinimum(0.000005); SignifScan.SetMaximum(1.0);
 
+    bin = -1
+    try:
+        bin = int(which)
+    except ValueError:
+        pass
+
+    signatureDict = {'res':'Resolved', 'boost':'Boosted', 'comb':'Combined', 'all':'', 'bins':''}
     zAxisTitle = "Signal Efficiency" #although for the 1D plots this is y-axis title
-    if which=="boost": zAxisTitle = "Boosted Signal Efficiency"
-    elif which=="res": zAxisTitle = "Resolved Signal Efficiency"
-    elif which=="comb": zAxisTitle = "Combined Signal Efficiency"
+    if bin > 0: zAxisTitle = "Bin "+which+" Signal Efficiency"
+    else:  zAxisTitle = signatureDict[which]+" Signal Efficiency"
 
+    colors = [kSpring+7, kTeal+9, kAzure+1, kAzure-1, kRed+2, kOrange+7, kOrange-3, kYellow+1]
+    colorOffset = 0 if len(bins) == 4 else 4  # A kludge to choose between resolved & boosted when which = 'bins'
+
+    # Set titles
     if model=="N1N2":
         SignifScan.SetTitle(";m("+chi02+") [GeV]; m("+chi01+") [GeV];"+zAxisTitle)
         SignifScan.GetZaxis().SetTitleOffset(1.2); SignifScan.GetZaxis().SetTitleSize(0.047)
@@ -335,6 +382,7 @@ def makeCanvas(model, which):
     ltitle = TLatex(0.17, 0.87,"#font[62]{CMS}#scale[0.76]{#font[52]{ Simulation Supplementary}}")
     ltitle.SetNDC(); ltitle.SetTextAlign(12);
 
+    # Set up text blocks
     if model=="N1N2":
         rtitle = TLatex(0.82, 0.945,"#scale[0.75]{137 fb^{-1} (13 TeV)}")
         txtd = TLatex(0.19,0.75,"pp#rightarrow "+chi03+" "+chi02+" #rightarrow HH "+chi01+" "+chi01);
@@ -352,25 +400,51 @@ def makeCanvas(model, which):
 
     if model=="N1N2":
         canv.SetLogz()
+        SignifScan.SetMaximum(1.0);
         SignifScan.SetContour(150)
+        if bin > 0:
+            SignifScan.SetMinimum(0.0000005)
+            SignifScan.Write("Bin"+str(bin)+"SignalEfficiency_"+model)
+        else:
+            SignifScan.SetMinimum(0.000005)
+            SignifScan.Write(signatureDict[which]+"SignalEfficiency_"+model)
         SignifScan.Draw("colz")
     elif model=="TChiHH" or model=="T5HH":
         canv.SetLogy()
         if model=="TChiHH":
-            SignifScan.SetMaximum(2.5); SignifScan.SetMinimum(0.001)
+            SignifScan.SetMaximum(1.0)
+            if which == "bins" or bin > 0:
+                SignifScan.SetMinimum(0.0000005)
+                SignifScan.SetMaximum(2.0);
+            else: SignifScan.SetMinimum(0.001)
             SignifScan.GetXaxis().SetRangeUser(180.0,1220.0);
         elif model=="T5HH":
-            if (which=="boost" or which=="comb"): SignifScan.SetMaximum(1.0); SignifScan.SetMinimum(0.01)
-            elif (which=="all"): SignifScan.SetMaximum(1.0); SignifScan.SetMinimum(0.0001)
-            elif (which=="res"): SignifScan.SetMaximum(1.0); SignifScan.SetMinimum(0.0001)
+            SignifScan.SetMaximum(2.5)
+            if which == "bins" or bin > 0:
+                min = 0.00001 if colorOffset == 4 else 0.00000001
+                SignifScan.SetMinimum(min)
+                if colorOffset == 0: SignifScan.SetMaximum(0.2)
+            elif (which=="boost" or which=="comb"): SignifScan.SetMinimum(0.01)
+            elif (which=="all" or which=="res"): SignifScan.SetMinimum(0.0001)
             SignifScan.GetXaxis().SetRangeUser(950.0,2550.0);
-        SignifScan.SetMarkerStyle(20); SignifScan.SetMarkerSize(1.8); SignifScan.SetMarkerColor(kBlack);
+        SignifScan.SetMarkerStyle(20); SignifScan.SetMarkerSize(1.8)
+        SignifScan.SetMarkerColor(kBlack); SignifScan.SetLineColor(kBlack)
+        if which == "bins":
+            SignifScan.SetMarkerColor(colors[colorOffset]); SignifScan.SetLineColor(colors[colorOffset])
+            SignifScan.Write("Bin"+bins[0]+"SignalEfficiency_"+model)
+        else:
+            SignifScan.Write("Combined"+"SignalEfficiency_"+model)
         SignifScan.Draw("APE")
 
         if (which=="all"):
-            SignifScanBoost.SetMarkerStyle(20); SignifScanBoost.SetMarkerSize(1.8); SignifScanBoost.SetMarkerColor(kRed); SignifScanBoost.SetLineColor(kRed);
-            SignifScanRes.SetMarkerStyle(20); SignifScanRes.SetMarkerSize(1.8); SignifScanRes.SetMarkerColor(kBlue); SignifScanRes.SetLineColor(kBlue);
-            SignifScanBoost.Draw("PE same"); SignifScanRes.Draw("PE same");
+            SignifScanBoost.SetMarkerStyle(20); SignifScanBoost.SetMarkerSize(1.8)
+            SignifScanBoost.SetMarkerColor(kRed); SignifScanBoost.SetLineColor(kRed);
+            SignifScanRes.SetMarkerStyle(20); SignifScanRes.SetMarkerSize(1.8)
+            SignifScanRes.SetMarkerColor(kBlue); SignifScanRes.SetLineColor(kBlue);
+            SignifScanBoost.Draw("PE same")
+            SignifScanBoost.Write("BoostedSignalEfficiency_"+model)
+            SignifScanRes.Draw("PE same");
+            SignifScanRes.Write("ResolvedSignalEfficiency_"+model)
             if model=="TChiHH": leg = TLegend(0.6,0.17,0.85,0.43);
             elif model=="T5HH": leg = TLegend(0.2,0.17,0.45,0.43);
             leg.SetFillStyle(4050); leg.SetFillColor(0);
@@ -380,95 +454,31 @@ def makeCanvas(model, which):
             leg.AddEntry(SignifScanBoost, "Boosted","lp")
             leg.AddEntry(SignifScan, "Combination","lp")
             leg.Draw("same")
+        elif (which=="bins"):
+            if model=="TChiHH": leg = TLegend(0.6,0.17,0.85,0.43);
+            elif model=="T5HH": leg = TLegend(0.2,0.17,0.45,0.43);
+            leg.SetFillStyle(4050); leg.SetFillColor(0);
+            leg.SetTextFont(42); leg.SetBorderSize(0);
+            leg.SetTextSize(0.045);
+            scan = []
+            for ib in range(0, len(bins)):
+                scan.append(readInValues(model, bins[ib]))
+                scan[ib].SetMarkerStyle(20); scan[ib].SetMarkerSize(1.8)
+                color = colors[colorOffset+ib]
+                scan[ib].SetMarkerColor(color); scan[ib].SetLineColor(color)
+                if ib > 0:
+                    scan[ib].Draw("PE same")  # The first bin was drawn above
+                    scan[ib].Write("Bin"+bins[ib]+"SignalEfficiency_"+model)
+                leg.AddEntry(scan[ib], "Bin "+bins[ib], "lp")
+            leg.Draw("same")
 
     rtitle.SetTextFont(42); rtitle.SetNDC(); rtitle.SetTextAlign(32)
     ltitle.Draw("same"); rtitle.Draw("same"); txtd.Draw("same")
     if model=="TChiHH": txte.Draw("same")
 
     #save canvas
-    if model=="TChiHH":
-        if which=="all": canv.SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_003-a.pdf", "PDF")
-        else: canv.SaveAs(outDIR+"signalEff_"+model+"_"+which+".pdf", "PDF")
-    elif model=="T5HH":
-        if which=="all": canv.SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_003-b.pdf", "PDF")
-        else: canv.SaveAs(outDIR+"signalEff_"+model+"_"+which+".pdf", "PDF")
-    else:
-        if which=="res": canv.SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_004-a.pdf", "PDF")
-        elif which=="boost": canv.SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_004-b.pdf", "PDF")
-        elif which=="comb": canv.SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_004-c.pdf", "PDF")
-
-
-def saveSigEffRootFile():
-    '''
-    For HEPData, saves all signal efficiency plots as root files
-    '''
-    SignifScan2DG = TGraph2D(); SignifScan2DGBoost = TGraph2D(); SignifScan2DGRes = TGraph2D();
-    SignifScan2D = TGraph(); SignifScan2DBoost = TGraph(); SignifScan2DRes = TGraph();
-    SignifScan1D = TGraph(); SignifScan1DBoost = TGraph(); SignifScan1DRes = TGraph();
-    SignifScan1Dglu = TGraph(); SignifScan1DgluBoost = TGraph(); SignifScan1DgluRes = TGraph();
-    SignifScan2DG = readInValues("N1N2", "comb")
-    SignifScan2DGBoost = readInValues("N1N2", "boost")
-    SignifScan2DGRes = readInValues("N1N2", "res")
-    SignifScan1D = readInValues("TChiHH", "comb")
-    SignifScan1DBoost = readInValues("TChiHH", "boost")
-    SignifScan1DRes = readInValues("TChiHH", "res")
-    SignifScan1Dglu = readInValues("T5HH", "comb")
-    SignifScan1DgluBoost = readInValues("T5HH", "boost")
-    SignifScan1DgluRes = readInValues("T5HH", "res")
-
-    SignifScan2DG.SetNpx(300); SignifScan2DG.SetNpy(300);
-    SignifScan2DGBoost.SetNpx(300); SignifScan2DGBoost.SetNpy(300);
-    SignifScan2DGRes.SetNpx(300); SignifScan2DGRes.SetNpy(300);
-    SignifScan2D = SignifScan2DG.GetHistogram(); SignifScan2DBoost = SignifScan2DGBoost.GetHistogram(); SignifScan2DRes = SignifScan2DGRes.GetHistogram();
-
-    #N1N2
-    SignifScan2D.SetTitle(";m("+chi02+") [GeV]; m("+chi01+") [GeV];Combined Signal Efficiency")
-    SignifScan2DBoost.SetTitle(";m("+chi02+") [GeV]; m("+chi01+") [GeV];Boosted Signal Efficiency")
-    SignifScan2DRes.SetTitle(";m("+chi02+") [GeV]; m("+chi01+") [GeV];Resolved Signal Efficiency")
-
-    #TChiHH
-    SignifScan1D.SetTitle(";m("+chi01nospace+") [GeV];Combined Signal Efficiency")
-    SignifScan1DBoost.SetTitle(";m("+chi01nospace+") [GeV];Boosted Signal Efficiency")
-    SignifScan1DRes.SetTitle(";m("+chi01nospace+") [GeV];Resolved Signal Efficiency")
-
-    #T5HH
-    SignifScan1Dglu.SetTitle(";m("+glu+") [GeV];Combined Signal Efficiency")
-    SignifScan1DgluBoost.SetTitle(";m("+glu+") [GeV];Boosted Signal Efficiency")
-    SignifScan1DgluRes.SetTitle(";m("+glu+") [GeV];Resolved Signal Efficiency")
-
-    canv = TCanvas("canv","",1200,1050)
-    SignifScan2D.SetContour(150); SignifScan2DBoost.SetContour(150); SignifScan2DRes.SetContour(150);
-    SignifScan2D.Draw("colz"); SignifScan2DBoost.Draw("colz"); SignifScan2DRes.Draw("colz");
-    SignifScan1D.Draw(); SignifScan1DBoost.Draw(); SignifScan1DRes.Draw();
-    SignifScan1Dglu.Draw(); SignifScan1DgluBoost.Draw(); SignifScan1DgluRes.Draw();
-
-    #Save in individual files
-    fNEW_TChiHH = TFile(outDIR+"CMS-SUS-20-004_Figure-aux_003-a.root", "recreate")
-    SignifScan1D.Write("CombinedSignalEfficiency_TChiHH")
-    SignifScan1DBoost.Write("BoostedSignalEfficiency_TChiHH")
-    SignifScan1DRes.Write("ResolvedSignalEfficiency_TChiHH")
-    fNEW_TChiHH.Close()
-
-    fNEW_T5HH = TFile(outDIR+"CMS-SUS-20-004_Figure-aux_003-b.root", "recreate")
-    SignifScan1Dglu.Write("CombinedSignalEfficiency_T5HH")
-    SignifScan1DgluBoost.Write("BoostedSignalEfficiency_T5HH")
-    SignifScan1DgluRes.Write("ResolvedSignalEfficiency_T5HH")
-    fNEW_T5HH.Close()
-
-    fNEW_N1N2res = TFile(outDIR+"CMS-SUS-20-004_Figure-aux_004-a.root", "recreate")
-    SignifScan2DRes.Write("ResolvedSignalEfficiency_N1N2")
-    fNEW_N1N2res.Close()
-
-    fNEW_N1N2boost = TFile(outDIR+"CMS-SUS-20-004_Figure-aux_004-b.root", "recreate")
-    SignifScan2DBoost.Write("BoostedSignalEfficiency_N1N2")
-    fNEW_N1N2boost.Close()
-
-    fNEW_N1N2comb = TFile(outDIR+"CMS-SUS-20-004_Figure-aux_004-c.root", "recreate")
-    SignifScan2D.Write("CombinedSignalEfficiency_N1N2")
-    fNEW_N1N2comb.Close()
-
-
-
+    canv.SaveAs(pdfFn, "PDF")
+    outRootFile.Close()
 
 def saveSigEffMassRootFile(model, mass, printEff):
     '''
@@ -531,16 +541,24 @@ def saveSigEffMassRootFile(model, mass, printEff):
     h_sigEff.SetStats(0)
     h_sigEff.SaveAs(outDIR+"CMS-SUS-20-004_aux_Table_002.root")
 
-def main():
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+
+    doSaveEff = True
+    if(len(args)) > 0 and args[0] == 'False':
+        doSaveEff = False
+
     # findWhichBins() # prints out indices of rate vector when reading from a datacard - for debugging
     '''
     Saves the efficiencies into a text file (boosted only, resolved only, combined)
     Will run automatically if the needed txt file can't be found
     arg1, model: "N1N2", "TChiHH", "T5HH"
     '''
-    saveEff("TChiHH")
-    saveEff("N1N2")
-    saveEff("T5HH")
+    if doSaveEff:
+        saveEff("TChiHH")
+        saveEff("N1N2")
+        saveEff("T5HH")
 
 
     '''
@@ -549,11 +567,25 @@ def main():
     arg1, model: "N1N2", "TChiHH", "T5HH"
     arg2, plotting: "comb", "boost", "res", "all" - "all" plots all three lines on the same canvas so doesn't work for 2D
     '''
-    makeCanvas("TChiHH", "all")
-    makeCanvas("T5HH", "all")
-    makeCanvas("N1N2", "boost")
-    makeCanvas("N1N2", "res")
-    makeCanvas("N1N2", "comb")
+    makeCanvas("TChiHH", "all", "aux_003-a")
+    makeCanvas("TChiHH", ['1', '2', '3', '4'], "aux_003-c")
+    makeCanvas("TChiHH", ['5', '6', '7', '8'], "aux_003-d")
+    makeCanvas("TChiHH", ['9', '10', '11', '12'], "aux_003-g")
+    makeCanvas("TChiHH", ['13', '14', '15', '16'], "aux_003-h")
+    makeCanvas("TChiHH", ['17', '18', '19'], "aux_003-k")
+    makeCanvas("TChiHH", ['20', '21', '22'], "aux_003-l")
+    makeCanvas("T5HH", "all", "aux_003-b")
+    makeCanvas("T5HH", ['1', '2', '3', '4'], "aux_003-e")
+    makeCanvas("T5HH", ['5', '6', '7', '8'], "aux_003-f")
+    makeCanvas("T5HH", ['9', '10', '11', '12'], "aux_003-i")
+    makeCanvas("T5HH", ['13', '14', '15', '16'], "aux_003-j")
+    makeCanvas("T5HH", ['17', '18', '19'], "aux_003-m")
+    makeCanvas("T5HH", ['20', '21', '22'], "aux_003-n")
+    makeCanvas("N1N2", "res", "aux_004-a")
+    makeCanvas("N1N2", "boost", "aux_004-b")
+    makeCanvas("N1N2", "comb", "aux_004-c")
+    for i in range(1, 23):
+        makeCanvas("N1N2", str(i), "aux_004-"+chr(96+3+i))
 
 
     '''
@@ -565,14 +597,6 @@ def main():
     arg3, prints the efficiency for each bin to the screen
     '''
     #saveSigEffMassRootFile("T5HH", "2200", False)
-
-
-    '''
-    Save the root file for HEPData
-    This saves the signal efficiency plots in the auxilary material (boosted only, resolved only, combined) for the three signal models
-    '''
-    saveSigEffRootFile()
-
 
 if __name__ == "__main__":
     main()

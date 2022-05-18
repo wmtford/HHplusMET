@@ -76,7 +76,8 @@ def saveCanvas(model,printSig):
 
         for h in hino:
             vmx.append(h)
-            vmy.append(1.0)
+            vmy.append(0.0)  # Needed to make histogram binning work
+            # vmy.append(1.0)
             thisSig =  ExtractFile(datacardsDIR+"higgsCombine2DTChiHH%i_LSP1_Data_Combo.Significance.mH120.root" %(h))
             vsig.append(thisSig)
             if thisSig>high_sig:
@@ -117,17 +118,23 @@ def saveCanvas(model,printSig):
 
 
     SignifScan2 = TGraph2D(); SignifScan = TGraph()
+    hForG2d = TH2F("hForG2d", "", 27, 137.5, 812.5, 27, -12.5, 662.5);
+    hForG2d.GetXaxis().SetNdivisions(207)
+    hForG2d.GetYaxis().SetNdivisions(207)
     if model == "N1N2":
         canv.SetRightMargin(0.16)
         SignifScan2 = TGraph2D("", ";m("+xparticle+") [GeV]; m("+yparticle+") [GeV]; Significance [#sigma]", len(vsig), vmx, vmy, vsig);
-        SignifScan2.SetNpx(300); SignifScan2.SetNpy(300);
+        SignifScan2.SetHistogram(hForG2d);
+        # SignifScan2.SetNpx(300); SignifScan2.SetNpy(300);
         SignifScan = SignifScan2.GetHistogram()
+        # SignifScan.Print("all")
+        SignifScan.SetStats(0)
         SignifScan.SetTitle(";m("+xparticle+") [GeV]; m("+yparticle+") [GeV]; Significance [#sigma]")
         SignifScan.GetZaxis().SetTitleOffset(1.1); SignifScan.GetZaxis().SetTitleSize(0.047)
         SignifScan.GetYaxis().SetTitleOffset(1.2); SignifScan.GetYaxis().SetTitleSize(0.047)
         SignifScan.GetXaxis().SetTitleOffset(1.0); SignifScan.GetXaxis().SetTitleSize(0.047)
-        SignifScan.SetMinimum(-1.0); SignifScan.SetMaximum(2.5);
-        SignifScan.GetXaxis().SetRangeUser(150.0,800.0); SignifScan.GetYaxis().SetRangeUser(1.0,650.0)
+        SignifScan.SetMinimum(-1.004); SignifScan.SetMaximum(2.5);
+        # SignifScan.GetXaxis().SetRangeUser(150.0,800.0); SignifScan.GetYaxis().SetRangeUser(1.0,650.0)
         SignifScan.SetContour(150)
         SignifScan.Draw("colz")
     elif model == "T5HH":
@@ -197,7 +204,8 @@ def saveRootFile():
 
     for h in hino:
         vmx.append(h)
-        vmy.append(1.0)
+        vmy.append(0.0)  # Needed to make histogram binning work
+        # vmy.append(1.0)
         thisSig =  ExtractFile(datacardsDIR+"higgsCombine2DTChiHH%i_LSP1_Data_Combo.Significance.mH120.root" %(h))
         vsig.append(thisSig)
         for lsp in hino:
@@ -219,16 +227,20 @@ def saveRootFile():
     yparticle = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0}}}#kern[-1.3]{#scale[0.85]{_{1}}}";
 
 
+    hForG2d = TH2F("hForG2d", "", 27, 137.5, 812.5, 27, -12.5, 662.5);
+    hForG2d.GetXaxis().SetNdivisions(207)
+    hForG2d.GetYaxis().SetNdivisions(207)
     SignifScan2 = TGraph2D(); SignifScan = TGraph(); SignifScan_g = TGraph();
     SignifScan2 = TGraph2D("", ";m("+xparticle_N1N2+") [GeV]; m("+yparticle+") [GeV]; Significance [#sigma]", len(vsig), vmx, vmy, vsig);
-    SignifScan2.SetNpx(300); SignifScan2.SetNpy(300);
+    SignifScan2.SetHistogram(hForG2d);
+    # SignifScan2.SetNpx(300); SignifScan2.SetNpy(300);
     SignifScan = SignifScan2.GetHistogram()
     SignifScan.SetTitle(";m("+xparticle_N1N2+") [GeV]; m("+yparticle+") [GeV]; Significance [#sigma]")
     SignifScan.GetZaxis().SetTitleOffset(1.1); SignifScan.GetZaxis().SetTitleSize(0.047)
     SignifScan.GetYaxis().SetTitleOffset(1.2); SignifScan.GetYaxis().SetTitleSize(0.047)
     SignifScan.GetXaxis().SetTitleOffset(1.0); SignifScan.GetXaxis().SetTitleSize(0.047)
-    SignifScan.SetMinimum(-1.0); SignifScan.SetMaximum(2.5);
-    SignifScan.GetXaxis().SetRangeUser(150.0,800.0); SignifScan.GetYaxis().SetRangeUser(1.0,650.0)
+    SignifScan.SetMinimum(-1.004); SignifScan.SetMaximum(2.5);
+    # SignifScan.GetXaxis().SetRangeUser(150.0,800.0); SignifScan.GetYaxis().SetRangeUser(1.0,650.0)
     SignifScan.SetContour(150)
 
     SignifScan_g = TGraph(len(vsig_g), vmx_g, vsig_g);
