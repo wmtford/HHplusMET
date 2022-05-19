@@ -260,7 +260,13 @@ def saveEff(model):
         # line = "%s %s %.7f %.7f %.7f\n" %(NLSPmass[i], LSPmass_final[i], boostEff, resEff, totalEff)
         line = [] ; line.append("%s" % NLSPmass[i]) ; line.append("%s" % LSPmass_final[i])
         effs = [] ; effs.extend([boostEff, resEff, totalEff])
-        bins = [35, 59, 83, 107, 37, 61, 85, 109, 47, 71, 95, 119, 49, 73, 97, 121, 7, 9, 11, 1, 3, 5]
+        bins = [
+            47, 71, 95, 119, # 3b, drmax>1.1, low to high met
+            49, 73, 97, 121, # 4b, drmax>1.1, low to high met
+            35, 59, 83, 107, # 3b, drmax<1.1, low to high met
+            37, 61, 85, 109, # 4b, drmax<1.1, low to high met
+            7, 9, 11, # 1H, low to high met
+            1, 3, 5]  # 2H, low to high met
         for bin in bins: effs.append(float(x[bin])/totalEvt)
         for eff in effs: line.append("%.7f" % eff)
         effFile.write(' '.join(line)); effFile.write('\n')
@@ -338,7 +344,7 @@ def makeCanvas(model, binsToPlot, figlabel = None):
         hForG2d.GetYaxis().SetNdivisions(207)
         SignifScan2.SetHistogram(hForG2d);
         SignifScan = SignifScan2.GetHistogram(); SignifScan.SetStats(0);
-        canv.SetWindowSize(1200,1050)
+        canv.SetCanvasSize(1200,1050)
         canv.SetRightMargin(0.18);
     elif model=="TChiHH" or model=="T5HH":
         if (which=="all"):
@@ -347,7 +353,7 @@ def makeCanvas(model, binsToPlot, figlabel = None):
             SignifScanRes = readInValues(model, "res");
         elif which == 'bins' and len(bins) > 0: SignifScan = readInValues(model, bins[0]) 
         else: SignifScan = readInValues(model, which);
-        canv.SetWindowSize(1200,1200)
+        canv.SetCanvasSize(1200,1200)
         canv.SetRightMargin(0.04);
     canv.cd()
     canv.SetLeftMargin(0.13); canv.SetBottomMargin(0.11);canv.SetTopMargin(0.08)
@@ -412,14 +418,16 @@ def makeCanvas(model, binsToPlot, figlabel = None):
     elif model=="TChiHH" or model=="T5HH":
         canv.SetLogy()
         if model=="TChiHH":
-            SignifScan.SetMaximum(1.0)
+            SignifScan.SetMaximum(2.5)
+            # SignifScan.SetMaximum(1.0)
             if which == "bins" or bin > 0:
                 SignifScan.SetMinimum(0.0000005)
                 SignifScan.SetMaximum(2.0);
             else: SignifScan.SetMinimum(0.001)
             SignifScan.GetXaxis().SetRangeUser(180.0,1220.0);
         elif model=="T5HH":
-            SignifScan.SetMaximum(2.5)
+            SignifScan.SetMaximum(1.0)
+            # SignifScan.SetMaximum(2.5)
             if which == "bins" or bin > 0:
                 min = 0.00001 if colorOffset == 4 else 0.00000001
                 SignifScan.SetMinimum(min)
