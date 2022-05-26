@@ -222,8 +222,9 @@ def saveEff(model):
         if model=="N1N2":
             BR = 0.5823329; modelName="2DTChiHH"
             if (LSPmass_final[i]=="1"):
+                modelName="1DTChiHH"  # Resolved veto was missed for this LSP mass row
                 signalFileName = signalSkimsTChiHHDIR+"tree_TChiHH_HToBB_HToBB_"+NLSPmass[i]+"_1_MC2016_fast.root"
-                convertXsec = higgsinoCrossSection1D(NLSPmass[i])/higgsinoCrossSection2D(NLSPmass[i])
+                # convertXsec = higgsinoCrossSection1D(NLSPmass[i])/higgsinoCrossSection2D(NLSPmass[i])
             else:
                 signalFileName = signalSkimsTChiHHDIR+"tree_TChiHH_HToBB_HToBB_2D_"+NLSPmass[i]+"_"+LSPmass_skims[i]+"_MC2016_fast.root"
         elif model=="TChiHH":
@@ -244,6 +245,7 @@ def saveEff(model):
 
         #open datacard
         datacardName = modelName+NLSPmass[i]+"_LSP"+LSPmass_final[i]+"_Data_Combo.txt"
+        # print "For model "+model+", datacardFile is "+datacardName
         datacardFile=open(datacardsDIR+datacardName, 'r');
         for line in datacardFile:
             if line.startswith("rate"):
@@ -291,6 +293,7 @@ def readInValues(model, which):
         if "#" in line: continue;
         thisLine = line.split()
         vmx.append(Double(thisLine[0])); vmy.append(Double(thisLine[1]));
+        if vmy[-1] == 1: vmy[-1] = -1  # A kludge to make histo binning work
         if which=="boost": veff.append(Double(thisLine[2]));
         elif which=="res": veff.append(Double(thisLine[3]));
         elif which=="comb": veff.append(Double(thisLine[4]));
@@ -339,11 +342,20 @@ def makeCanvas(model, binsToPlot, figlabel = None):
     canv = TCanvas(canvName)
     if model=="N1N2":
         SignifScan2 = readInValues(model, which);
-        hForG2d = TH2F("hForG2d", "", 27, 137.5, 812.5, 27, 12.5, 687.5);
+        hForG2d = TH2F("hForG2d", "", 27, 137.5, 812.5, 28, -12.5, 687.5);
         hForG2d.GetXaxis().SetNdivisions(207)
         hForG2d.GetYaxis().SetNdivisions(207)
+        # hForG2d.SetStats(0)
+        # npts = SignifScan2.GetN()
+        # xvals = SignifScan2.GetX()
+        # yvals = SignifScan2.GetY()
+        # zvals = SignifScan2.GetZ()
+        # for pt in range(0, npts):
+        #     hForG2d.Fill(xvals[pt], yvals[pt], zvals[pt])
+        # SignifScan = hForG2d
         SignifScan2.SetHistogram(hForG2d);
-        SignifScan = SignifScan2.GetHistogram(); SignifScan.SetStats(0);
+        SignifScan = SignifScan2.GetHistogram()
+        SignifScan.SetStats(0);
         canv.SetCanvasSize(1200,1050)
         canv.SetRightMargin(0.18);
     elif model=="TChiHH" or model=="T5HH":
@@ -385,7 +397,12 @@ def makeCanvas(model, binsToPlot, figlabel = None):
 
     SignifScan.GetYaxis().SetTitleOffset(1.2); SignifScan.GetYaxis().SetTitleSize(0.047)
     SignifScan.GetXaxis().SetTitleOffset(1.0); SignifScan.GetXaxis().SetTitleSize(0.047)
-    ltitle = TLatex(0.17, 0.87,"#font[62]{CMS}#scale[0.76]{#font[52]{ Simulation Supplementary}}")
+    # ltitle = TLatex(0.17, 0.87,"#font[62]{CMS}#scale[0.76]{#font[52]{ Simulation Supplementary}}")
+    CMStitleStr = "#font[62]{CMS}#scale[0.76]{#font[52]{ Simulation Supplementary}}"
+    subfig = figlabel.split('-')[1]
+    if not (subfig == 'a' or subfig == 'b' or (model == "N1N2" and subfig == 'c')):
+        CMStitleStr += "#font[42]{     ("+subfig+")}"
+    ltitle = TLatex(0.17, 0.87, CMStitleStr)
     ltitle.SetNDC(); ltitle.SetTextAlign(12);
 
     # Set up text blocks
@@ -419,7 +436,6 @@ def makeCanvas(model, binsToPlot, figlabel = None):
         canv.SetLogy()
         if model=="TChiHH":
             SignifScan.SetMaximum(2.5)
-            # SignifScan.SetMaximum(1.0)
             if which == "bins" or bin > 0:
                 SignifScan.SetMinimum(0.0000005)
                 SignifScan.SetMaximum(2.0);
@@ -427,7 +443,6 @@ def makeCanvas(model, binsToPlot, figlabel = None):
             SignifScan.GetXaxis().SetRangeUser(180.0,1220.0);
         elif model=="T5HH":
             SignifScan.SetMaximum(1.0)
-            # SignifScan.SetMaximum(2.5)
             if which == "bins" or bin > 0:
                 min = 0.00001 if colorOffset == 4 else 0.00000001
                 SignifScan.SetMinimum(min)

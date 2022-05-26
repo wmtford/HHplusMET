@@ -25,8 +25,13 @@ def ExtractFile(iname):
     f = ROOT.TFile(iname);
     t = f.Get("limit");
     lims = 0.0
-    t.GetEntry(0);
-    lims =  t.limit
+    Nentries = t.GetEntries()
+    if Nentries != 1:
+        # print "Unexpected number of entries = "+str(Nentries)+" in significance root file:  "+iname
+        pass
+    else:
+        t.GetEntry(0);
+        lims =  t.limit
     return lims;
 
 def saveCanvas(model,printSig):
@@ -76,7 +81,7 @@ def saveCanvas(model,printSig):
 
         for h in hino:
             vmx.append(h)
-            vmy.append(0.0)  # Needed to make histogram binning work
+            vmy.append(-1)  # Needed to make histogram binning work
             # vmy.append(1.0)
             thisSig =  ExtractFile(datacardsDIR+"higgsCombine2DTChiHH%i_LSP1_Data_Combo.Significance.mH120.root" %(h))
             vsig.append(thisSig)
@@ -118,7 +123,7 @@ def saveCanvas(model,printSig):
 
 
     SignifScan2 = TGraph2D(); SignifScan = TGraph()
-    hForG2d = TH2F("hForG2d", "", 27, 137.5, 812.5, 27, -12.5, 662.5);
+    hForG2d = TH2F("hForG2d", "", 27, 137.5, 812.5, 28, -12.5, 687.5);
     hForG2d.GetXaxis().SetNdivisions(207)
     hForG2d.GetYaxis().SetNdivisions(207)
     if model == "N1N2":
@@ -127,7 +132,6 @@ def saveCanvas(model,printSig):
         SignifScan2.SetHistogram(hForG2d);
         # SignifScan2.SetNpx(300); SignifScan2.SetNpy(300);
         SignifScan = SignifScan2.GetHistogram()
-        # SignifScan.Print("all")
         SignifScan.SetStats(0)
         SignifScan.SetTitle(";m("+xparticle+") [GeV]; m("+yparticle+") [GeV]; Significance [#sigma]")
         SignifScan.GetZaxis().SetTitleOffset(1.1); SignifScan.GetZaxis().SetTitleSize(0.047)
@@ -204,7 +208,7 @@ def saveRootFile():
 
     for h in hino:
         vmx.append(h)
-        vmy.append(0.0)  # Needed to make histogram binning work
+        vmy.append(-1)  # Needed to make histogram binning work
         # vmy.append(1.0)
         thisSig =  ExtractFile(datacardsDIR+"higgsCombine2DTChiHH%i_LSP1_Data_Combo.Significance.mH120.root" %(h))
         vsig.append(thisSig)
@@ -227,7 +231,7 @@ def saveRootFile():
     yparticle = "#lower[-0.12]{#tilde{#chi}}#lower[0.2]{#scale[0.85]{^{0}}}#kern[-1.3]{#scale[0.85]{_{1}}}";
 
 
-    hForG2d = TH2F("hForG2d", "", 27, 137.5, 812.5, 27, -12.5, 662.5);
+    hForG2d = TH2F("hForG2d", "", 27, 137.5, 812.5, 28, -12.5, 687.5);
     hForG2d.GetXaxis().SetNdivisions(207)
     hForG2d.GetYaxis().SetNdivisions(207)
     SignifScan2 = TGraph2D(); SignifScan = TGraph(); SignifScan_g = TGraph();
