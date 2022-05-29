@@ -216,6 +216,9 @@ def saveEff(model):
             thisMass = 1000+g*100;
             NLSPmass.append(str(thisMass)); LSPmass_final.append("1"); LSPmass_skims.append("1")
 
+    years = ['2016', '2017', '2018']
+    lumis = [35922.0, 41529.0, 59740.0]
+
     for i in range(len(NLSPmass)):
         print("For %s, mNLSP=%s and mLSP=%s" %(model, NLSPmass[i],LSPmass_final[i]))
         BR = 0.5823329; convertXsec = 1.0; signalFileName = ""; modelName = ""
@@ -223,54 +226,73 @@ def saveEff(model):
             BR = 0.5823329; modelName="2DTChiHH"
             if (LSPmass_final[i]=="1"):
                 modelName="1DTChiHH"  # Resolved veto was missed for this LSP mass row
-                signalFileName = signalSkimsTChiHHDIR+"tree_TChiHH_HToBB_HToBB_"+NLSPmass[i]+"_1_MC2016_fast.root"
+                signalFileName = signalSkimsTChiHHDIR+"tree_TChiHH_HToBB_HToBB_"+NLSPmass[i]+"_1_MCYEAR_fast.root"
                 # convertXsec = higgsinoCrossSection1D(NLSPmass[i])/higgsinoCrossSection2D(NLSPmass[i])
             else:
-                signalFileName = signalSkimsTChiHHDIR+"tree_TChiHH_HToBB_HToBB_2D_"+NLSPmass[i]+"_"+LSPmass_skims[i]+"_MC2016_fast.root"
+                signalFileName = signalSkimsTChiHHDIR+"tree_TChiHH_HToBB_HToBB_2D_"+NLSPmass[i]+"_"+LSPmass_skims[i]+"_MCYEAR_fast.root"
         elif model=="TChiHH":
             BR = 0.5823329; modelName="1DTChiHH"
-            signalFileName = signalSkimsTChiHHDIR+"tree_TChiHH_HToBB_HToBB_"+NLSPmass[i]+"_1_MC2016_fast.root"
+            signalFileName = signalSkimsTChiHHDIR+"tree_TChiHH_HToBB_HToBB_"+NLSPmass[i]+"_1_MCYEAR_fast.root"
         elif model=="T5HH":
             BR = 1.0; modelName="1DT5HH"
-            signalFileName = signalSkimsT5HHDIR+"tree_T5qqqqZH-mGluino-1000to2500_"+NLSPmass[i]+"_1_MC2016.root"
+            signalFileName = signalSkimsT5HHDIR+"tree_T5qqqqZH-mGluino-1000to2500_"+NLSPmass[i]+"_1_MCYEAR.root"
 
-        signalFile = TFile(signalFileName, "r")
-        tree = signalFile.Get("tree"); weight=tree.GetMaximum("Weight")
-        if weight==0: print("Weight is zero")
-        else: signalFile.Close()
-        totalEvt1 = weight*35922.0*BR*BR/convertXsec
-        totalEvt2 = weight*41529.0*BR*BR/convertXsec
-        totalEvt3 = weight*59740.0*BR*BR/convertXsec
-        totalEvt = totalEvt1+totalEvt2+totalEvt3
+        totalEvt = float(0)
+        MCevts = float(0)
+        for yr, mcyear in enumerate(years):
+            signalFile = TFile(signalFileName.replace('MCYEAR', 'MC'+mcyear), "r")
+            tree = signalFile.Get("tree")
+            weight = tree.GetMaximum("Weight")
+            MCevt = signalFile.Get("nEventProc").GetBinContent(1)
+            if weight == 0 or MCevt == 0:
+                print("Missing branch:  Weight = "+weight+", nEventProc content = "+MCevt)
+                continue
+            totalEvt += weight*lumis[yr]*BR*BR/convertXsec
+            MCevts += MCevt
+            signalFile.Close()
+        # Following is contribution of 1 MC event to rate (in datacard);
+        # the first factor is an empirical estimate of instrumental weights
+        lumiWt = 0.46*totalEvt/MCevts
 
         #open datacard
         datacardName = modelName+NLSPmass[i]+"_LSP"+LSPmass_final[i]+"_Data_Combo.txt"
         # print "For model "+model+", datacardFile is "+datacardName
         datacardFile=open(datacardsDIR+datacardName, 'r');
-        for line in datacardFile:
-            if line.startswith("rate"):
-                x = line.split()
-                res3b = float(x[35]) + float(x[47]) + float(x[59]) + float(x[71]) + float(x[83]) + float(x[95]) + float(x[107]) + float(x[119])
-                res4b = float(x[37]) + float(x[49]) + float(x[61]) + float(x[73]) + float(x[85]) + float(x[97]) + float(x[109]) + float(x[121])
-                boost2H = float(x[1]) + float(x[3]) + float(x[5])
-                boost1H = float(x[7]) + float(x[9]) + float(x[11])
-                break;
-        passCuts = res3b+res4b+boost1H+boost2H
-        datacardFile.close()
-        boostEff = (boost1H+boost2H)/totalEvt; resEff = (res3b+res4b)/totalEvt; totalEff = passCuts/totalEvt
-        # print("boostEff: %.4f, resEff: %.4f, totalEff: %.4f" %(boostEff, resEff, totalEff))
-        # line = "%s %s %.7f %.7f %.7f\n" %(NLSPmass[i], LSPmass_final[i], boostEff, resEff, totalEff)
-        line = [] ; line.append("%s" % NLSPmass[i]) ; line.append("%s" % LSPmass_final[i])
-        effs = [] ; effs.extend([boostEff, resEff, totalEff])
-        bins = [
+        resbins = [
             47, 71, 95, 119, # 3b, drmax>1.1, low to high met
             49, 73, 97, 121, # 4b, drmax>1.1, low to high met
             35, 59, 83, 107, # 3b, drmax<1.1, low to high met
-            37, 61, 85, 109, # 4b, drmax<1.1, low to high met
+            37, 61, 85, 109] # 4b, drmax<1.1, low to high met
+        boostbins = [
             7, 9, 11, # 1H, low to high met
             1, 3, 5]  # 2H, low to high met
-        for bin in bins: effs.append(float(x[bin])/totalEvt)
-        for eff in effs: line.append("%.7f" % eff)
+        bins = resbins + boostbins
+        rescounts = float(0);  boostcounts = float(0);  combcounts = float(0)
+        reszbins = int(0);  boostzbins = int(0)
+        bineffs = []
+        mincount = 0.69*lumiWt  # 50% coverage for 0 observed MC counts
+        for line in datacardFile:
+            if line.startswith("rate"):
+                x = line.split()
+                for bin in bins:
+                    count = float(x[bin])
+                    if bin in resbins:
+                        rescounts += count
+                        if count == 0.0:  reszbins += 1
+                    if bin in boostbins:
+                        boostcounts += count
+                        if count == 0.0:  boostzbins += 1
+                    combcounts += count
+                    bineffs.append((count if count > 0.0 else mincount)/totalEvt)
+                break;
+        datacardFile.close()
+        # if reszbins+boostzbins > 0:
+            # print "  Weight = "+str(weight)+", (zbins, zcounts, counts) for res/boost = ("+str(reszbins)+", "+str(reszbins*mincount)+", "+str(rescounts)+") / ("+str(boostzbins)+", "+str(boostzbins*mincount)+", "+str(boostcounts)+")" 
+        line = [] ; line.append("%s" % NLSPmass[i]) ; line.append("%s" % LSPmass_final[i])
+        line.append("%.7f" % ((boostcounts if boostcounts > 0.0 else mincount)/totalEvt))
+        line.append("%.7f" % ((rescounts if rescounts > 0.0 else mincount)/totalEvt))
+        line.append("%.7f" % ((combcounts if combcounts > 0.0 else mincount)/totalEvt))
+        for eff in bineffs: line.append("%.7f" % eff)
         effFile.write(' '.join(line)); effFile.write('\n')
     effFile.close()
 
@@ -315,7 +337,14 @@ def makeCanvas(model, binsToPlot, figlabel = None):
 
     outFn = ''
     if figlabel is None:
-        outFn = "signalEff_"+model+"_"+which
+        outFn = "signalEff_"+model+"_"
+        if type(binsToPlot) is str:
+            outFn += binsToPlot
+        else:  # binsToPlot is a list of integers
+            outFn += 'bins'
+            for ib, bin in enumerate(binsToPlot):
+                if ib > 0: outFn += '-'
+                outFn += str(bin)
     else:
         outFn = "CMS-SUS-20-004_Figure-"+figlabel
     pdfFn = outDIR+outFn+".pdf"
@@ -399,9 +428,10 @@ def makeCanvas(model, binsToPlot, figlabel = None):
     SignifScan.GetXaxis().SetTitleOffset(1.0); SignifScan.GetXaxis().SetTitleSize(0.047)
     # ltitle = TLatex(0.17, 0.87,"#font[62]{CMS}#scale[0.76]{#font[52]{ Simulation Supplementary}}")
     CMStitleStr = "#font[62]{CMS}#scale[0.76]{#font[52]{ Simulation Supplementary}}"
-    subfig = figlabel.split('-')[1]
-    if not (subfig == 'a' or subfig == 'b' or (model == "N1N2" and subfig == 'c')):
-        CMStitleStr += "#font[42]{     ("+subfig+")}"
+    if figlabel is not None:
+        subfig = figlabel.split('-')[1]
+        if not (subfig == 'a' or subfig == 'b' or (model == "N1N2" and subfig == 'c')):
+            CMStitleStr += "#font[42]{     ("+subfig+")}"
     ltitle = TLatex(0.17, 0.87, CMStitleStr)
     ltitle.SetNDC(); ltitle.SetTextAlign(12);
 
@@ -586,7 +616,7 @@ def main(args=None):
 
     '''
     Creates and saves the signal efficiency plots in the paper
-    makeCanvas(arg1, arg2),
+    makeCanvas(arg1, arg2, [arg3]),
     arg1, model: "N1N2", "TChiHH", "T5HH"
     arg2, plotting: "comb", "boost", "res", "all" - "all" plots all three lines on the same canvas so doesn't work for 2D
     '''
