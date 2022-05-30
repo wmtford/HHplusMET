@@ -156,8 +156,14 @@ def saveCanvas(model,printSig):
 
     if model == "N1N2":
         canv.SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_002-a.pdf","PDF")
+        fNEW_TChiHH = TFile(outDIR+"CMS-SUS-20-004_Figure-aux_002-a.root", "recreate")
+        SignifScan.Write("TChiHH")
+        fNEW_TChiHH.Close()
     elif model == "T5HH":
         canv.SaveAs(outDIR+"CMS-SUS-20-004_Figure-aux_002-b.pdf","PDF")
+        fNEW_T5HH = TFile(outDIR+"CMS-SUS-20-004_Figure-aux_002-b.root", "recreate")
+        SignifScan.Write("T5HH")
+        fNEW_T5HH.Close()
     if printSig: print("Highest significance is %.4f at (%i,%i)" %(high_sig,high_x,high_y))
 
 
@@ -269,11 +275,11 @@ if __name__ == '__main__':
     Can run for 2D TChiHH "N1N2" or the 1D T5HH "T5HH"
     Second argument is to print the highest significance, and the (mNLSP,mLSP) point
     '''
-    saveCanvas("N1N2",False)
+    saveCanvas("N1N2", True)
     saveCanvas("T5HH",False)
 
 
     '''
     Save the root file containing the significance plots for both TChiHH and T5HH for HEPData
     '''
-    saveRootFile()
+    # saveRootFile()
