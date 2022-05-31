@@ -430,8 +430,11 @@ def makeCanvas(model, binsToPlot, figlabel = None):
     CMStitleStr = "#font[62]{CMS}#scale[0.76]{#font[52]{ Simulation Supplementary}}"
     if figlabel is not None:
         subfig = figlabel.split('-')[1]
-        if not (subfig == 'a' or subfig == 'b' or (model == "N1N2" and subfig == 'c')):
-            CMStitleStr += "#font[42]{     ("+subfig+")}"
+        # if not (subfig == 'a' or subfig == 'b' or (model == "N1N2" and subfig == 'c')):
+        if model == "N1N2":
+            CMStitleStr += "#font[42]{   ("+subfig+")}"
+        else:
+            CMStitleStr += "#font[42]{          ("+subfig+")}"
     ltitle = TLatex(0.17, 0.87, CMStitleStr)
     ltitle.SetNDC(); ltitle.SetTextAlign(12);
 
