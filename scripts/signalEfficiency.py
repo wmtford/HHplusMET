@@ -250,6 +250,9 @@ def saveEff(model):
             totalEvt += weight*lumis[yr]*BR*BR/convertXsec
             MCevts += MCevt
             signalFile.Close()
+        # if model=="N1N2" and int(LSPmass_final[i]) == 1:
+        #     print("%s,%.2f" %(NLSPmass[i], float(totalEvt)*higgsinoCrossSection2D(NLSPmass[i])/higgsinoCrossSection1D(NLSPmass[i])))
+        #     continue
         # Following is contribution of 1 MC event to rate (in datacard);
         # the first factor is an empirical estimate of instrumental weights
         lumiWt = 0.46*totalEvt/MCevts
@@ -446,13 +449,15 @@ def makeCanvas(model, binsToPlot, figlabel = None):
     elif model=="TChiHH":
         rtitle = TLatex(0.96, 0.943,"#scale[0.75]{137 fb^{-1} (13 TeV)}")
         txtd = TLatex(0.17,0.78,"pp #rightarrow "+chi0pmi+chi0mpj+"#rightarrow "+chi01+chi01+" + X_{soft} #rightarrow HH#tilde{G}#tilde{G} + X_{soft}");
-        txtd.SetNDC(); txtd.SetTextFont(42); txtd.SetTextSize(0.045);
+        txtd.SetNDC(); txtd.SetTextFont(42); txtd.SetTextSize(0.043);
         txte = TLatex(0.17,0.72,"m("+chi02nospace+") = m("+chipm1nospace+") = m("+chi01nospace+"), m(#tilde{G}) = 1 GeV");
-        txte.SetNDC(); txte.SetTextFont(42); txte.SetTextSize(0.045);
+        txte.SetNDC(); txte.SetTextFont(42); txte.SetTextSize(0.043);
     elif model=="T5HH":
         rtitle = TLatex(0.96, 0.943,"#scale[0.75]{137 fb^{-1} (13 TeV)}")
         txtd = TLatex(0.17,0.78,"pp #rightarrow #tilde{g} #tilde{g},  #tilde{g} #rightarrow q #bar{q} "+chi02+",  "+chi02+" #rightarrow H "+chi01);
-        txtd.SetNDC(); txtd.SetTextFont(42); txtd.SetTextSize(0.045);
+        txtd.SetNDC(); txtd.SetTextFont(42); txtd.SetTextSize(0.043);
+        txte = TLatex(0.17,0.72,"m("+chi02nospace+") = m("+glu+")-50 GeV, m("+chi01nospace+") = 1 GeV");
+        txte.SetNDC(); txte.SetTextFont(42); txte.SetTextSize(0.043);
 
     if model=="N1N2":
         canv.SetLogz()
@@ -475,11 +480,11 @@ def makeCanvas(model, binsToPlot, figlabel = None):
             else: SignifScan.SetMinimum(0.001)
             SignifScan.GetXaxis().SetRangeUser(180.0,1220.0);
         elif model=="T5HH":
-            SignifScan.SetMaximum(1.0)
+            SignifScan.SetMaximum(2.5)
             if which == "bins" or bin > 0:
                 min = 0.00001 if colorOffset == 4 else 0.00000001
                 SignifScan.SetMinimum(min)
-                if colorOffset == 0: SignifScan.SetMaximum(0.2)
+                if colorOffset == 0: SignifScan.SetMaximum(0.7)
             elif (which=="boost" or which=="comb"): SignifScan.SetMinimum(0.01)
             elif (which=="all" or which=="res"): SignifScan.SetMinimum(0.0001)
             SignifScan.GetXaxis().SetRangeUser(950.0,2550.0);
@@ -530,7 +535,7 @@ def makeCanvas(model, binsToPlot, figlabel = None):
 
     rtitle.SetTextFont(42); rtitle.SetNDC(); rtitle.SetTextAlign(32)
     ltitle.Draw("same"); rtitle.Draw("same"); txtd.Draw("same")
-    if model=="TChiHH": txte.Draw("same")
+    if model=="TChiHH" or model=="T5HH": txte.Draw("same")
 
     #save canvas
     canv.SaveAs(pdfFn, "PDF")
@@ -598,6 +603,7 @@ def saveSigEffMassRootFile(model, mass, printEff):
     h_sigEff.SaveAs(outDIR+"CMS-SUS-20-004_aux_Table_002.root")
 
 def main(args=None):
+    # saveEff("N1N2") ; return
     if args is None:
         args = sys.argv[1:]
 
