@@ -66,6 +66,7 @@ TGraph DrawContours(TGraph2D &g2, int color, int style, double width, double val
 TGraph* joinGraphs(TGraph *graph1, TGraph *graph2);
 void ReverseGraph(TGraph &graph);
 void SetupColors();
+TGraph2D* gHEPData(TGraph2D* gr);
 bool doesFileExist (const std::string& name);
 
 void limit_scan() {
@@ -461,7 +462,7 @@ TGraph DrawContours(TGraph2D &g2, int color, int style, double width,
   g2.GetHistogram();
   l = g2.GetContourList(val);
   if (l == nullptr || l->GetSize()==0) {
-    std::cout<<"Contour list is empty"<<std::endl;
+    std::cout<<"Contour list is empty" << " for " << g2.GetName() <<std::endl;
     return graph;
   }
   int max_points = -1;
@@ -661,6 +662,11 @@ void SaveRootFile() {
   TGraph2D gxsec("TheoryXSec", title.c_str(), vxsec_comb.size(), &vmx_comb.at(0), &vmy_comb.at(0), &vxsec_comb.at(0));
   gxsec.GetZaxis()->SetTitle("Theory cross section [fb]");
 
+  // Rebin for HEPData
+  TGraph2D* gxsecHD = gHEPData(&gxsec);
+  gxsecHD->GetZaxis()->SetTitle("Theory cross section [fb]");
+  TGraph2D* glimHD = gHEPData(&glim);
+  TGraph2D* glimexpHD = gHEPData(&glimexp);
 
   TGraph cobs = DrawContours(gobs, 1, 1, 2, 1., false);
   TGraph cobsup = DrawContours(gobsup, 1, 2, 2, 1., false);
@@ -697,6 +703,9 @@ void SaveRootFile() {
   glimexp_res.GetHistogram()->Write();
   glimexp_boost.GetHistogram()->Write();
   glimexp.GetHistogram()->Write();
+  gxsecHD->GetHistogram()->Write();
+  glimHD->GetHistogram()->Write();
+  glimexpHD->GetHistogram()->Write();
 
 
   cobs.Write("ObservedLimit_Combo"); cobsup.Write("ObservedLimit1SigmaUp_Combo"); cobsdown.Write("ObservedLimit1SigmaDown_Combo");
@@ -712,6 +721,18 @@ void SaveRootFile() {
   cup2_res.Write("ExpectedLimit2SigmaUp_Resolved"); cdown2_res.Write("ExpectedLimit2SigmaDown_Resolved");
 
   fNEW->Close();
+}
+
+TGraph2D* gHEPData(TGraph2D* gr) {
+  // Make a copy with 25 x 25 GeV bins centered on scan points
+  TGraph2D* gHD = (TGraph2D*) gr->Clone();
+  TString gname = gr->GetName();
+  gname += "_for_HEPData";
+  TH2D* hForG2d = new TH2D(gname.Data(), gr->GetTitle(), 27, 137.5, 812.5, 28, -12.5, 687.5);
+  hForG2d->GetXaxis()->SetNdivisions(407);
+  hForG2d->GetYaxis()->SetNdivisions(407);
+  gHD->SetHistogram(hForG2d);
+  return gHD;
 }
 
 bool doesFileExist (const std::string& name) {
