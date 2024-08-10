@@ -71,14 +71,14 @@ bool doesFileExist (const std::string& name);
 
 void limit_scan() {
   vector<double> vmx, vmy, vxsec, vobs, vobsup, vobsdown,vobsup2, vobsdown2, vexp, vup, vdown, vup2, vdown2;
-  ReadPointsCombo(vmx, vmy, vxsec, vobs, vobsup, vobsdown, vobsup2, vobsdown2, vexp, vup, vdown, vup2, vdown2); //just for boosted+resolved combo
+  // ReadPointsCombo(vmx, vmy, vxsec, vobs, vobsup, vobsdown, vobsup2, vobsdown2, vexp, vup, vdown, vup2, vdown2); //just for boosted+resolved combo
   vector<double> vlim(vxsec.size());
   for (size_t i = 0; i < vxsec.size(); ++i) {
     vlim.at(i) = vxsec.at(i)*vobs.at(i);
   }
-  MakeLimitPlotCombo(vmx, vmy, vlim, vobs, vobsup, vobsdown, vobsup2, vobsdown2, vexp, vup, vdown, vup2, vdown2);
+  // MakeLimitPlotCombo(vmx, vmy, vlim, vobs, vobsup, vobsdown, vobsup2, vobsdown2, vexp, vup, vdown, vup2, vdown2);
 
-  // SaveRootFile(); //For HEPdata; CAN'T RUN AT THE SAME TIME AS READPOINTSCOMBO+MAKELIMITPLOT
+  SaveRootFile(); //For HEPdata; CAN'T RUN AT THE SAME TIME AS READPOINTSCOMBO+MAKELIMITPLOT
 
   std::exit(1); //so it exits when run in the shell script
 }
@@ -559,7 +559,12 @@ void SaveRootFile() {
     iss >> pmx >> pmy >> pxsec >> pxsecunc >> pobs >> pexp >> pup >> pdown >> pup2 >> pdown2;
 
     vmx_comb.push_back(pmx);
-    vmy_comb.push_back(pmy);
+    if (pmy==1.0){
+      vmy_comb.push_back(-1.0); //shift for plotting purposes
+    }
+    else {
+      vmy_comb.push_back(pmy);
+    }
     vxsec_comb.push_back(pxsec); //Regular N2N1-only xsec OR gluino
     vobs_comb.push_back(pobs);
     vobsup_comb.push_back(pobs/(1+pxsecunc));
@@ -582,7 +587,12 @@ void SaveRootFile() {
     iss2 >> pmx >> pmy >> pxsec >> pxsecunc >> pobs >> pexp >> pup >> pdown >> pup2 >> pdown2;
 
     vmx_boost.push_back(pmx);
-    vmy_boost.push_back(pmy);
+    if (pmy==1.0){
+      vmy_boost.push_back(-1.0); //shift for plotting purposes
+    }
+    else {
+      vmy_boost.push_back(pmy);
+    }
     vxsec_boost.push_back(pxsec);
     vobs_boost.push_back(pobs);
     vobsup_boost.push_back(pobs/(1+pxsecunc));
@@ -605,7 +615,12 @@ void SaveRootFile() {
     iss3 >> pmx >> pmy >> pxsec >> pxsecunc >> pobs >> pexp >> pup >> pdown >> pup2 >> pdown2;
 
     vmx_res.push_back(pmx);
-    vmy_res.push_back(pmy);
+    if (pmy==1.0){
+      vmy_res.push_back(-1.0); //shift for plotting purposes
+    }
+    else {
+      vmy_res.push_back(pmy);
+    }
     vxsec_res.push_back(pxsec);
     vobs_res.push_back(pobs);
     vobsup_res.push_back(pobs/(1+pxsecunc));
